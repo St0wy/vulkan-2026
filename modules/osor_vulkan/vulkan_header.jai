@@ -97,7 +97,8 @@ VK_COMPUTE_OCCUPANCY_PRIORITY_HIGH_NV :float: 0.75;
 #if VULKAN_PLATFORM == .X11
 {
     #import "Linux";
-    // @@TODO: We probably need more things here
+    #import "X11";
+    RROutput :: XID;
 } // X11
 
 #if VULKAN_PLATFORM == .Wayland

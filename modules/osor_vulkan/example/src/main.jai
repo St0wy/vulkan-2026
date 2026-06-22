@@ -15,10 +15,23 @@ Feel free to request changes here :)
 #import "Math";
 #import "File";
 #import "String";
-#import "Windows";
 #import "Input";
 #import "Window_Creation";
 #import "Debug";
+#if OS == .WINDOWS
+{
+    #import "Windows";
+}
+else #if OS_IS_UNIX
+{
+    #import "POSIX";
+    #if OS == .LINUX
+    {
+        #import "X11";
+    }
+    else #assert(false);
+}
+else #assert(false);
 #import,dir "../../../osor_vulkan";
 
 
@@ -114,7 +127,8 @@ main :: ()
 
     // # Main Loop
     get_time :: () -> float64 { return to_float64_seconds(current_time_monotonic()); }
-    last_time := get_time() - 1.0/60.0;
+    first_time := get_time();
+    last_time := first_time - 1.0/60.0;
     need_to_recreate_framebuffers := false;
     run_main_loop := true;
     while run_main_loop 
@@ -216,7 +230,7 @@ main :: ()
         per_frame_data : Per_Frame_Data;
         per_frame_data.resolution_x = xx vulkan_context.current_swapchain_image_extents.width;
         per_frame_data.resolution_y = xx vulkan_context.current_swapchain_image_extents.height;
-        per_frame_data.time = cast(float32) now;
+        per_frame_data.time = cast(float32) (now-first_time);
         per_frame_data.delta_time = cast(float32) delta_time;
         per_frame_data.mouse_position_x = mouse_position_x;
         per_frame_data.mouse_position_y = mouse_position_y;
@@ -579,7 +593,7 @@ using Vulkan_Context :: struct
 
 
 vulkan_init :: (using vulkan_context : *Vulkan_Context, 
-                window_handle : Window_Handle, 
+                window_handle : Window_Type, 
                 $want_validation_layers := true, 
                 $want_debug_extensions := true)
 {
@@ -587,9 +601,17 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
     #if OS == .WINDOWS
     {
         vulkan_library := LoadLibraryA("vulkan-1.dll");
-        load_vulkan_loader_procedures(vulkan_library, GetProcAddress);
+        library_loading_function :: GetProcAddress;
+    }
+    else #if OS_IS_UNIX
+    {
+                           vulkan_library := dlopen("libvulkan.so.1", RTLD_NOW | RTLD_LOCAL);
+        if !vulkan_library vulkan_library := dlopen("libvulkan.so",   RTLD_NOW | RTLD_LOCAL);
+        library_loading_function :: dlsym;
     }
     else #assert(false);
+    assert(vulkan_library != null, "Couldn't load a valid vulkan dynamic library!");
+    load_vulkan_loader_procedures(vulkan_library, dlsym);
 
 
     // # Instance Layers
@@ -617,6 +639,8 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
         array_add(*desired_instance_extensions, "VK_KHR_surface");
         #if OS == .WINDOWS
             array_add(*desired_instance_extensions, "VK_KHR_win32_surface");
+        else #if OS == .LINUX
+            array_add(*desired_instance_extensions, "VK_KHR_xlib_surface");
         else #assert(false);
         #if want_debug_extensions array_add(*desired_instance_extensions, "VK_EXT_debug_utils");
 
@@ -630,6 +654,8 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
         assert(array_contains_string(enabled_instance_extensions, "VK_KHR_surface"));
         #if OS == .WINDOWS
             assert(array_contains_string(enabled_instance_extensions, "VK_KHR_win32_surface"));
+        else #if OS == .LINUX
+            assert(array_contains_string(enabled_instance_extensions, "VK_KHR_xlib_surface"));
         else #assert(false);
     }
     
@@ -720,6 +746,14 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
         surface_create_info.hinstance = GetModuleHandleW(null);
         surface_create_info.hwnd = window_handle;
         surface_result := vkCreateWin32SurfaceKHR(instance, *surface_create_info, vulkan_allocator, *surface);
+        assert(surface_result == VK_SUCCESS);
+    }
+    else #if OS == .LINUX
+    {
+        surface_create_info : VkXlibSurfaceCreateInfoKHR;
+        surface_create_info.dpy = x_global_display;
+        surface_create_info.window = window_handle;
+        surface_result := vkCreateXlibSurfaceKHR(instance, *surface_create_info, vulkan_allocator, *surface);
         assert(surface_result == VK_SUCCESS);
     }
     else #assert(false);
@@ -820,6 +854,24 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
                 {
                     queue_family_indices.transfer_family_index = queue_family_index;
                     queue_family_indices.transfer_queue_index  = 0;
+                }
+            }
+            if queue_family_indices.async_family_index == -1
+            {
+                queue_family_indices.async_family_index = queue_family_indices.graphics_family_index;
+                queue_family_indices.async_queue_index  = queue_family_indices.graphics_queue_index;
+            }
+            if queue_family_indices.transfer_family_index == -1
+            {
+                if queue_family_indices.async_family_index != -1
+                {
+                    queue_family_indices.transfer_family_index = queue_family_indices.async_family_index;
+                    queue_family_indices.transfer_queue_index  = queue_family_indices.async_queue_index;
+                }
+                else
+                {
+                    queue_family_indices.transfer_family_index = queue_family_indices.graphics_family_index;
+                    queue_family_indices.transfer_queue_index  = queue_family_indices.graphics_queue_index;
                 }
             }
             array_add(*physical_devices_queue_family_indices, queue_family_indices);
@@ -935,7 +987,7 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
 
             array_add(*graphics_priorities, 1.0);
 
-            async_uses_graphics_queue    := queue_family_indices.async_family_index == queue_family_indices.graphics_family_index;
+            async_uses_graphics_queue    := queue_family_indices.async_family_index    == queue_family_indices.graphics_family_index;
             transfer_uses_graphics_queue := queue_family_indices.transfer_family_index == queue_family_indices.graphics_family_index;
             if async_uses_graphics_queue
                 array_add(*graphics_priorities, 0.75);
@@ -1385,13 +1437,6 @@ vulkan_create_swapchain :: (vulkan_context : *Vulkan_Context,
 
     return true;
 }
-
-
-#if OS == .WINDOWS
-{
-    Window_Handle :: HWND;
-}
-else #assert(false);
 
 
 vulkan_create_command_pools :: (using vulkan_context : *Vulkan_Context)
@@ -2677,7 +2722,7 @@ vulkan_example_update_and_bind_uniform_buffer :: (using vulkan_context : *Vulkan
 new_temporary_array :: ($Element_Type : Type, initial_reserved_count := 16) -> [..] Element_Type
 {
     array : [..] Element_Type;
-    array.allocator = __temporary_allocator;
+    array.allocator = temporary_allocator;
     array_reserve(*array, initial_reserved_count);
     return array;
 }

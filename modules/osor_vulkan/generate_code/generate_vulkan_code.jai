@@ -1389,7 +1389,7 @@ generate_jai_vulkan_code :: (vk_xml_contents : string) -> header : string, loade
         {
             assert(false);
         }
-        comment.text = builder_to_string(*builder, do_reset = false,, __temporary_allocator);
+        comment.text = builder_to_string(*builder, do_reset = false,, temporary_allocator);
         array_add(*instance.comments, comment);
     }
 
@@ -2900,16 +2900,10 @@ load_vulkan_device_procedures :: (device: VkDevice, device_commands : *Vulkan_De
     platform_preludes : [platform_count] string;
     {
         using Vulkan_Platform;
-
         for * platform_preludes { it.* = ""; };
-
-        platform_preludes[X11]       = VULKAN_LINUX_PRELUDE;
-        platform_preludes[Wayland]   = VULKAN_LINUX_PRELUDE;
-        // @@NOTE: On these we probably will need more stuff since
-        // I doubt that the generic prelude will work for all the
-        // different ways linux has to deal with presentation.
-
-        platform_preludes[Windows]   = VULKAN_WINDOWS_PRELUDE;
+        platform_preludes[X11]     = VULKAN_LINUX_X11_PRELUDE;
+        platform_preludes[Wayland] = VULKAN_LINUX_WAYLAND_PRELUDE;
+        platform_preludes[Windows] = VULKAN_WINDOWS_PRELUDE;
     }
     for get_enum_values(Vulkan_Platform)
     {
@@ -3041,7 +3035,13 @@ VULKAN_WINDOWS_PRELUDE :: #string DONE
     #import "Windows";
 DONE
 
-VULKAN_LINUX_PRELUDE :: #string DONE
+VULKAN_LINUX_X11_PRELUDE :: #string DONE
+    #import "Linux";
+    #import "X11";
+    RROutput :: XID;
+DONE
+
+VULKAN_LINUX_WAYLAND_PRELUDE :: #string DONE
     #import "Linux";
     // @@TODO: We probably need more things here
 DONE
@@ -4063,11 +4063,3 @@ fix_xml_ampersand_shit_in_place :: (original : string) -> string
 }
 
 
-/*
-Ampersand	&amp;	&
-Less-than	&lt;	<
-Greater-than	&gt;	>
-Quotes	&quot;	"
-Apostrophe	&apos;	'
-
-*/
