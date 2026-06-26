@@ -27,6 +27,10 @@ Vulkan_Context :: struct {
 	swapchain: VkSwapchainKHR;
 	swapchain_images: [] VkImage;
 	swapchain_image_views: [] VkImageView;
+	window_size: VkExtent2D;
+	depth_image: VkImage;
+	depth_image_allocation: VmaAllocation;
+	depth_image_view: VkImageView;
 }
 
 vulkan_init :: (
@@ -233,14 +237,16 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 		return false;
 	}
 
-	swapchain_extent: VkExtent2D = surface_capabilities.currentExtent;
+	vk_context.window_size = surface_capabilities.currentExtent;
 	if width != -1 || height != -1 {
-		swapchain_extent = {width, height};
+		vk_context.window_size = {xx width, xx height};
 	} else if swapchain_extent.width == 0xFFFFFFFF {
 		x, y, win_width, win_height, ok := get_dimensions(vk_context.window);
 		assert(ok);
-		swapchain_extent = {win_width, win_height};
+		vk_context.window_size = {win_width, win_height};
 	}
+
+
 
 	image_format :: VkFormat.VK_FORMAT_B8G8R8A8_SRGB;
 	swapchain_info: VkSwapchainCreateInfoKHR;
@@ -248,7 +254,7 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	swapchain_info.minImageCount = surface_capabilities.minImageCount;
 	swapchain_info.imageFormat = image_format;
 	swapchain_info.imageColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-	swapchain_info.imageExtent = swapchain_extent;
+	swapchain_info.imageExtent = vk_context.window_size;
 	swapchain_info.imageArrayLayers = 1;
 	swapchain_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 	swapchain_info.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
@@ -286,11 +292,64 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	}
 }
 
+vulkan_create_depth :: (vk_context: *Vulkan_Context) {
+	depth_format_list :: .[
+		VK_FORMAT_D32_SFLOAT_S8_UINT,
+		VK_FORMAT_D24_UNORM_S8_UINT
+	];
+	depth_format: VkFormat;
+	for depth_format_list {
+		format_properties: VkFormatProperties2;
+		vkGetPhysicalDeviceFormatProperties2(vk_context.device, it, *format_properties);
+		if format_properties.formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT {
+			depth_format = it;
+			break;
+		}
+	}
+
+	assert(depth_format != VK_FORMAT_UNDEFINED);
+
+	depth_image_info: VkImageCreateInfo;
+	depth_image_info.imageType = VK_IMAGE_TYPE_2D;
+	depth_image_info.format = depth_format;
+	depth_image_info.extent = {vk_context.window_size.width, vk_context.window_size.height, 1};
+	depth_image_info.mipLevels = 1;
+	depth_image_info.arrayLayers = 1;
+	depth_image_info.samples = VK_SAMPLE_COUNT_1_BIT;
+	depth_image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
+	depth_image_info.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	depth_image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+	alloc_info := VmaAllocationCreateInfo.{
+		flags=VmaAllocationCreateFlagBits.DEDICATED_MEMORY_BIT,
+		usage=VmaMemoryUsage.AUTO,
+	};
+	chk(vmaCreateImage(
+		vk_context.allocator,
+		*depth_image_info,
+		*alloc_info,
+		*vk_context.depth_image,
+		*vk_context.depth_image_allocation,
+		null
+	));
+
+	depth_view_info: VkImageViewCreateInfo;
+	depth_view_info.image = vk_context.depth_image;
+	depth_view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	depth_view_info.format = depth_format;
+	depth_view_info.subresourceRange = {aspectMask=VK_IMAGE_ASPECT_DEPTH_BIT, levelCount=1, layerCount=1};
+	chk(vkCreateImageView(vk_context.device, *depth_view_info, null, *vk_context.depth_image_view));
+}
+
 main :: () {
 	window_handle := create_window(1920, 1080, "Vulkan 2026");
 	vk_context: Vulkan_Context;
 	vulkan_init(*vk_context, window_handle);
 	defer vulkan_deinit(*vk_context);
+
+	ok := vulkan_create_swapchain(*vk_context);
+	assert(ok, "Could not create the first swapchain");
+	vulkan_create_depth(*vk_context);
 
 	quit := false;
 	while !quit {

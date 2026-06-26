@@ -5,35 +5,35 @@ Vertex :: struct {
 	tangent: Vector4;
 }
 
-// Right now I only render few models, so the booleans are okay
-// but eventually they should be switched to flags
-Model :: struct {
+Mesh :: struct {
+	name: string;
 	vertices: [] Vertex;
-	indices: [] int;
-	normal_map: Image;
-	base_color: Image;
-	has_normal_map: bool;
-	has_base_color: bool;
+	indices: [] u32;
+	material_index: u16; // 0 = nil
+}
+
+Material :: struct {
+	name: string;
+	base_color_index: u16; // 0 = nil
+	normal_map_index: u16; // 0 = nil
 }
 
 // Based on https://github.com/thisistherk/fast_obj
-load_model_obj :: (obj_path: string, base_color_path: string = "", normal_map_path: string = "") -> bool, Model {
-	model: Model;
+load_model_obj :: (obj_path: string) -> bool, Model {
+	mesh: Mesh;
 	obj_content, success := read_entire_file(obj_path);
 	defer free(obj_content);
 	if !success then return false, model;
 
-	positions: [..] Vector3;
-	positions.allocator = temp;
-	normals: [..] Vector3;
-	normals.allocator = temp;
-	tex_coords: [..] Vector2;
-	tex_coords.allocator = temp;
-	added_indices: [..] ObjIndexInfo;
-	added_indices.allocator = temp;
+	positions: make_temp_dyn_array(Vector3);
+	normals: make_temp_dyn_array(Vector3);
+	tex_coords: make_temp_dyn_array(Vector2);
+	added_indices: make_temp_dyn_array(ObjIndexInfo);
 
 	vertices: [..] Vertex;
+	vertices.allocator = context.allocator;
 	indices: [..] int;
+	indices.allocator = context.allocator;
 
 	line := 1;
 	content := obj_content;
@@ -76,7 +76,7 @@ load_model_obj :: (obj_path: string, base_color_path: string = "", normal_map_pa
 					} else {
 						vertex: Vertex;
 						vertex.position = positions[index_info.vertex - 1];
-						// TODO Handle the case where there's not texture coordinates, normal etc
+						// TODO Handle the case where there's no texture coordinates, normal etc
 						vertex.tex_coords = tex_coords[index_info.tex_coords - 1];
 						vertex.normal = normals[index_info.normal - 1];
 
@@ -88,6 +88,37 @@ load_model_obj :: (obj_path: string, base_color_path: string = "", normal_map_pa
 				}
 			} else {
 				go_back(*content);
+			}
+		case "o";
+			advance(*content);
+			c := content[0];
+			advance(*content);
+			if is_whitespace(c) {
+				// TODO handle multiple meshes
+				assert(mesh.name == "");
+				skip_whitespace(*content);
+				start := content;
+				skip_name(*content);
+				end := content;
+
+				count := start.count - end.count;
+				name := start;
+				name.count = count;
+
+				mesh.name = copy_string(name);
+			} else {
+				go_back(*content);
+			}
+		case "m";
+			advance(*content);
+			if content[0] == "t" &&
+			content[1] == "l" &&
+			content[2] == "l" &&
+			content[3] == "i" &&
+			content[4] == "b" &&
+			is_whitespace(content[5]) {
+				advance(*content, 5);
+				// TODO https://github.com/thisistherk/fast_obj/blob/d620667f10a548dee94dbc8c144bb22f79162176/fast_obj.h#L1233
 			}
 		}
 
@@ -119,15 +150,14 @@ load_model_obj :: (obj_path: string, base_color_path: string = "", normal_map_pa
 	return true, model;
 }
 
-delete_model :: (model: Model) {
-	array_free(model.vertices);
-	array_free(model.indices);
-	if model.has_normal_map {
-		delete_image(model.normal_map);
-	}
-}
+// delete_model :: (model: Model) {
+// 	array_free(model.vertices);
+// 	array_free(model.indices);
+// 	if model.has_normal_map delete_image(model.normal_map);
+// 	if model.has
+// }
 
-generate_tangents :: (model: *Model) {
+generate_tangents :: (vertices: [] Vertex) {
 	for face_index: 0..(model.indices.count / 3) - 1 {
 		vertex_a := *model.vertices[model.indices[face_index * 3]];
 		vertex_b := *model.vertices[model.indices[face_index * 3 + 1]];
@@ -171,7 +201,18 @@ operator == :: inline (a: ObjIndexInfo, b: ObjIndexInfo) -> bool {
 }
 
 skip_whitespace :: inline (str: *string) {
-	while is_whitespace(str.*[0]) advance(str, 1);
+	while is_whitespace(str.*[0]) advance(str);
+}
+
+peek_previous :: inline (str: string) -> u8 {
+	data := str.data;
+	return (data - 1).*
+}
+
+skip_name :: inline (str: *string) {
+	start := str.data;
+	while !is_newline(str[0]) advance(str);
+	while str.data > start && is_whitespace(peek_previous(str))) go_back(str);
 }
 
 is_whitespace :: inline (c: u8) -> bool {
@@ -183,7 +224,7 @@ is_newline :: inline (c: u8) -> bool {
 }
 
 is_digit :: inline (c: u8) -> bool {
-    return c >= #char "0" && c <= #char "9";
+	return c >= #char "0" && c <= #char "9";
 }
 
 is_exponent :: inline (c: u8) -> bool {
@@ -191,10 +232,9 @@ is_exponent :: inline (c: u8) -> bool {
 }
 
 go_back :: inline (s: *string, amount: s64 = 1) {
-    assert(amount >= 0);
-    // assert(s.count >= amount);
-    s.count += amount;
-    s.data  -= amount;
+	assert(amount >= 0);
+	s.count += amount;
+	s.data  -= amount;
 }
 
 skip_line :: inline (str: *string) {
@@ -241,7 +281,7 @@ parse_normal :: inline (str: *string) -> Vector3 {
 	return normal;
 }
 
-parse_face :: inline (str: *string) -> [3] ObjIndexInfo {
+parse_face :: (str: *string) -> [3] ObjIndexInfo {
 	index_info: [3] ObjIndexInfo;
 	skip_whitespace(str);
 
@@ -276,7 +316,7 @@ parse_face :: inline (str: *string) -> [3] ObjIndexInfo {
 }
 
 // Based on https://github.com/thisistherk/fast_obj/blob/d620667f10a548dee94dbc8c144bb22f79162176/fast_obj.h#L587
-parse_float :: inline (str: *string) -> float {
+parse_float :: (str: *string) -> float {
 	sign: float64 = 1.0;
 
 	skip_whitespace(str);
@@ -312,11 +352,11 @@ parse_float :: inline (str: *string) -> float {
 
 		POWER_10_POS :: float64.[
 			1.0e0,  1.0e1,  1.0e2,  1.0e3,  1.0e4,  1.0e5,  1.0e6,  1.0e7,  1.0e8,  1.0e9,
-    		1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
+			1.0e10, 1.0e11, 1.0e12, 1.0e13, 1.0e14, 1.0e15, 1.0e16, 1.0e17, 1.0e18, 1.0e19,
 		];
 		POWER_10_NEG :: float64.[
 			1.0e0, 1.0e-1,  1.0e-2,  1.0e-3,  1.0e-4,  1.0e-5,  1.0e-6,  1.0e-7,  1.0e-8,  1.0e-9,
-    		1.0e-10, 1.0e-11, 1.0e-12, 1.0e-13, 1.0e-14, 1.0e-15, 1.0e-16, 1.0e-17, 1.0e-18, 1.0e-19,
+			1.0e-10, 1.0e-11, 1.0e-12, 1.0e-13, 1.0e-14, 1.0e-15, 1.0e-16, 1.0e-17, 1.0e-18, 1.0e-19,
 		];
 		MAX_POWER :: 20;
 		powers := POWER_10_POS;
@@ -341,7 +381,7 @@ parse_float :: inline (str: *string) -> float {
 	return val;
 }
 
-parse_int :: inline (str: *string) -> int {
+parse_int :: (str: *string) -> int {
 	sign := 1;
 	num: int;
 
