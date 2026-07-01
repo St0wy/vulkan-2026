@@ -14,13 +14,21 @@ Mesh :: struct {
 
 Material :: struct {
 	name: string;
-	base_color_index: u16; // 0 = nil
-	normal_map_index: u16; // 0 = nil
+	ambient: Vector3;
+	diffuse: Vector3;
+	specular: Vector3;
+	specular_exponent: float;
+	emissive: Vector3;
+	index_of_refraction: float;
+	dissolve: float;
+	// base_color_index: u16; // 0 = nil
+	// normal_map_index: u16; // 0 = nil
 }
 
 // Based on https://github.com/thisistherk/fast_obj
-load_model_obj :: (obj_path: string) -> bool, Model {
+load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 	mesh: Mesh;
+	materials: [] Material;
 	obj_content, success := read_entire_file(obj_path);
 	defer free(obj_content);
 	if !success then return false, model;
@@ -31,9 +39,7 @@ load_model_obj :: (obj_path: string) -> bool, Model {
 	added_indices: make_temp_dyn_array(ObjIndexInfo);
 
 	vertices: [..] Vertex;
-	vertices.allocator = context.allocator;
 	indices: [..] int;
-	indices.allocator = context.allocator;
 
 	line := 1;
 	content := obj_content;
@@ -118,7 +124,50 @@ load_model_obj :: (obj_path: string) -> bool, Model {
 			content[4] == "b" &&
 			is_whitespace(content[5]) {
 				advance(*content, 5);
-				// TODO https://github.com/thisistherk/fast_obj/blob/d620667f10a548dee94dbc8c144bb22f79162176/fast_obj.h#L1233
+				skip_whitespace(*content);
+
+				start := content;
+				skip_name(*content);
+				end := content;
+				count := start.count - end.count;
+				mtl_name := start;
+				mtl_name.count = count;
+
+				mtl_path := parse_path(obj_path,, temp);
+				mtl_path.words[mtl_path.words.count - 1] = mtl_name;
+				mtl_path_string := path_to_string(mtl_path,, temp);
+
+				materials=, ok := read_mtllib(mtl_path_string);
+				if !ok return false, mesh;
+			}
+		case "u";
+			advance(*content);
+			if content[0] == "s" &&
+			content[1] == "e" &&
+			content[2] == "m" &&
+			content[3] == "t" &&
+			content[4] == "l" &&
+			is_whitespace(content[5]) {
+				advance(*content, 5);
+				skip_whitespace(*content);
+
+				start := content;
+				skip_name(*content);
+				end := content;
+				count := start.count - end.count;
+				mtl_name := start;
+				mtl_name.count = count;
+
+				for materials {
+					if it.name == mtl_name {
+						mesh.material_index = it_index;
+						break;
+					}
+				}
+
+				if mesh.material_index == 0 {
+					log("Did not find material %", mtl_name);
+				}
 			}
 		}
 
@@ -150,12 +199,92 @@ load_model_obj :: (obj_path: string) -> bool, Model {
 	return true, model;
 }
 
-// delete_model :: (model: Model) {
-// 	array_free(model.vertices);
-// 	array_free(model.indices);
-// 	if model.has_normal_map delete_image(model.normal_map);
-// 	if model.has
-// }
+read_mtllib :: (path: string) -> bool, [] Material {
+	materials: [..] Material;
+	current_material: *Material;
+
+	mtl_contents, ok := read_entire_file(path);
+	defer free(mtl_contents);
+	if !ok then return false, materials;
+
+	// Add empty one because index 0 means no material in the mesh
+	array_add(*materials, Material.{});
+	contents := mtl_contents;
+	while contents.count > 0 {
+		skip_whitespace(*contents);
+
+		if contents[0] == {
+		case "n";
+			advance(*contents);
+			if contents[0] == "e" &&
+			contents[1] == "w" &&
+			contents[2] == "m" &&
+			contents[3] == "t" &&
+			contents[4] == "l" &&
+			is_whitespace(contents[5]) {
+				array_add(*materials, Material.{});
+				current_material = materials[materials.count - 1];
+				advance(*contents, 5);
+				skip_whitespace(*contents);
+
+				start := content;
+				skip_name(*content);
+				end := content;
+				count := start.count - end.count;
+				name := start;
+				name.count = count;
+
+				current_material.name = copy_string(name);
+			}
+		case "K";
+			if contents[1] == "a" {
+				advance(*contents, 2);
+				current_material.ambient = parse_mtl_triple(*contents);
+			} else if contents[1] == "d" {
+				advance(*contents, 2);
+				current_material.diffuse = parse_mtl_triple(*contents);
+			} else if contents[1] == "s" {
+				advance(*contents, 2);
+				current_material.specular = parse_mtl_triple(*contents);
+			} else if contents[1] == "e" {
+				advance(*contents, 2);
+				current_material.emissive = parse_mtl_triple(*contents);
+			}
+		case "N";
+			if contents[1] == "s" {
+				advance(*contents, 2);
+				current_material.specular_exponent = parse_float(*contents);
+			} else if contents[1] == "i" {
+				advance(*contents, 2);
+				current_material.index_of_refraction = parse_float(*contents);
+			}
+		case "d";
+			if is_whitespace(contents[1]) {
+				advance(*contents);
+				current_material.dissolve = parse_float(*contents);
+			}
+		}
+
+		skip_line(*contents);
+	}
+
+	return true, materials;
+}
+
+delete_mesh :: (mesh: Mesh) {
+	array_free(mesh.vertices);
+	array_free(mesh.indices);
+	free(mesh.name);
+}
+
+delete_materials :: (materials: *[] Materials) {
+	for materials {
+		free(it.name);
+	}
+	array_free(materials.*);
+	materials.data = null;
+	materials.count = 0;
+}
 
 generate_tangents :: (vertices: [] Vertex) {
 	for face_index: 0..(model.indices.count / 3) - 1 {
@@ -279,6 +408,16 @@ parse_normal :: inline (str: *string) -> Vector3 {
 	}
 
 	return normal;
+}
+
+parse_mtl_triple :: inline (str: *string) -> Vector3 {
+	value: Vector3 = ---;
+	for * value.component {
+		v := parse_float(str);
+		it.* = v;
+	}
+
+	return value;
 }
 
 parse_face :: (str: *string) -> [3] ObjIndexInfo {
