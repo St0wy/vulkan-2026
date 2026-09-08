@@ -32,6 +32,8 @@ Vulkan_Context :: struct {
 	depth_image: VkImage;
 	depth_image_allocation: VmaAllocation;
 	depth_image_view: VkImageView;
+	vertex_buffer: VkBuffer;
+	vertex_buffer_allocation: VmaAllocation;
 }
 
 vulkan_init :: (
@@ -353,7 +355,18 @@ main :: () {
 	vulkan_create_depth(*vk_context);
 
 	ok=, mesh, materials := load_model_obj("data/suzanne.obj");
-	log("%", FormatStruct.{value=mesh, draw_type_name=true});
+
+	v_buf_size := cast(VkDeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
+	i_buf_size := cast(VkDeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
+	alloc_info: VmaAllocationInfo;
+	vk_context.vertex_buffer, vk_context.vertex_buffer_allocation, alloc_info = vulkan_create_buffer(
+		vk_context.allocator,
+		v_buf_size + i_buf_size,
+		VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT
+	);
+	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
+	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
 
 	quit := false;
 	while !quit {
@@ -373,33 +386,37 @@ main :: () {
 	}
 }
 
+vulkan_create_buffer :: (
+	allocator: VmaAllocator,
+	size: VkDeviceSize,
+	usage: VkBufferUsageFlags,
+	alloc_flags: VmaAllocationCreateFlags
+) -> VkBuffer, VmaAllocation, VmaAllocationInfo {
+	buffer_info: VkBufferCreateInfo;
+	buffer_info.size = size;
+	buffer_info.usage = usage;
+	buffer_alloc_create_info: VmaAllocationCreateInfo;
+	buffer_alloc_create_info.flags = alloc_flags;
+	buffer_alloc_create_info.usage = .AUTO;
+	buffer_alloc_info: VmaAllocationInfo;
+
+	buffer: VkBuffer;
+	alloc: VmaAllocation;
+	chk(vmaCreateBuffer(
+		allocator,
+		*buffer_info,
+		*buffer_alloc_create_info,
+		*buffer,
+		*alloc,
+		*buffer_alloc_info
+	));
+
+	return buffer, alloc, buffer_alloc_info;
+}
+
 // From modules/osor_vulkan/examples/src/main.jai
 vulkan_fill_array :: ($type : Type, procedure : $Procedure, $arguments : ..Code) -> [] type #expand
 {
-    //
-    // @@NOTE: I would like to be able to derive the return type from the procedure they pass in. This
-    // would mean that we can get the type of the last argument and use it in the declaration of the procedure
-    // which I can't find a way to do right now for it to work with polymorphism. Essentially I would like to do something
-    // like the following:
-    //
-    // test :: ($procedure : $Procedure) -> #insert #run get_array_type(procedure)
-    // {
-    //     // . . .
-    // }
-    //
-    // get_array_type :: ($procedure : Procedure) -> string
-    // {
-    //     info := type_info(procedure);
-    //     argument := info.return_types[info.return_types-1];
-    //     assert(argument.type == Type_Info_Tag.POINTER);
-    //     argument_pointer := cast(*Type_Info_Pointer) argument;
-    //     type_pointed_to := argument_pointer.pointer_to;
-    //     assert(type_pointed_to.type == Type_Info_Tag.STRUCT);
-    //     type_pointed_to_struct := cast(*Type_Info_Struct) type_pointed_to;
-    //     return type_pointer_to_struct.name;
-    // }
-    //
-
     #insert #run -> string
     {
         builder : String_Builder;

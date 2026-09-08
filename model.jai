@@ -175,8 +175,6 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 		line += 1;
 	}
 
-	log("%\n%", vertices, indices);
-
 	mesh.vertices = vertices;
 	mesh.indices = indices;
 
@@ -397,7 +395,6 @@ parse_mtl_triple :: inline (str: *string) -> Vector3 {
 }
 
 parse_faces :: (str: *string) -> [..][3] ObjIndexInfo {
-	triangles := make_temp_dyn_array([3] ObjIndexInfo);
 	index_info := make_temp_dyn_array(ObjIndexInfo);
 	skip_whitespace(str);
 
@@ -429,13 +426,15 @@ parse_faces :: (str: *string) -> [..][3] ObjIndexInfo {
 	//
 	assert(index_info.count == 4 || index_info.count == 3, "Count equal to 3 or 4, but it's %", index_info.count);
 
+	triangles := make_temp_dyn_array([3] ObjIndexInfo);
+
 	if index_info.count == 3 {
 		triangle: [3] ObjIndexInfo;
 		for index_info triangle[it_index] = it;
 		array_add(*triangles, triangle);
-	} else if index_info.count == 3 {
+	} else if index_info.count == 4 {
 		triangle_1: [3] ObjIndexInfo;
-		for index_info triangle_1[it_index] = it;
+		for 0..2 triangle_1[it] = index_info[it];
 		array_add(*triangles, triangle_1);
 
 		triangle_2: [3] ObjIndexInfo;
