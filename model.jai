@@ -21,8 +21,6 @@ Material :: struct {
 	emissive: Vector3;
 	index_of_refraction: float;
 	dissolve: float;
-	// base_color_index: u16; // 0 = nil
-	// normal_map_index: u16; // 0 = nil
 }
 
 // Based on https://github.com/thisistherk/fast_obj
@@ -30,16 +28,16 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 	mesh: Mesh;
 	materials: [] Material;
 	obj_content, success := read_entire_file(obj_path);
+	if !success then return false, mesh, materials;
 	defer free(obj_content);
-	if !success then return false, model;
 
-	positions: make_temp_dyn_array(Vector3);
-	normals: make_temp_dyn_array(Vector3);
-	tex_coords: make_temp_dyn_array(Vector2);
-	added_indices: make_temp_dyn_array(ObjIndexInfo);
+	positions := make_temp_dyn_array(Vector3);
+	normals := make_temp_dyn_array(Vector3);
+	tex_coords := make_temp_dyn_array(Vector2);
+	added_indices := make_temp_dyn_array(ObjIndexInfo);
 
 	vertices: [..] Vertex;
-	indices: [..] int;
+	indices: [..] u32;
 
 	line := 1;
 	content := obj_content;
@@ -70,26 +68,28 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 			advance(*content);
 
 			if is_whitespace(c) {
-				index_infos := parse_face(*content);
+				faces_index_infos := parse_faces(*content);
 				// For now doing it while parsing, but if the face data is before positions etc it
 				// wont work, so might have to move it out later
-				for index_info: index_infos {
-					// Already got and index with the same infos
-					could_find, index_index := array_find(added_indices, index_info);
-					if could_find {
-						assert(index_index < vertices.count);
-						array_add(*indices, index_index);
-					} else {
-						vertex: Vertex;
-						vertex.position = positions[index_info.vertex - 1];
-						// TODO Handle the case where there's no texture coordinates, normal etc
-						vertex.tex_coords = tex_coords[index_info.tex_coords - 1];
-						vertex.normal = normals[index_info.normal - 1];
+				for index_infos: faces_index_infos {
+					for index_info: index_infos {
+						// Already got and index with the same infos
+						could_find, index_index := array_find(added_indices, index_info);
+						if could_find {
+							assert(index_index < vertices.count);
+							array_add(*indices, xx index_index);
+						} else {
+							vertex: Vertex;
+							vertex.position = positions[index_info.vertex - 1];
+							// TODO Handle the case where there's no texture coordinates, normal etc
+							vertex.tex_coords = tex_coords[index_info.tex_coords - 1];
+							vertex.normal = normals[index_info.normal - 1];
 
-						array_add(*vertices, vertex);
-						array_add(*added_indices, index_info);
-						array_add(*indices, added_indices.count - 1);
-						assert(vertices.count == added_indices.count);
+							array_add(*vertices, vertex);
+							array_add(*added_indices, index_info);
+							array_add(*indices, cast(u32, added_indices.count - 1));
+							assert(vertices.count == added_indices.count);
+						}
 					}
 				}
 			} else {
@@ -137,8 +137,8 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 				mtl_path.words[mtl_path.words.count - 1] = mtl_name;
 				mtl_path_string := path_to_string(mtl_path,, temp);
 
-				materials=, ok := read_mtllib(mtl_path_string);
-				if !ok return false, mesh;
+				ok:, materials = read_mtllib(mtl_path_string);
+				if !ok return false, mesh, materials;
 			}
 		case "u";
 			advance(*content);
@@ -160,7 +160,7 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 
 				for materials {
 					if it.name == mtl_name {
-						mesh.material_index = it_index;
+						mesh.material_index = xx it_index;
 						break;
 					}
 				}
@@ -175,28 +175,12 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 		line += 1;
 	}
 
-	model.vertices = vertices;
-	model.indices = indices;
+	log("%\n%", vertices, indices);
 
-	if normal_map_path != "" {
-		success, model.normal_map = load_image(normal_map_path);
-		if !success {
-			log_error("Could not load normal map.");
-			return false, model;
-		}
-		model.has_normal_map = true;
-	}
+	mesh.vertices = vertices;
+	mesh.indices = indices;
 
-	if base_color_path != "" {
-		success, model.base_color = load_image(base_color_path);
-		if !success {
-			log_error("Could not load base color.");
-			return false, model;
-		}
-		model.has_base_color = true;
-	}
-
-	return true, model;
+	return true, mesh, materials;
 }
 
 read_mtllib :: (path: string) -> bool, [] Material {
@@ -227,9 +211,9 @@ read_mtllib :: (path: string) -> bool, [] Material {
 				advance(*contents, 5);
 				skip_whitespace(*contents);
 
-				start := content;
-				skip_name(*content);
-				end := content;
+				start := contents;
+				skip_name(*contents);
+				end := contents;
 				count := start.count - end.count;
 				name := start;
 				name.count = count;
@@ -278,7 +262,7 @@ delete_mesh :: (mesh: Mesh) {
 }
 
 delete_materials :: (materials: *[] Material) {
-	for materials {
+	for materials.* {
 		free(it.name);
 	}
 	array_free(materials.*);
@@ -286,11 +270,11 @@ delete_materials :: (materials: *[] Material) {
 	materials.count = 0;
 }
 
-generate_tangents :: (vertices: [] Vertex) {
-	for face_index: 0..(model.indices.count / 3) - 1 {
-		vertex_a := *model.vertices[model.indices[face_index * 3]];
-		vertex_b := *model.vertices[model.indices[face_index * 3 + 1]];
-		vertex_c := *model.vertices[model.indices[face_index * 3 + 2]];
+generate_tangents :: (mesh: Mesh) {
+	for face_index: 0..(mesh.indices.count / 3) - 1 {
+		vertex_a := *mesh.vertices[mesh.indices[face_index * 3]];
+		vertex_b := *mesh.vertices[mesh.indices[face_index * 3 + 1]];
+		vertex_c := *mesh.vertices[mesh.indices[face_index * 3 + 2]];
 
 		edge_1 := vertex_b.position - vertex_a.position;
 		edge_2 := vertex_c.position - vertex_a.position;
@@ -412,11 +396,11 @@ parse_mtl_triple :: inline (str: *string) -> Vector3 {
 	return value;
 }
 
-parse_face :: (str: *string) -> [3] ObjIndexInfo {
-	index_info: [3] ObjIndexInfo;
+parse_faces :: (str: *string) -> [..][3] ObjIndexInfo {
+	triangles := make_temp_dyn_array([3] ObjIndexInfo);
+	index_info := make_temp_dyn_array(ObjIndexInfo);
 	skip_whitespace(str);
 
-	count: u32;
 	while !is_newline(str.*[0]) {
 		v := parse_int(str);
 		t, n: int;
@@ -433,17 +417,35 @@ parse_face :: (str: *string) -> [3] ObjIndexInfo {
 			}
 		}
 
-		index_info[count].vertex = v;
-		index_info[count].tex_coords = t;
-		index_info[count].normal = n;
-		count += 1;
+		array_add(*index_info, ObjIndexInfo.{
+			vertex = v,
+			tex_coords = t,
+			normal = n,
+		});
 		skip_whitespace(str);
 	}
 
 	// TODO handle lines and polygons and stuff
+	//
+	assert(index_info.count == 4 || index_info.count == 3, "Count equal to 3 or 4, but it's %", index_info.count);
 
-	assert(count == 3, "Count should be 3, but it's %", count);
-	return index_info;
+	if index_info.count == 3 {
+		triangle: [3] ObjIndexInfo;
+		for index_info triangle[it_index] = it;
+		array_add(*triangles, triangle);
+	} else if index_info.count == 3 {
+		triangle_1: [3] ObjIndexInfo;
+		for index_info triangle_1[it_index] = it;
+		array_add(*triangles, triangle_1);
+
+		triangle_2: [3] ObjIndexInfo;
+		triangle_2[0] = index_info[0];
+		triangle_2[1] = index_info[2];
+		triangle_2[2] = index_info[3];
+		array_add(*triangles, triangle_2);
+	}
+
+	return triangles;
 }
 
 // Based on https://github.com/thisistherk/fast_obj/blob/d620667f10a548dee94dbc8c144bb22f79162176/fast_obj.h#L587

@@ -160,9 +160,9 @@ vulkan_init :: (
 
 		device_properties: VkPhysicalDeviceProperties2;
 		vkGetPhysicalDeviceProperties2(physical_device, *device_properties);
-		log("Selected device: %", device_properties.properties.deviceName);
+		log("Selected device: %", to_string(device_properties.properties.deviceName));
 
-		queue_families := vulkan_fill_array_no_result(VkQueueFamilyProperties, vkGetPhysicalDeviceQueueFamilyProperties, physical_device);
+		queue_families := vulkan_fill_array(VkQueueFamilyProperties, vkGetPhysicalDeviceQueueFamilyProperties, physical_device);
 		for queue_families {
 			if it.queueFlags & VK_QUEUE_GRAPHICS_BIT {
 				queue_family = xx it_index;
@@ -218,7 +218,7 @@ vulkan_init :: (
 			flags = .BUFFER_DEVICE_ADDRESS_BIT,
 			physicalDevice = physical_device,
 			device = device,
-			pVulkanFunctions = vk_functions,
+			pVulkanFunctions = *vk_functions,
 			instance = instance,
 		};
 		chk(vmaCreateAllocator(*allocator_info, *allocator));
@@ -241,10 +241,10 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	vk_context.window_size = surface_capabilities.currentExtent;
 	if width != -1 || height != -1 {
 		vk_context.window_size = {xx width, xx height};
-	} else if swapchain_extent.width == 0xFFFFFFFF {
-		x, y, win_width, win_height, ok := get_dimensions(vk_context.window);
+	} else if vk_context.window_size.width == 0xFFFFFFFF {
+		x, y, win_width, win_height, ok := get_dimensions(vk_context.window, right_handed=false);
 		assert(ok);
-		vk_context.window_size = {win_width, win_height};
+		vk_context.window_size = {xx win_width, xx win_height};
 	}
 
 	image_format :: VkFormat.VK_FORMAT_B8G8R8A8_SRGB;
@@ -261,7 +261,7 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	swapchain_info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
 	chk(vkCreateSwapchainKHR(vk_context.device, *swapchain_info, null, *vk_context.swapchain));
 
-	images := vulkan_fill_array(VkImage, vkGetSwapchainImagesKHR, vk_context.device, vulkan_context.swapchain);
+	images := vulkan_fill_array(VkImage, vkGetSwapchainImagesKHR, vk_context.device, vk_context.swapchain);
 	if vk_context.swapchain_images.count == 0 {
 		vk_context.swapchain_images = alloc_and_copy_array(images);
 	} else if vk_context.swapchain_images.count == images.count {
@@ -270,7 +270,7 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 		assert(false, "Missmatch between old and new swapchain image count");
 	}
 
-	new_image_views := new_temporary_array(VkImageView);
+	new_image_views := make_temp_dyn_array(VkImageView);
 	for vk_context.swapchain_images {
 		view_info: VkImageViewCreateInfo;
 		view_info.image = it;
@@ -278,7 +278,7 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 		view_info.format = image_format;
 		view_info.subresourceRange = {aspectMask=VK_IMAGE_ASPECT_COLOR_BIT, levelCount=1, layerCount=1};
 		image_view: VkImageView;
-		chk(vkCreateImageView(vk_context.device, *view_info, null, image_view));
+		chk(vkCreateImageView(vk_context.device, *view_info, null, *image_view));
 		array_add(*new_image_views, image_view);
 	}
 
@@ -289,6 +289,8 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	} else {
 		assert(false, "Missmatch between old and new swapchain image views count");
 	}
+
+	return true;
 }
 
 vulkan_create_depth :: (vk_context: *Vulkan_Context) {
@@ -351,6 +353,7 @@ main :: () {
 	vulkan_create_depth(*vk_context);
 
 	ok=, mesh, materials := load_model_obj("data/suzanne.obj");
+	log("%", FormatStruct.{value=mesh, draw_type_name=true});
 
 	quit := false;
 	while !quit {

@@ -206,7 +206,7 @@ vulkan_memory_allocator_visitor :: (decl: *Declaration, parent_decl: *Declaratio
 #import "BuildCpp";
 
 VMA_FOOTER :: #string DONE
-#import "jai-vulkan";
+#import "osor_vulkan";
 
 #if OS == .WINDOWS {
 	libvma :: #library "windows/VMA";
