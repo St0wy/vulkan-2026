@@ -52,10 +52,12 @@ VK_API_VERSION_1_0 :: #run VK_MAKE_API_VERSION(0, 1, 0, 0);
 VK_API_VERSION_1_1 :: #run VK_MAKE_API_VERSION(0, 1, 1, 0);
 VK_API_VERSION_1_2 :: #run VK_MAKE_API_VERSION(0, 1, 2, 0);
 VK_API_VERSION_1_3 :: #run VK_MAKE_API_VERSION(0, 1, 3, 0);
+VK_API_VERSION_1_4 :: #run VK_MAKE_API_VERSION(0, 1, 4, 0);
+VK_API_VERSION_1_5 :: #run VK_MAKE_API_VERSION(0, 1, 5, 0);
 
 VK_NULL_HANDLE :: null;
 
-VK_HEADER_VERSION :: 343;
+VK_HEADER_VERSION :: 356;
 VK_HEADER_VERSION_COMPLETE :: #run VK_MAKE_API_VERSION(0, 1, 4, VK_HEADER_VERSION);
 VK_MAX_PHYSICAL_DEVICE_NAME_SIZE :u32: 256;
 VK_UUID_SIZE :u32: 16;
@@ -92,6 +94,8 @@ VK_DATA_GRAPH_MODEL_TOOLCHAIN_VERSION_LENGTH_QCOM :u32: 3;
 VK_COMPUTE_OCCUPANCY_PRIORITY_LOW_NV :float: 0.25;
 VK_COMPUTE_OCCUPANCY_PRIORITY_NORMAL_NV :float: 0.50;
 VK_COMPUTE_OCCUPANCY_PRIORITY_HIGH_NV :float: 0.75;
+VK_MAX_DATA_GRAPH_TOSA_NAME_SIZE_ARM :u32: 128;
+VK_MAX_TENSOR_CREATE_INFO_ROLLING_BACKING_WRAP_COUNT_ARM :u32: 4;
 
 
 #if VULKAN_PLATFORM == .X11
@@ -484,6 +488,8 @@ using VkBufferCreateFlagBits :: enum_flags u32 #specified
 
 // Enum VkBufferUsageFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferUsageFlagBits.html)
+// Referenced by VK_KHR_maintenance5
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
 using VkBufferUsageFlagBits :: enum_flags u32 #specified 
 {
     VK_BUFFER_USAGE_TRANSFER_SRC_BIT :: (1 << 0); // Can be used as a source of transfer operations
@@ -1295,6 +1301,8 @@ using VkFormat :: enum s32 #specified
 
 // Enum VkFormatFeatureFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkFormatFeatureFlagBits.html)
+// Referenced by VK_KHR_format_feature_flags2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_format_feature_flags2.html)
 using VkFormatFeatureFlagBits :: enum_flags u32 #specified 
 {
     VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT :: (1 << 0); // Format can be used for sampled images (SAMPLED_IMAGE and COMBINED_IMAGE_SAMPLER descriptor types)
@@ -1435,6 +1443,8 @@ using VkImageAspectFlagBits :: enum_flags u32 #specified
 
 // Enum VkImageCreateFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageCreateFlagBits.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 using VkImageCreateFlagBits :: enum_flags u32 #specified 
 {
     VK_IMAGE_CREATE_SPARSE_BINDING_BIT :: (1 << 0); // Image should support sparse backing
@@ -1512,6 +1522,10 @@ using VkImageCreateFlagBits :: enum_flags u32 #specified
     // Added for extension VK_EXT_fragment_density_map_offset
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_fragment_density_map_offset.html)
     VK_IMAGE_CREATE_FRAGMENT_DENSITY_MAP_OFFSET_BIT_EXT :: (1 << 15);
+
+    // Added for extension VK_KHR_maintenance11
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+    VK_IMAGE_CREATE_ALIAS_SINGLE_LAYER_DESCRIPTOR_BIT_KHR :: (1 << 22);
 }
 
 
@@ -1642,6 +1656,8 @@ using VkImageType :: enum s32 #specified
 
 // Enum VkImageUsageFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageUsageFlagBits.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 using VkImageUsageFlagBits :: enum_flags u32 #specified 
 {
     VK_IMAGE_USAGE_TRANSFER_SRC_BIT :: (1 << 0); // Can be used as a source of transfer operations
@@ -1866,6 +1882,8 @@ using VkMemoryHeapFlagBits :: enum_flags u32 #specified
 
 // Enum VkAccessFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccessFlagBits.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 using VkAccessFlagBits :: enum_flags u32 #specified 
 {
     VK_ACCESS_INDIRECT_COMMAND_READ_BIT :: (1 << 0); // Controls coherency of indirect command reads
@@ -2008,6 +2026,8 @@ using VkPipelineBindPoint :: enum s32 #specified
 
 // Enum VkPipelineCreateFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPipelineCreateFlagBits.html)
+// Referenced by VK_KHR_maintenance5
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
 using VkPipelineCreateFlagBits :: enum_flags u32 #specified 
 {
     VK_PIPELINE_CREATE_DISABLE_OPTIMIZATION_BIT :: (1 << 0);
@@ -2097,7 +2117,7 @@ using VkPipelineCreateFlagBits :: enum_flags u32 #specified
 
     // Added for extension VK_EXT_opacity_micromap
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-    VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT :: (1 << 24);
+    VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT :: VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_KHR;
 
     // Added for extension VK_NV_displacement_micromap
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_displacement_micromap.html)
@@ -2107,6 +2127,10 @@ using VkPipelineCreateFlagBits :: enum_flags u32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_pipeline_protected_access.html)
     VK_PIPELINE_CREATE_NO_PROTECTED_ACCESS_BIT_EXT :: VK_PIPELINE_CREATE_NO_PROTECTED_ACCESS_BIT;
     VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT_EXT :: VK_PIPELINE_CREATE_PROTECTED_ACCESS_ONLY_BIT;
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_PIPELINE_CREATE_RAY_TRACING_OPACITY_MICROMAP_BIT_KHR :: (1 << 24);
 }
 
 
@@ -2206,6 +2230,10 @@ using VkQueryType :: enum s32 #specified
     // Added for extension VK_NV_ray_tracing
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_ray_tracing.html)
     VK_QUERY_TYPE_ACCELERATION_STRUCTURE_COMPACTED_SIZE_NV :: 1000165000;
+
+    // Added for extension VK_QCOM_elapsed_timer_query
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_elapsed_timer_query.html)
+    VK_QUERY_TYPE_TIME_ELAPSED_QCOM :: 1000173000;
 
     // Added for extension VK_INTEL_performance_query
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_INTEL_performance_query.html)
@@ -2650,12 +2678,12 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETER_FEATURES :: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES;
 
     // Added in vulkan,vulkansc,vulkanbase 1.2
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES :: 1000196000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES :: 49;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_PROPERTIES :: 50;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES :: 51;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_PROPERTIES :: 52;
     VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO :: 1000147000;
-    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES :: 1000196000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_MEMORY_MODEL_FEATURES :: 1000211000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_HOST_QUERY_RESET_FEATURES :: 1000261000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_TIMELINE_SEMAPHORE_FEATURES :: 1000207000;
@@ -3317,6 +3345,16 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES_EXT :: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SAMPLER_FILTER_MINMAX_PROPERTIES;
     VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT :: VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO;
 
+    // Added for extension VK_AMD_gpa_interface
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_FEATURES_AMD :: 1000133000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_PROPERTIES_AMD :: 1000133001;
+    VK_STRUCTURE_TYPE_GPA_SAMPLE_BEGIN_INFO_AMD :: 1000133002;
+    VK_STRUCTURE_TYPE_GPA_SESSION_CREATE_INFO_AMD :: 1000133003;
+    VK_STRUCTURE_TYPE_GPA_DEVICE_CLOCK_MODE_INFO_AMD :: 1000133004;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_PROPERTIES_2_AMD :: 1000133005;
+    VK_STRUCTURE_TYPE_GPA_DEVICE_GET_CLOCK_INFO_AMD :: 1000133006;
+
     // Added for extension VK_AMDX_shader_enqueue
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMDX_shader_enqueue.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ENQUEUE_FEATURES_AMDX :: 1000134000;
@@ -3508,6 +3546,10 @@ using VkStructureType :: enum s32 #specified
     // Added for extension VK_QCOM_cooperative_matrix_conversion
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_cooperative_matrix_conversion.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_CONVERSION_FEATURES_QCOM :: 1000172000;
+
+    // Added for extension VK_QCOM_elapsed_timer_query
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_elapsed_timer_query.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ELAPSED_TIMER_QUERY_FEATURES_QCOM :: 1000173000;
 
     // Added for extension VK_EXT_global_priority
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_global_priority.html)
@@ -3717,11 +3759,21 @@ using VkStructureType :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_device_coherent_memory.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COHERENT_MEMORY_FEATURES_AMD :: 1000229000;
 
+    // Added for extension VK_KHR_shader_constant_data
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_constant_data.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CONSTANT_DATA_FEATURES_KHR :: 1000231000;
+
     // Added for extension VK_KHR_dynamic_rendering_local_read
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_dynamic_rendering_local_read.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES_KHR :: VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_LOCAL_READ_FEATURES;
     VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO_KHR :: VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_LOCATION_INFO;
     VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO_KHR :: VK_STRUCTURE_TYPE_RENDERING_INPUT_ATTACHMENT_INDEX_INFO;
+
+    // Added for extension VK_KHR_shader_abort
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_abort.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ABORT_FEATURES_KHR :: 1000233000;
+    VK_STRUCTURE_TYPE_DEVICE_FAULT_SHADER_ABORT_MESSAGE_INFO_KHR :: 1000233001;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ABORT_PROPERTIES_KHR :: 1000233002;
 
     // Added for extension VK_EXT_shader_image_atomic_int64
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_image_atomic_int64.html)
@@ -4005,6 +4057,26 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DIAGNOSTICS_CONFIG_FEATURES_NV :: 1000300000;
     VK_STRUCTURE_TYPE_DEVICE_DIAGNOSTICS_CONFIG_CREATE_INFO_NV :: 1000300001;
 
+    // Added for extension VK_QCOM_queue_perf_hint
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+    VK_STRUCTURE_TYPE_PERF_HINT_INFO_QCOM :: 1000302000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_QUEUE_PERF_HINT_FEATURES_QCOM :: 1000302001;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_QUEUE_PERF_HINT_PROPERTIES_QCOM :: 1000302002;
+
+    // Added for extension VK_QCOM_image_processing3
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_image_processing3.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_3_FEATURES_QCOM :: 1000303000;
+
+    // Added for extension VK_QCOM_shader_multiple_wait_queues
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_shader_multiple_wait_queues.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MULTIPLE_WAIT_QUEUES_FEATURES_QCOM :: 1000304000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MULTIPLE_WAIT_QUEUES_PROPERTIES_QCOM :: 1000304001;
+
+    // Added for extension VK_EXT_shader_split_barrier
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_split_barrier.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SPLIT_BARRIER_FEATURES_EXT :: 1000305000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SPLIT_BARRIER_PROPERTIES_EXT :: 1000305001;
+
     // Added for extension VK_NV_cuda_kernel_launch
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cuda_kernel_launch.html)
     VK_STRUCTURE_TYPE_CUDA_MODULE_CREATE_INFO_NV :: 1000307000;
@@ -4071,6 +4143,25 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT :: 1000316011;
     VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_PUSH_DESCRIPTOR_BUFFER_HANDLE_EXT :: 1000316012;
     VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CAPTURE_DESCRIPTOR_DATA_INFO_EXT :: 1000316009;
+
+    // Added for extension VK_KHR_device_address_commands
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+    VK_STRUCTURE_TYPE_DEVICE_MEMORY_COPY_KHR :: 1000318000;
+    VK_STRUCTURE_TYPE_COPY_DEVICE_MEMORY_INFO_KHR :: 1000318001;
+    VK_STRUCTURE_TYPE_DEVICE_MEMORY_IMAGE_COPY_KHR :: 1000318002;
+    VK_STRUCTURE_TYPE_COPY_DEVICE_MEMORY_IMAGE_INFO_KHR :: 1000318003;
+    VK_STRUCTURE_TYPE_MEMORY_RANGE_BARRIERS_INFO_KHR :: 1000318004;
+    VK_STRUCTURE_TYPE_MEMORY_RANGE_BARRIER_KHR :: 1000318005;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_ADDRESS_COMMANDS_FEATURES_KHR :: 1000318006;
+    VK_STRUCTURE_TYPE_BIND_INDEX_BUFFER_3_INFO_KHR :: 1000318007;
+    VK_STRUCTURE_TYPE_BIND_VERTEX_BUFFER_3_INFO_KHR :: 1000318008;
+    VK_STRUCTURE_TYPE_DRAW_INDIRECT_2_INFO_KHR :: 1000318009;
+    VK_STRUCTURE_TYPE_DRAW_INDIRECT_COUNT_2_INFO_KHR :: 1000318010;
+    VK_STRUCTURE_TYPE_DISPATCH_INDIRECT_2_INFO_KHR :: 1000318011;
+    VK_STRUCTURE_TYPE_CONDITIONAL_RENDERING_BEGIN_INFO_2_EXT :: 1000318012;
+    VK_STRUCTURE_TYPE_BIND_TRANSFORM_FEEDBACK_BUFFER_2_INFO_EXT :: 1000318013;
+    VK_STRUCTURE_TYPE_MEMORY_MARKER_INFO_AMD :: 1000318014;
+    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_2_KHR :: 1000318015;
 
     // Added for extension VK_EXT_graphics_pipeline_library
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_graphics_pipeline_library.html)
@@ -4404,6 +4495,8 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_DEVICE_QUEUE_SHADER_CORE_CONTROL_CREATE_INFO_ARM :: 1000417000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_FEATURES_ARM :: 1000417001;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_PROPERTIES_ARM :: 1000417002;
+    VK_STRUCTURE_TYPE_DISPATCH_PARAMETERS_ARM :: 1000417003;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_DISPATCH_PARAMETERS_PROPERTIES_ARM :: 1000417004;
 
     // Added for extension VK_EXT_image_sliced_view_of_3d
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_image_sliced_view_of_3d.html)
@@ -4762,6 +4855,10 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_QUEUE_FAMILY_DATA_GRAPH_PROCESSING_ENGINE_INFO_ARM :: 1000507019;
     VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_CONSTANT_TENSOR_SEMI_STRUCTURED_SPARSITY_INFO_ARM :: 1000507015;
 
+    // Added for extension VK_ARM_data_graph_instruction_set_tosa
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_DATA_GRAPH_TOSA_PROPERTIES_ARM :: 1000508000;
+
     // Added for extension VK_QCOM_multiview_per_view_render_areas
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_multiview_per_view_render_areas.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTIVIEW_PER_VIEW_RENDER_AREAS_FEATURES_QCOM :: 1000510000;
@@ -4978,6 +5075,11 @@ using VkStructureType :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_replicated_composites.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_REPLICATED_COMPOSITES_FEATURES_EXT :: 1000564000;
 
+    // Added for extension VK_ARM_tensor_controls
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_tensor_controls.html)
+    VK_STRUCTURE_TYPE_TENSOR_EXPLICIT_TILING_FORMAT_PROPERTIES_ARM :: 1000565000;
+    VK_STRUCTURE_TYPE_TENSOR_ROLLING_BACKING_CREATE_INFO_ARM :: 1000565001;
+
     // Added for extension VK_EXT_shader_float8
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_float8.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT8_FEATURES_EXT :: 1000567000;
@@ -5022,6 +5124,13 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_INDIRECT_EXECUTION_SET_SHADER_LAYOUT_INFO_EXT :: 1000572012;
     VK_STRUCTURE_TYPE_GENERATED_COMMANDS_PIPELINE_INFO_EXT :: 1000572013;
     VK_STRUCTURE_TYPE_GENERATED_COMMANDS_SHADER_INFO_EXT :: 1000572014;
+
+    // Added for extension VK_KHR_device_fault
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_KHR :: 1000573000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_PROPERTIES_KHR :: 1000573001;
+    VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_KHR :: 1000573002;
+    VK_STRUCTURE_TYPE_DEVICE_FAULT_DEBUG_INFO_KHR :: 1000573003;
 
     // Added for extension VK_KHR_maintenance8
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance8.html)
@@ -5086,6 +5195,12 @@ using VkStructureType :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_pipeline_opacity_micromap.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PIPELINE_OPACITY_MICROMAP_FEATURES_ARM :: 1000596000;
 
+    // Added for extension VK_KHR_video_encode_feedback2
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_ENCODE_FEEDBACK_2_FEATURES_KHR :: 1000598000;
+    VK_STRUCTURE_TYPE_VIDEO_ENCODE_FEEDBACK_2_CAPABILITIES_KHR :: 1000598001;
+    VK_STRUCTURE_TYPE_QUERY_POOL_VIDEO_ENCODE_PER_PARTITION_FEEDBACK_CREATE_INFO_KHR :: 1000598002;
+
     // Added for extension VK_EXT_external_memory_metal
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_external_memory_metal.html)
     VK_STRUCTURE_TYPE_IMPORT_MEMORY_METAL_HANDLE_INFO_EXT :: 1000602000;
@@ -5103,6 +5218,13 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_ARM :: 1000605002;
     VK_STRUCTURE_TYPE_PERFORMANCE_COUNTER_DESCRIPTION_ARM :: 1000605003;
     VK_STRUCTURE_TYPE_RENDER_PASS_PERFORMANCE_COUNTERS_BY_REGION_BEGIN_INFO_ARM :: 1000605004;
+
+    // Added for extension VK_ARM_shader_instrumentation
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INSTRUMENTATION_FEATURES_ARM :: 1000607000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INSTRUMENTATION_PROPERTIES_ARM :: 1000607001;
+    VK_STRUCTURE_TYPE_SHADER_INSTRUMENTATION_CREATE_INFO_ARM :: 1000607002;
+    VK_STRUCTURE_TYPE_SHADER_INSTRUMENTATION_METRIC_DESCRIPTION_ARM :: 1000607003;
 
     // Added for extension VK_EXT_vertex_attribute_robustness
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_vertex_attribute_robustness.html)
@@ -5128,6 +5250,11 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_SET_PRESENT_CONFIG_NV :: 1000613000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_METERING_FEATURES_NV :: 1000613001;
 
+    // Added for extension VK_EXT_multisampled_render_to_swapchain
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_multisampled_render_to_swapchain.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SWAPCHAIN_FEATURES_EXT :: 1000616000;
+    VK_STRUCTURE_TYPE_SWAPCHAIN_FLAGS_SURFACE_CAPABILITIES_EXT :: 1000616001;
+
     // Added for extension VK_EXT_fragment_density_map_offset
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_fragment_density_map_offset.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FRAGMENT_DENSITY_MAP_OFFSET_FEATURES_EXT :: 1000425000;
@@ -5142,6 +5269,13 @@ using VkStructureType :: enum s32 #specified
     // Added for extension VK_KHR_present_mode_fifo_latest_ready
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_present_mode_fifo_latest_ready.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_MODE_FIFO_LATEST_READY_FEATURES_KHR :: 1000361000;
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPACITY_MICROMAP_FEATURES_KHR :: 1000623000;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPACITY_MICROMAP_PROPERTIES_KHR :: 1000623001;
+    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_MICROMAP_DATA_KHR :: 1000623002;
+    VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_TRIANGLES_OPACITY_MICROMAP_KHR :: 1000623003;
 
     // Added for extension VK_EXT_shader_64bit_indexing
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_64bit_indexing.html)
@@ -5166,6 +5300,18 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_RENDERING_END_INFO_KHR :: 1000619003;
     VK_STRUCTURE_TYPE_RESOLVE_IMAGE_MODE_INFO_KHR :: 1000630004;
 
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DATA_GRAPH_OPTICAL_FLOW_FEATURES_ARM :: 1000631000;
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_DATA_GRAPH_OPTICAL_FLOW_PROPERTIES_ARM :: 1000631001;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_OPTICAL_FLOW_IMAGE_FORMAT_INFO_ARM :: 1000631003;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_OPTICAL_FLOW_IMAGE_FORMAT_PROPERTIES_ARM :: 1000631004;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_OPTICAL_FLOW_DISPATCH_INFO_ARM :: 1000631005;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_OPTICAL_FLOW_CREATE_INFO_ARM :: 1000631002;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_RESOURCE_INFO_IMAGE_LAYOUT_ARM :: 1000631006;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SINGLE_NODE_CREATE_INFO_ARM :: 1000631007;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SINGLE_NODE_CONNECTION_ARM :: 1000631008;
+
     // Added for extension VK_EXT_shader_long_vector
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_long_vector.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_LONG_VECTOR_FEATURES_EXT :: 1000635000;
@@ -5184,6 +5330,11 @@ using VkStructureType :: enum s32 #specified
     VK_STRUCTURE_TYPE_COMPUTE_OCCUPANCY_PRIORITY_PARAMETERS_NV :: 1000645000;
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COMPUTE_OCCUPANCY_PRIORITY_FEATURES_NV :: 1000645001;
 
+    // Added for extension VK_KHR_maintenance11
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_11_FEATURES_KHR :: 1000657000;
+    VK_STRUCTURE_TYPE_QUEUE_FAMILY_OPTIMAL_IMAGE_TRANSFER_GRANULARITY_PROPERTIES_KHR :: 1000657001;
+
     // Added for extension VK_EXT_shader_subgroup_partitioned
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_subgroup_partitioned.html)
     VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_PARTITIONED_FEATURES_EXT :: 1000662000;
@@ -5191,6 +5342,43 @@ using VkStructureType :: enum s32 #specified
     // Added for extension VK_SEC_ubm_surface
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_ubm_surface.html)
     VK_STRUCTURE_TYPE_UBM_SURFACE_CREATE_INFO_SEC :: 1000664000;
+
+    // Added for extension VK_KHR_extended_flags
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+    VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_4_KHR :: 1000668000;
+    VK_STRUCTURE_TYPE_IMAGE_CREATE_FLAGS_2_CREATE_INFO_KHR :: 1000668001;
+    VK_STRUCTURE_TYPE_IMAGE_USAGE_FLAGS_2_CREATE_INFO_KHR :: 1000668002;
+    VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_2_CREATE_INFO_KHR :: 1000668003;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_FLAGS_FEATURES_KHR :: 1000668004;
+    VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_2_CREATE_INFO_KHR :: 1000668005;
+    VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_2_KHR :: 1000668006;
+
+    // Added for extension VK_EXT_shader_ocp_microscaling_types
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_ocp_microscaling_types.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OCP_MICROSCALING_TYPES_FEATURES_EXT :: 1000672000;
+
+    // Added for extension VK_VALVE_shader_mixed_float_dot_product
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_VALVE_shader_mixed_float_dot_product.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MIXED_FLOAT_DOT_PRODUCT_FEATURES_VALVE :: 1000673000;
+
+    // Added for extension VK_SEC_throttle_hint
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_throttle_hint.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_THROTTLE_HINT_FEATURES_SEC :: 1000674000;
+    VK_STRUCTURE_TYPE_THROTTLE_HINT_SUBMIT_INFO_SEC :: 1000674001;
+
+    // Added for extension VK_ARM_data_graph_neural_accelerator_statistics
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_NEURAL_STATISTICS_CREATE_INFO_ARM :: 1000676000;
+    VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SESSION_NEURAL_STATISTICS_CREATE_INFO_ARM :: 1000676001;
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DATA_GRAPH_NEURAL_ACCELERATOR_STATISTICS_FEATURES_ARM :: 1000676002;
+
+    // Added for extension VK_EXT_primitive_restart_index
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_primitive_restart_index.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_RESTART_INDEX_FEATURES_EXT :: 1000678000;
+
+    // Added for extension VK_NV_cooperative_matrix_decode_vector
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cooperative_matrix_decode_vector.html)
+    VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_DECODE_VECTOR_FEATURES_NV :: 1000689000;
 }
 
 
@@ -5268,6 +5456,8 @@ using VkVertexInputRate :: enum s32 #specified
 
 // Enum VkPipelineStageFlagBits
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPipelineStageFlagBits.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 using VkPipelineStageFlagBits :: enum_flags u32 #specified 
 {
     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT :: (1 << 0); // Before subsequent commands are processed
@@ -5575,6 +5765,10 @@ using VkObjectType :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_debug_utils.html)
     VK_OBJECT_TYPE_DEBUG_UTILS_MESSENGER_EXT :: 1000128000;
 
+    // Added for extension VK_AMD_gpa_interface
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+    VK_OBJECT_TYPE_GPA_SESSION_AMD :: 1000133000;
+
     // Added for extension VK_KHR_acceleration_structure
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
     VK_OBJECT_TYPE_ACCELERATION_STRUCTURE_KHR :: 1000150000;
@@ -5653,6 +5847,10 @@ using VkObjectType :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_generated_commands.html)
     VK_OBJECT_TYPE_INDIRECT_COMMANDS_LAYOUT_EXT :: 1000572000;
     VK_OBJECT_TYPE_INDIRECT_EXECUTION_SET_EXT :: 1000572001;
+
+    // Added for extension VK_ARM_shader_instrumentation
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+    VK_OBJECT_TYPE_SHADER_INSTRUMENTATION_ARM :: 1000607000;
 }
 
 
@@ -5679,6 +5877,10 @@ using VkPipelineLayoutCreateFlagBits :: enum_flags u32 #specified
     // Added for extension VK_EXT_graphics_pipeline_library
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_graphics_pipeline_library.html)
     VK_PIPELINE_LAYOUT_CREATE_INDEPENDENT_SETS_BIT_EXT :: (1 << 1);
+
+    // Added for extension VK_KHR_maintenance11
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+    VK_PIPELINE_LAYOUT_CREATE_NO_TASK_SHADER_BIT_KHR :: (1 << 2);
 }
 
 
@@ -6163,10 +6365,15 @@ using VkGeometryInstanceFlagBitsKHR :: enum_flags u32 #specified
 
     // Added for extension VK_EXT_opacity_micromap
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-    VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_BIT_EXT :: (1 << 4);
+    VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_BIT_EXT :: VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_BIT_KHR;
     VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_EXT :: VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_BIT_EXT;
-    VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_BIT_EXT :: (1 << 5);
+    VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_BIT_EXT :: VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_BIT_KHR;
     VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_EXT :: VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_BIT_EXT;
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_GEOMETRY_INSTANCE_FORCE_OPACITY_MICROMAP_2_STATE_BIT_KHR :: (1 << 4);
+    VK_GEOMETRY_INSTANCE_DISABLE_OPACITY_MICROMAPS_BIT_KHR :: (1 << 5);
 }
 
 
@@ -6241,9 +6448,9 @@ using VkBuildAccelerationStructureFlagBitsKHR :: enum_flags u32 #specified
 
     // Added for extension VK_EXT_opacity_micromap
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_EXT :: (1 << 6);
+    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_EXT :: VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_KHR;
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_EXT :: VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_EXT;
-    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_EXT :: (1 << 7);
+    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_EXT :: VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_KHR;
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_EXT :: VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_EXT;
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_DATA_UPDATE_BIT_EXT :: (1 << 8);
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_DATA_UPDATE_EXT :: VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_DATA_UPDATE_BIT_EXT;
@@ -6261,6 +6468,12 @@ using VkBuildAccelerationStructureFlagBitsKHR :: enum_flags u32 #specified
     // Added for extension VK_NV_cluster_acceleration_structure
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cluster_acceleration_structure.html)
     VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_CLUSTER_OPACITY_MICROMAPS_BIT_NV :: (1 << 12);
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_OPACITY_MICROMAP_UPDATE_BIT_KHR :: (1 << 6);
+    VK_BUILD_ACCELERATION_STRUCTURE_ALLOW_DISABLE_OPACITY_MICROMAPS_BIT_KHR :: (1 << 7);
+    VK_BUILD_ACCELERATION_STRUCTURE_MICROMAP_LOSSY_BIT_KHR :: (1 << 10);
 }
 
 
@@ -6342,6 +6555,10 @@ using VkAccelerationStructureTypeKHR :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_ray_tracing.html)
     VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_NV :: VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR;
     VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_NV :: VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR;
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_ACCELERATION_STRUCTURE_TYPE_OPACITY_MICROMAP_KHR :: 1000623000;
 }
 
 
@@ -6375,6 +6592,10 @@ using VkGeometryTypeKHR :: enum s32 #specified
     // Added for extension VK_AMDX_dense_geometry_format
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMDX_dense_geometry_format.html)
     VK_GEOMETRY_TYPE_DENSE_GEOMETRY_FORMAT_TRIANGLES_AMDX :: 1000478000;
+
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_GEOMETRY_TYPE_MICROMAP_KHR :: 1000623000;
 }
 
 
@@ -7294,6 +7515,10 @@ using VkFormatFeatureFlagBits2 :: enum_flags u64 #specified
     VK_FORMAT_FEATURE_2_VIDEO_ENCODE_INPUT_BIT_KHR :: (1 << 27);
     VK_FORMAT_FEATURE_2_VIDEO_ENCODE_DPB_BIT_KHR :: (1 << 28);
 
+    // Added for extension VK_QCOM_image_processing3
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_image_processing3.html)
+    VK_FORMAT_FEATURE_2_BLOCK_MATCHING_SXD_BIT_QCOM :: (1 << 44);
+
     // Added for extension VK_KHR_format_feature_flags2
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_format_feature_flags2.html)
     VK_FORMAT_FEATURE_2_SAMPLED_IMAGE_BIT_KHR :: VK_FORMAT_FEATURE_2_SAMPLED_IMAGE_BIT;
@@ -7363,12 +7588,22 @@ using VkFormatFeatureFlagBits2 :: enum_flags u64 #specified
     VK_FORMAT_FEATURE_2_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR :: (1 << 49);
     VK_FORMAT_FEATURE_2_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR :: (1 << 50);
 
+    // Added for extension VK_IMG_filter_linear_2d
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_IMG_filter_linear_2d.html)
+    VK_FORMAT_FEATURE_2_SAMPLED_IMAGE_FILTER_LINEAR_2D_BIT_IMG :: (1 << 45);
+
     // Added for extension VK_KHR_maintenance10
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance10.html)
     VK_FORMAT_FEATURE_2_DEPTH_COPY_ON_COMPUTE_QUEUE_BIT_KHR :: (1 << 52);
     VK_FORMAT_FEATURE_2_DEPTH_COPY_ON_TRANSFER_QUEUE_BIT_KHR :: (1 << 53);
     VK_FORMAT_FEATURE_2_STENCIL_COPY_ON_COMPUTE_QUEUE_BIT_KHR :: (1 << 54);
     VK_FORMAT_FEATURE_2_STENCIL_COPY_ON_TRANSFER_QUEUE_BIT_KHR :: (1 << 55);
+
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_FORMAT_FEATURE_2_DATA_GRAPH_OPTICAL_FLOW_IMAGE_BIT_ARM :: (1 << 56);
+    VK_FORMAT_FEATURE_2_DATA_GRAPH_OPTICAL_FLOW_VECTOR_BIT_ARM :: (1 << 57);
+    VK_FORMAT_FEATURE_2_DATA_GRAPH_OPTICAL_FLOW_COST_BIT_ARM :: (1 << 58);
 }
 
 
@@ -7377,6 +7612,16 @@ using VkFormatFeatureFlagBits2 :: enum_flags u64 #specified
 // Referenced by VK_KHR_format_feature_flags2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_format_feature_flags2.html)
 VkFormatFeatureFlagBits2KHR :: VkFormatFeatureFlagBits2;
+
+
+// Enum VkFormatFeatureFlagBits4KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkFormatFeatureFlagBits4KHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+using VkFormatFeatureFlagBits4KHR :: enum_flags u64 #specified 
+{
+    // empty
+}
 
 
 // Enum VkRenderingFlagBits
@@ -7680,27 +7925,46 @@ using VkMicromapCreateFlagBitsEXT :: enum_flags u32 #specified
 }
 
 
+// Enum VkOpacityMicromapFormatKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkOpacityMicromapFormatKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+using VkOpacityMicromapFormatKHR :: enum s32 #specified
+{
+    VK_OPACITY_MICROMAP_FORMAT_2_STATE_KHR :: 1;
+    VK_OPACITY_MICROMAP_FORMAT_4_STATE_KHR :: 2;
+
+    // Added for extension VK_EXT_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+    VK_OPACITY_MICROMAP_FORMAT_2_STATE_EXT :: VK_OPACITY_MICROMAP_FORMAT_2_STATE_KHR;
+    VK_OPACITY_MICROMAP_FORMAT_4_STATE_EXT :: VK_OPACITY_MICROMAP_FORMAT_4_STATE_KHR;
+}
+
+
 // Enum VkOpacityMicromapFormatEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkOpacityMicromapFormatEXT.html)
 // Referenced by VK_EXT_opacity_micromap
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-using VkOpacityMicromapFormatEXT :: enum s32 #specified
-{
-    VK_OPACITY_MICROMAP_FORMAT_2_STATE_EXT :: 1;
-    VK_OPACITY_MICROMAP_FORMAT_4_STATE_EXT :: 2;
-}
+VkOpacityMicromapFormatEXT :: VkOpacityMicromapFormatKHR;
 
 
-// Enum VkOpacityMicromapSpecialIndexEXT
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkOpacityMicromapSpecialIndexEXT.html)
-// Referenced by VK_EXT_opacity_micromap
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-using VkOpacityMicromapSpecialIndexEXT :: enum s32 #specified
+// Enum VkOpacityMicromapSpecialIndexKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkOpacityMicromapSpecialIndexKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+using VkOpacityMicromapSpecialIndexKHR :: enum s32 #specified
 {
-    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_TRANSPARENT_EXT :: -1;
-    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_OPAQUE_EXT :: -2;
-    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_TRANSPARENT_EXT :: -3;
-    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_OPAQUE_EXT :: -4;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_TRANSPARENT_KHR :: -1;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_OPAQUE_KHR :: -2;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_TRANSPARENT_KHR :: -3;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_OPAQUE_KHR :: -4;
+
+    // Added for extension VK_EXT_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_TRANSPARENT_EXT :: VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_TRANSPARENT_KHR;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_OPAQUE_EXT :: VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_OPAQUE_KHR;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_TRANSPARENT_EXT :: VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_TRANSPARENT_KHR;
+    VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_OPAQUE_EXT :: VK_OPACITY_MICROMAP_SPECIAL_INDEX_FULLY_UNKNOWN_OPAQUE_KHR;
 
     // Added for extension VK_NV_cluster_acceleration_structure
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cluster_acceleration_structure.html)
@@ -7708,13 +7972,20 @@ using VkOpacityMicromapSpecialIndexEXT :: enum s32 #specified
 }
 
 
-// Enum VkDeviceFaultVendorBinaryHeaderVersionEXT
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionEXT.html)
-// Referenced by VK_EXT_device_fault
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
-using VkDeviceFaultVendorBinaryHeaderVersionEXT :: enum s32 #specified
+// Enum VkOpacityMicromapSpecialIndexEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkOpacityMicromapSpecialIndexEXT.html)
+// Referenced by VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+VkOpacityMicromapSpecialIndexEXT :: VkOpacityMicromapSpecialIndexKHR;
+
+
+// Enum VkAccelerationStructureSerializedBlockTypeKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccelerationStructureSerializedBlockTypeKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+using VkAccelerationStructureSerializedBlockTypeKHR :: enum s32 #specified
 {
-    VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT :: 1;
+    VK_ACCELERATION_STRUCTURE_SERIALIZED_BLOCK_TYPE_OPACITY_MICROMAP_KHR :: 0;
 }
 
 
@@ -7749,6 +8020,24 @@ using VkIndirectCommandsInputModeFlagBitsEXT :: enum_flags u32 #specified
     VK_INDIRECT_COMMANDS_INPUT_MODE_VULKAN_INDEX_BUFFER_EXT :: (1 << 0);
     VK_INDIRECT_COMMANDS_INPUT_MODE_DXGI_INDEX_BUFFER_EXT :: (1 << 1);
 }
+
+
+// Enum VkDeviceFaultVendorBinaryHeaderVersionKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+using VkDeviceFaultVendorBinaryHeaderVersionKHR :: enum s32 #specified
+{
+    VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_KHR :: 1;
+    VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_EXT :: VK_DEVICE_FAULT_VENDOR_BINARY_HEADER_VERSION_ONE_KHR;
+}
+
+
+// Enum VkDeviceFaultVendorBinaryHeaderVersionEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionEXT.html)
+// Referenced by VK_EXT_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
+VkDeviceFaultVendorBinaryHeaderVersionEXT :: VkDeviceFaultVendorBinaryHeaderVersionKHR;
 
 
 // Enum VkFrameBoundaryFlagBitsEXT
@@ -7828,6 +8117,10 @@ using VkPipelineCreateFlagBits2 :: enum_flags u64 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_ray_tracing_pipeline.html)
     VK_PIPELINE_CREATE_2_RAY_TRACING_SKIP_BUILT_IN_PRIMITIVES_BIT_KHR :: VK_PIPELINE_CREATE_2_RAY_TRACING_SKIP_TRIANGLES_BIT_KHR;
 
+    // Added for extension VK_EXT_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+    VK_PIPELINE_CREATE_2_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT :: VK_PIPELINE_CREATE_2_RAY_TRACING_OPACITY_MICROMAP_BIT_KHR;
+
     // Added for extension VK_NV_ray_tracing_linear_swept_spheres
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_ray_tracing_linear_swept_spheres.html)
     VK_PIPELINE_CREATE_2_RAY_TRACING_ALLOW_SPHERES_AND_LINEAR_SWEPT_SPHERES_BIT_NV :: (1 << 33);
@@ -7862,7 +8155,6 @@ using VkPipelineCreateFlagBits2 :: enum_flags u64 #specified
     VK_PIPELINE_CREATE_2_RAY_TRACING_ALLOW_MOTION_BIT_NV :: (1 << 20);
     VK_PIPELINE_CREATE_2_RENDERING_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR :: (1 << 21);
     VK_PIPELINE_CREATE_2_RENDERING_FRAGMENT_DENSITY_MAP_ATTACHMENT_BIT_EXT :: (1 << 22);
-    VK_PIPELINE_CREATE_2_RAY_TRACING_OPACITY_MICROMAP_BIT_EXT :: (1 << 24);
     VK_PIPELINE_CREATE_2_COLOR_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT :: (1 << 25);
     VK_PIPELINE_CREATE_2_DEPTH_STENCIL_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT :: (1 << 26);
     VK_PIPELINE_CREATE_2_NO_PROTECTED_ACCESS_BIT_EXT :: VK_PIPELINE_CREATE_2_NO_PROTECTED_ACCESS_BIT;
@@ -7870,6 +8162,7 @@ using VkPipelineCreateFlagBits2 :: enum_flags u64 #specified
     VK_PIPELINE_CREATE_2_RAY_TRACING_DISPLACEMENT_MICROMAP_BIT_NV :: (1 << 28);
     VK_PIPELINE_CREATE_2_DESCRIPTOR_BUFFER_BIT_EXT :: (1 << 29);
     VK_PIPELINE_CREATE_2_DISALLOW_OPACITY_MICROMAP_BIT_ARM :: (1 << 37);
+    VK_PIPELINE_CREATE_2_INSTRUMENT_SHADERS_BIT_ARM :: (1 << 39);
 
     // Added for extension VK_KHR_pipeline_binary
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_pipeline_binary.html)
@@ -7883,6 +8176,11 @@ using VkPipelineCreateFlagBits2 :: enum_flags u64 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_VALVE_fragment_density_map_layered.html)
     VK_PIPELINE_CREATE_2_PER_LAYER_FRAGMENT_DENSITY_BIT_VALVE :: (1 << 40);
 
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_PIPELINE_CREATE_2_RAY_TRACING_OPACITY_MICROMAP_BIT_KHR :: (1 << 24);
+    VK_PIPELINE_CREATE_2_OPACITY_MICROMAP_DISALLOW_MIXED_SPECIAL_INDEX_BIT_KHR :: (1 << 41);
+
     // Added for extension VK_EXT_shader_64bit_indexing
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_64bit_indexing.html)
     VK_PIPELINE_CREATE_2_64_BIT_INDEXING_BIT_EXT :: (1 << 43);
@@ -7891,8 +8189,9 @@ using VkPipelineCreateFlagBits2 :: enum_flags u64 #specified
 
 // Enum VkPipelineCreateFlagBits2KHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPipelineCreateFlagBits2KHR.html)
-// Referenced by VK_KHR_maintenance5
+// Referenced by VK_KHR_maintenance5, VK_KHR_extended_flags
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 VkPipelineCreateFlagBits2KHR :: VkPipelineCreateFlagBits2;
 
 
@@ -7921,6 +8220,11 @@ using VkBufferUsageFlagBits2 :: enum_flags u64 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
     VK_BUFFER_USAGE_2_DESCRIPTOR_HEAP_BIT_EXT :: (1 << 28);
 
+    // Added for extension VK_EXT_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+    VK_BUFFER_USAGE_2_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT :: (1 << 23);
+    VK_BUFFER_USAGE_2_MICROMAP_STORAGE_BIT_EXT :: (1 << 24);
+
     // Added for extension VK_KHR_maintenance5
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
     VK_BUFFER_USAGE_2_TRANSFER_SRC_BIT_KHR :: VK_BUFFER_USAGE_2_TRANSFER_SRC_BIT;
@@ -7947,8 +8251,6 @@ using VkBufferUsageFlagBits2 :: enum_flags u64 #specified
     VK_BUFFER_USAGE_2_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT :: (1 << 21);
     VK_BUFFER_USAGE_2_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT :: (1 << 22);
     VK_BUFFER_USAGE_2_PUSH_DESCRIPTORS_DESCRIPTOR_BUFFER_BIT_EXT :: (1 << 26);
-    VK_BUFFER_USAGE_2_MICROMAP_BUILD_INPUT_READ_ONLY_BIT_EXT :: (1 << 23);
-    VK_BUFFER_USAGE_2_MICROMAP_STORAGE_BIT_EXT :: (1 << 24);
 
     // Added for extension VK_AMDX_dense_geometry_format
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMDX_dense_geometry_format.html)
@@ -7974,9 +8276,83 @@ using VkBufferUsageFlagBits2 :: enum_flags u64 #specified
 
 // Enum VkBufferUsageFlagBits2KHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferUsageFlagBits2KHR.html)
-// Referenced by VK_KHR_maintenance5
+// Referenced by VK_KHR_maintenance5, VK_KHR_extended_flags
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 VkBufferUsageFlagBits2KHR :: VkBufferUsageFlagBits2;
+
+
+// Enum VkImageUsageFlagBits2KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageUsageFlagBits2KHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+using VkImageUsageFlagBits2KHR :: enum_flags u64 #specified 
+{
+    VK_IMAGE_USAGE_2_TRANSFER_SRC_BIT_KHR :: (1 << 0);
+    VK_IMAGE_USAGE_2_TRANSFER_DST_BIT_KHR :: (1 << 1);
+    VK_IMAGE_USAGE_2_SAMPLED_BIT_KHR :: (1 << 2);
+    VK_IMAGE_USAGE_2_STORAGE_BIT_KHR :: (1 << 3);
+    VK_IMAGE_USAGE_2_COLOR_ATTACHMENT_BIT_KHR :: (1 << 4);
+    VK_IMAGE_USAGE_2_DEPTH_STENCIL_ATTACHMENT_BIT_KHR :: (1 << 5);
+    VK_IMAGE_USAGE_2_TRANSIENT_ATTACHMENT_BIT_KHR :: (1 << 6);
+    VK_IMAGE_USAGE_2_INPUT_ATTACHMENT_BIT_KHR :: (1 << 7);
+
+    // Added for extension VK_KHR_extended_flags
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+    VK_IMAGE_USAGE_2_FRAGMENT_SHADING_RATE_ATTACHMENT_BIT_KHR :: (1 << 8);
+    VK_IMAGE_USAGE_2_FRAGMENT_DENSITY_MAP_BIT_EXT :: (1 << 9);
+    VK_IMAGE_USAGE_2_VIDEO_DECODE_DST_BIT_KHR :: (1 << 10);
+    VK_IMAGE_USAGE_2_VIDEO_DECODE_SRC_BIT_KHR :: (1 << 11);
+    VK_IMAGE_USAGE_2_VIDEO_DECODE_DPB_BIT_KHR :: (1 << 12);
+    VK_IMAGE_USAGE_2_VIDEO_ENCODE_DST_BIT_KHR :: (1 << 13);
+    VK_IMAGE_USAGE_2_VIDEO_ENCODE_SRC_BIT_KHR :: (1 << 14);
+    VK_IMAGE_USAGE_2_VIDEO_ENCODE_DPB_BIT_KHR :: (1 << 15);
+    VK_IMAGE_USAGE_2_INVOCATION_MASK_BIT_HUAWEI :: (1 << 18);
+    VK_IMAGE_USAGE_2_ATTACHMENT_FEEDBACK_LOOP_BIT_EXT :: (1 << 19);
+    VK_IMAGE_USAGE_2_SAMPLE_WEIGHT_BIT_QCOM :: (1 << 20);
+    VK_IMAGE_USAGE_2_SAMPLE_BLOCK_MATCH_BIT_QCOM :: (1 << 21);
+    VK_IMAGE_USAGE_2_HOST_TRANSFER_BIT_KHR :: (1 << 22);
+    VK_IMAGE_USAGE_2_TENSOR_ALIASING_BIT_ARM :: (1 << 23);
+    VK_IMAGE_USAGE_2_VIDEO_ENCODE_QUANTIZATION_DELTA_MAP_BIT_KHR :: (1 << 25);
+    VK_IMAGE_USAGE_2_VIDEO_ENCODE_EMPHASIS_MAP_BIT_KHR :: (1 << 26);
+    VK_IMAGE_USAGE_2_TILE_MEMORY_BIT_QCOM :: (1 << 27);
+}
+
+
+// Enum VkImageCreateFlagBits2KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageCreateFlagBits2KHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+using VkImageCreateFlagBits2KHR :: enum_flags u64 #specified 
+{
+    VK_IMAGE_CREATE_2_SPARSE_BINDING_BIT_KHR :: (1 << 0);
+    VK_IMAGE_CREATE_2_SPARSE_RESIDENCY_BIT_KHR :: (1 << 1);
+    VK_IMAGE_CREATE_2_SPARSE_ALIASED_BIT_KHR :: (1 << 2);
+    VK_IMAGE_CREATE_2_MUTABLE_FORMAT_BIT_KHR :: (1 << 3);
+    VK_IMAGE_CREATE_2_CUBE_COMPATIBLE_BIT_KHR :: (1 << 4);
+
+    // Added for extension VK_KHR_maintenance11
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+    VK_IMAGE_CREATE_2_ALIAS_SINGLE_LAYER_DESCRIPTOR_BIT_KHR :: (1 << 22);
+
+    // Added for extension VK_KHR_extended_flags
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+    VK_IMAGE_CREATE_2_2D_ARRAY_COMPATIBLE_BIT_KHR :: (1 << 5);
+    VK_IMAGE_CREATE_2_SPLIT_INSTANCE_BIND_REGIONS_BIT_KHR :: (1 << 6);
+    VK_IMAGE_CREATE_2_BLOCK_TEXEL_VIEW_COMPATIBLE_BIT_KHR :: (1 << 7);
+    VK_IMAGE_CREATE_2_EXTENDED_USAGE_BIT_KHR :: (1 << 8);
+    VK_IMAGE_CREATE_2_DISJOINT_BIT_KHR :: (1 << 9);
+    VK_IMAGE_CREATE_2_ALIAS_BIT_KHR :: (1 << 10);
+    VK_IMAGE_CREATE_2_PROTECTED_BIT_KHR :: (1 << 11);
+    VK_IMAGE_CREATE_2_SAMPLE_LOCATIONS_COMPATIBLE_DEPTH_BIT_EXT :: (1 << 12);
+    VK_IMAGE_CREATE_2_CORNER_SAMPLED_BIT_NV :: (1 << 13);
+    VK_IMAGE_CREATE_2_SUBSAMPLED_BIT_EXT :: (1 << 14);
+    VK_IMAGE_CREATE_2_FRAGMENT_DENSITY_MAP_OFFSET_BIT_EXT :: (1 << 15);
+    VK_IMAGE_CREATE_2_DESCRIPTOR_BUFFER_CAPTURE_REPLAY_BIT_EXT :: (1 << 16);
+    VK_IMAGE_CREATE_2_2D_VIEW_COMPATIBLE_BIT_EXT :: (1 << 17);
+    VK_IMAGE_CREATE_2_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT :: (1 << 18);
+    VK_IMAGE_CREATE_2_VIDEO_PROFILE_INDEPENDENT_BIT_KHR :: (1 << 20);
+}
 
 
 // Enum VkPartitionedAccelerationStructureOpTypeNV
@@ -8052,6 +8428,10 @@ using VkShaderCreateFlagBitsEXT :: enum_flags u32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
     VK_SHADER_CREATE_DESCRIPTOR_HEAP_BIT_EXT :: (1 << 10);
 
+    // Added for extension VK_KHR_maintenance5
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
+    VK_SHADER_CREATE_INSTRUMENT_SHADER_BIT_ARM :: (1 << 11);
+
     // Added for extension VK_EXT_shader_object
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_object.html)
     VK_SHADER_CREATE_ALLOW_VARYING_SUBGROUP_SIZE_BIT_EXT :: (1 << 1);
@@ -8065,9 +8445,17 @@ using VkShaderCreateFlagBitsEXT :: enum_flags u32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_generated_commands.html)
     VK_SHADER_CREATE_INDIRECT_BINDABLE_BIT_EXT :: (1 << 7);
 
+    // Added for extension VK_KHR_opacity_micromap
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+    VK_SHADER_CREATE_OPACITY_MICROMAP_DISALLOW_MIXED_SPECIAL_INDEX_BIT_EXT :: (1 << 12);
+
     // Added for extension VK_EXT_shader_64bit_indexing
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_64bit_indexing.html)
     VK_SHADER_CREATE_64_BIT_INDEXING_BIT_EXT :: (1 << 15);
+
+    // Added for extension VK_KHR_maintenance11
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+    VK_SHADER_CREATE_INDEPENDENT_SETS_BIT_KHR :: (1 << 18);
 }
 
 
@@ -8150,6 +8538,14 @@ using VkComponentTypeKHR :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_float8.html)
     VK_COMPONENT_TYPE_FLOAT8_E4M3_EXT :: 1000491002;
     VK_COMPONENT_TYPE_FLOAT8_E5M2_EXT :: 1000491003;
+
+    // Added for extension VK_EXT_shader_ocp_microscaling_types
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_ocp_microscaling_types.html)
+    VK_COMPONENT_TYPE_FLOAT6_E2M3_EXT :: 1000672000;
+    VK_COMPONENT_TYPE_FLOAT6_E3M2_EXT :: 1000672001;
+    VK_COMPONENT_TYPE_FLOAT4_E2M1_EXT :: 1000672002;
+    VK_COMPONENT_TYPE_FLOAT8_UNSIGNED_E8M0_EXT :: 1000672003;
+    VK_COMPONENT_TYPE_MXINT8_EXT :: 1000672004;
 }
 
 
@@ -8317,6 +8713,14 @@ using VkTensorTilingARM :: enum s32 #specified
 {
     VK_TENSOR_TILING_OPTIMAL_ARM :: 0;
     VK_TENSOR_TILING_LINEAR_ARM :: 1;
+
+    // Added for extension VK_ARM_tensor_controls
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_tensor_controls.html)
+    VK_TENSOR_TILING_BRICK_16_WIDE_ARM :: 1000565000;
+    VK_TENSOR_TILING_BRICK_8_WIDE_ARM :: 1000565001;
+    VK_TENSOR_TILING_BRICK_4_WIDE_ARM :: 1000565002;
+    VK_TENSOR_TILING_BLOCK_U_INTERLEAVED_ARM :: 1000565003;
+    VK_TENSOR_TILING_BLOCK_U_INTERLEAVED_64K_ARM :: 1000565004;
 }
 
 
@@ -8339,6 +8743,10 @@ using VkTensorViewCreateFlagBitsARM :: enum_flags u64 #specified
 using VkDataGraphPipelineSessionCreateFlagBitsARM :: enum_flags u64 #specified 
 {
     VK_DATA_GRAPH_PIPELINE_SESSION_CREATE_PROTECTED_BIT_ARM :: (1 << 0);
+
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_DATA_GRAPH_PIPELINE_SESSION_CREATE_OPTICAL_FLOW_CACHE_BIT_ARM :: (1 << 1);
 }
 
 
@@ -8350,6 +8758,11 @@ using VkDataGraphPipelinePropertyARM :: enum s32 #specified
 {
     VK_DATA_GRAPH_PIPELINE_PROPERTY_CREATION_LOG_ARM :: 0;
     VK_DATA_GRAPH_PIPELINE_PROPERTY_IDENTIFIER_ARM :: 1;
+
+    // Added for extension VK_ARM_data_graph_neural_accelerator_statistics
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+    VK_DATA_GRAPH_PIPELINE_PROPERTY_NEURAL_ACCELERATOR_DEBUG_DATABASE_ARM :: 1000676000;
+    VK_DATA_GRAPH_PIPELINE_PROPERTY_NEURAL_ACCELERATOR_STATISTICS_INFO_ARM :: 1000676001;
 }
 
 
@@ -8360,6 +8773,14 @@ using VkDataGraphPipelinePropertyARM :: enum s32 #specified
 using VkDataGraphPipelineSessionBindPointARM :: enum s32 #specified
 {
     VK_DATA_GRAPH_PIPELINE_SESSION_BIND_POINT_TRANSIENT_ARM :: 0;
+
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_DATA_GRAPH_PIPELINE_SESSION_BIND_POINT_OPTICAL_FLOW_CACHE_ARM :: 1000631001;
+
+    // Added for extension VK_ARM_data_graph_neural_accelerator_statistics
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+    VK_DATA_GRAPH_PIPELINE_SESSION_BIND_POINT_NEURAL_ACCELERATOR_STATISTICS_ARM :: 1000676000;
 }
 
 
@@ -8410,6 +8831,10 @@ using VkPhysicalDeviceDataGraphOperationTypeARM :: enum s32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_data_graph_model.html)
     VK_PHYSICAL_DEVICE_DATA_GRAPH_OPERATION_TYPE_NEURAL_MODEL_QCOM :: 1000629000;
     VK_PHYSICAL_DEVICE_DATA_GRAPH_OPERATION_TYPE_BUILTIN_MODEL_QCOM :: 1000629001;
+
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_PHYSICAL_DEVICE_DATA_GRAPH_OPERATION_TYPE_OPTICAL_FLOW_ARM :: 1000631000;
 }
 
 
@@ -8420,6 +8845,19 @@ using VkPhysicalDeviceDataGraphOperationTypeARM :: enum s32 #specified
 using VkDataGraphModelCacheTypeQCOM :: enum s32 #specified
 {
     VK_DATA_GRAPH_MODEL_CACHE_TYPE_GENERIC_BINARY_QCOM :: 0;
+}
+
+
+// Enum VkPerfHintTypeQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPerfHintTypeQCOM.html)
+// Referenced by VK_QCOM_queue_perf_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+using VkPerfHintTypeQCOM :: enum s32 #specified
+{
+    VK_PERF_HINT_TYPE_DEFAULT_QCOM :: 0;
+    VK_PERF_HINT_TYPE_FREQUENCY_MIN_QCOM :: 1;
+    VK_PERF_HINT_TYPE_FREQUENCY_MAX_QCOM :: 2;
+    VK_PERF_HINT_TYPE_FREQUENCY_SCALED_QCOM :: 3;
 }
 
 
@@ -8474,8 +8912,7 @@ using VkDescriptorMappingSourceEXT :: enum s32 #specified
     VK_DESCRIPTOR_MAPPING_SOURCE_PUSH_ADDRESS_EXT :: 6;
     VK_DESCRIPTOR_MAPPING_SOURCE_INDIRECT_ADDRESS_EXT :: 7;
 
-    // Added for extension VK_EXT_descriptor_heap
-    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
+    // values 8, 9, and 10 are defined as an extension interaction
     VK_DESCRIPTOR_MAPPING_SOURCE_HEAP_WITH_SHADER_RECORD_INDEX_EXT :: 8;
     VK_DESCRIPTOR_MAPPING_SOURCE_SHADER_RECORD_DATA_EXT :: 9;
     VK_DESCRIPTOR_MAPPING_SOURCE_SHADER_RECORD_ADDRESS_EXT :: 10;
@@ -8502,6 +8939,278 @@ using VkSpirvResourceTypeFlagBitsEXT :: enum_flags u32 #specified
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
     VK_SPIRV_RESOURCE_TYPE_ACCELERATION_STRUCTURE_BIT_EXT :: (1 << 8);
     VK_SPIRV_RESOURCE_TYPE_TENSOR_BIT_ARM :: (1 << 9);
+}
+
+
+// Enum VkGpaSqShaderStageFlagBitsAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaSqShaderStageFlagBitsAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+using VkGpaSqShaderStageFlagBitsAMD :: enum_flags u32 #specified 
+{
+    VK_GPA_SQ_SHADER_STAGE_PS_BIT_AMD :: (1 << 0);
+    VK_GPA_SQ_SHADER_STAGE_VS_BIT_AMD :: (1 << 1);
+    VK_GPA_SQ_SHADER_STAGE_GS_BIT_AMD :: (1 << 2);
+    VK_GPA_SQ_SHADER_STAGE_ES_BIT_AMD :: (1 << 3);
+    VK_GPA_SQ_SHADER_STAGE_HS_BIT_AMD :: (1 << 4);
+    VK_GPA_SQ_SHADER_STAGE_LS_BIT_AMD :: (1 << 5);
+    VK_GPA_SQ_SHADER_STAGE_CS_BIT_AMD :: (1 << 6);
+}
+
+
+// Enum VkGpaPerfBlockAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaPerfBlockAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+using VkGpaPerfBlockAMD :: enum s32 #specified
+{
+    VK_GPA_PERF_BLOCK_CPF_AMD :: 0;
+    VK_GPA_PERF_BLOCK_IA_AMD :: 1;
+    VK_GPA_PERF_BLOCK_VGT_AMD :: 2;
+    VK_GPA_PERF_BLOCK_PA_AMD :: 3;
+    VK_GPA_PERF_BLOCK_SC_AMD :: 4;
+    VK_GPA_PERF_BLOCK_SPI_AMD :: 5;
+    VK_GPA_PERF_BLOCK_SQ_AMD :: 6;
+    VK_GPA_PERF_BLOCK_SX_AMD :: 7;
+    VK_GPA_PERF_BLOCK_TA_AMD :: 8;
+    VK_GPA_PERF_BLOCK_TD_AMD :: 9;
+    VK_GPA_PERF_BLOCK_TCP_AMD :: 10;
+    VK_GPA_PERF_BLOCK_TCC_AMD :: 11;
+    VK_GPA_PERF_BLOCK_TCA_AMD :: 12;
+    VK_GPA_PERF_BLOCK_DB_AMD :: 13;
+    VK_GPA_PERF_BLOCK_CB_AMD :: 14;
+    VK_GPA_PERF_BLOCK_GDS_AMD :: 15;
+    VK_GPA_PERF_BLOCK_SRBM_AMD :: 16;
+    VK_GPA_PERF_BLOCK_GRBM_AMD :: 17;
+    VK_GPA_PERF_BLOCK_GRBM_SE_AMD :: 18;
+    VK_GPA_PERF_BLOCK_RLC_AMD :: 19;
+    VK_GPA_PERF_BLOCK_DMA_AMD :: 20;
+    VK_GPA_PERF_BLOCK_MC_AMD :: 21;
+    VK_GPA_PERF_BLOCK_CPG_AMD :: 22;
+    VK_GPA_PERF_BLOCK_CPC_AMD :: 23;
+    VK_GPA_PERF_BLOCK_WD_AMD :: 24;
+    VK_GPA_PERF_BLOCK_TCS_AMD :: 25;
+    VK_GPA_PERF_BLOCK_ATC_AMD :: 26;
+    VK_GPA_PERF_BLOCK_ATC_L2_AMD :: 27;
+    VK_GPA_PERF_BLOCK_MC_VM_L2_AMD :: 28;
+    VK_GPA_PERF_BLOCK_EA_AMD :: 29;
+    VK_GPA_PERF_BLOCK_RPB_AMD :: 30;
+    VK_GPA_PERF_BLOCK_RMI_AMD :: 31;
+    VK_GPA_PERF_BLOCK_UMCCH_AMD :: 32;
+    VK_GPA_PERF_BLOCK_GE_AMD :: 33;
+    VK_GPA_PERF_BLOCK_GL1A_AMD :: 34;
+    VK_GPA_PERF_BLOCK_GL1C_AMD :: 35;
+    VK_GPA_PERF_BLOCK_GL1CG_AMD :: 36;
+    VK_GPA_PERF_BLOCK_GL2A_AMD :: 37;
+    VK_GPA_PERF_BLOCK_GL2C_AMD :: 38;
+    VK_GPA_PERF_BLOCK_CHA_AMD :: 39;
+    VK_GPA_PERF_BLOCK_CHC_AMD :: 40;
+    VK_GPA_PERF_BLOCK_CHCG_AMD :: 41;
+    VK_GPA_PERF_BLOCK_GUS_AMD :: 42;
+    VK_GPA_PERF_BLOCK_GCR_AMD :: 43;
+    VK_GPA_PERF_BLOCK_PH_AMD :: 44;
+    VK_GPA_PERF_BLOCK_UTCL1_AMD :: 45;
+    VK_GPA_PERF_BLOCK_GE1_AMD :: VK_GPA_PERF_BLOCK_GE_AMD;
+    VK_GPA_PERF_BLOCK_GE_DIST_AMD :: 46;
+    VK_GPA_PERF_BLOCK_GE_SE_AMD :: 47;
+    VK_GPA_PERF_BLOCK_DF_MALL_AMD :: 48;
+    VK_GPA_PERF_BLOCK_SQ_WGP_AMD :: 49;
+    VK_GPA_PERF_BLOCK_PC_AMD :: 50;
+    VK_GPA_PERF_BLOCK_GL1XA_AMD :: 51;
+    VK_GPA_PERF_BLOCK_GL1XC_AMD :: 52;
+    VK_GPA_PERF_BLOCK_WGS_AMD :: 53;
+    VK_GPA_PERF_BLOCK_EACPWD_AMD :: 54;
+    VK_GPA_PERF_BLOCK_EASE_AMD :: 55;
+    VK_GPA_PERF_BLOCK_RLCUSER_AMD :: 56;
+    VK_GPA_PERF_BLOCK_RLCLOCAL_AMD :: VK_GPA_PERF_BLOCK_RLCUSER_AMD;
+}
+
+
+// Enum VkGpaSampleTypeAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaSampleTypeAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+using VkGpaSampleTypeAMD :: enum s32 #specified
+{
+    VK_GPA_SAMPLE_TYPE_CUMULATIVE_AMD :: 0;
+    VK_GPA_SAMPLE_TYPE_TRACE_AMD :: 1;
+    VK_GPA_SAMPLE_TYPE_TIMING_AMD :: 2;
+}
+
+
+// Enum VkGpaDeviceClockModeAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaDeviceClockModeAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+using VkGpaDeviceClockModeAMD :: enum s32 #specified
+{
+    VK_GPA_DEVICE_CLOCK_MODE_DEFAULT_AMD :: 0;
+    VK_GPA_DEVICE_CLOCK_MODE_QUERY_AMD :: 1;
+    VK_GPA_DEVICE_CLOCK_MODE_PROFILING_AMD :: 2;
+    VK_GPA_DEVICE_CLOCK_MODE_MIN_MEMORY_AMD :: 3;
+    VK_GPA_DEVICE_CLOCK_MODE_MIN_ENGINE_AMD :: 4;
+    VK_GPA_DEVICE_CLOCK_MODE_PEAK_AMD :: 5;
+}
+
+
+// Enum VkAddressCommandFlagBitsKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAddressCommandFlagBitsKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+using VkAddressCommandFlagBitsKHR :: enum_flags u32 #specified 
+{
+    VK_ADDRESS_COMMAND_PROTECTED_BIT_KHR :: (1 << 0);
+    VK_ADDRESS_COMMAND_FULLY_BOUND_BIT_KHR :: (1 << 1);
+    VK_ADDRESS_COMMAND_STORAGE_BUFFER_USAGE_BIT_KHR :: (1 << 2);
+    VK_ADDRESS_COMMAND_UNKNOWN_STORAGE_BUFFER_USAGE_BIT_KHR :: (1 << 3);
+
+    // Added for extension VK_KHR_device_address_commands
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+    VK_ADDRESS_COMMAND_TRANSFORM_FEEDBACK_BUFFER_USAGE_BIT_KHR :: (1 << 4);
+    VK_ADDRESS_COMMAND_UNKNOWN_TRANSFORM_FEEDBACK_BUFFER_USAGE_BIT_KHR :: (1 << 5);
+}
+
+
+// Enum VkDataGraphTOSAQualityFlagBitsARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphTOSAQualityFlagBitsARM.html)
+// Referenced by VK_ARM_data_graph_instruction_set_tosa
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+using VkDataGraphTOSAQualityFlagBitsARM :: enum_flags u32 #specified 
+{
+    VK_DATA_GRAPH_TOSA_QUALITY_ACCELERATED_ARM :: (1 << 0);
+    VK_DATA_GRAPH_TOSA_QUALITY_CONFORMANT_ARM :: (1 << 1);
+    VK_DATA_GRAPH_TOSA_QUALITY_EXPERIMENTAL_ARM :: (1 << 2);
+    VK_DATA_GRAPH_TOSA_QUALITY_DEPRECATED_ARM :: (1 << 3);
+}
+
+
+// Enum VkDataGraphTOSALevelARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphTOSALevelARM.html)
+// Referenced by VK_ARM_data_graph_instruction_set_tosa
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+using VkDataGraphTOSALevelARM :: enum s32 #specified
+{
+    VK_DATA_GRAPH_TOSA_LEVEL_NONE_ARM :: 0;
+    VK_DATA_GRAPH_TOSA_LEVEL_8K_ARM :: 1;
+}
+
+
+// Enum VkDataGraphOpticalFlowGridSizeFlagBitsARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowGridSizeFlagBitsARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphOpticalFlowGridSizeFlagBitsARM :: enum_flags u32 #specified 
+{
+    VK_DATA_GRAPH_OPTICAL_FLOW_GRID_SIZE_UNKNOWN_ARM :: 0;
+    VK_DATA_GRAPH_OPTICAL_FLOW_GRID_SIZE_1X1_BIT_ARM :: (1 << 0);
+    VK_DATA_GRAPH_OPTICAL_FLOW_GRID_SIZE_2X2_BIT_ARM :: (1 << 1);
+    VK_DATA_GRAPH_OPTICAL_FLOW_GRID_SIZE_4X4_BIT_ARM :: (1 << 2);
+    VK_DATA_GRAPH_OPTICAL_FLOW_GRID_SIZE_8X8_BIT_ARM :: (1 << 3);
+}
+
+
+// Enum VkDataGraphOpticalFlowImageUsageFlagBitsARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowImageUsageFlagBitsARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphOpticalFlowImageUsageFlagBitsARM :: enum_flags u32 #specified 
+{
+    VK_DATA_GRAPH_OPTICAL_FLOW_IMAGE_USAGE_UNKNOWN_ARM :: 0;
+    VK_DATA_GRAPH_OPTICAL_FLOW_IMAGE_USAGE_INPUT_BIT_ARM :: (1 << 0);
+    VK_DATA_GRAPH_OPTICAL_FLOW_IMAGE_USAGE_OUTPUT_BIT_ARM :: (1 << 1);
+    VK_DATA_GRAPH_OPTICAL_FLOW_IMAGE_USAGE_HINT_BIT_ARM :: (1 << 2);
+    VK_DATA_GRAPH_OPTICAL_FLOW_IMAGE_USAGE_COST_BIT_ARM :: (1 << 3);
+}
+
+
+// Enum VkDataGraphOpticalFlowPerformanceLevelARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowPerformanceLevelARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphOpticalFlowPerformanceLevelARM :: enum s32 #specified
+{
+    VK_DATA_GRAPH_OPTICAL_FLOW_PERFORMANCE_LEVEL_UNKNOWN_ARM :: 0;
+    VK_DATA_GRAPH_OPTICAL_FLOW_PERFORMANCE_LEVEL_SLOW_ARM :: 1;
+    VK_DATA_GRAPH_OPTICAL_FLOW_PERFORMANCE_LEVEL_MEDIUM_ARM :: 2;
+    VK_DATA_GRAPH_OPTICAL_FLOW_PERFORMANCE_LEVEL_FAST_ARM :: 3;
+}
+
+
+// Enum VkDataGraphPipelineNodeConnectionTypeARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineNodeConnectionTypeARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphPipelineNodeConnectionTypeARM :: enum s32 #specified
+{
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_DATA_GRAPH_PIPELINE_NODE_CONNECTION_TYPE_OPTICAL_FLOW_INPUT_ARM :: 1000631000;
+    VK_DATA_GRAPH_PIPELINE_NODE_CONNECTION_TYPE_OPTICAL_FLOW_REFERENCE_ARM :: 1000631001;
+    VK_DATA_GRAPH_PIPELINE_NODE_CONNECTION_TYPE_OPTICAL_FLOW_HINT_ARM :: 1000631002;
+    VK_DATA_GRAPH_PIPELINE_NODE_CONNECTION_TYPE_OPTICAL_FLOW_FLOW_VECTOR_ARM :: 1000631003;
+    VK_DATA_GRAPH_PIPELINE_NODE_CONNECTION_TYPE_OPTICAL_FLOW_COST_ARM :: 1000631004;
+}
+
+
+// Enum VkDataGraphPipelineNodeTypeARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineNodeTypeARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphPipelineNodeTypeARM :: enum s32 #specified
+{
+    // Added for extension VK_ARM_data_graph_optical_flow
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+    VK_DATA_GRAPH_PIPELINE_NODE_TYPE_OPTICAL_FLOW_ARM :: 1000631000;
+}
+
+
+// Enum VkDataGraphOpticalFlowCreateFlagBitsARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowCreateFlagBitsARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphOpticalFlowCreateFlagBitsARM :: enum_flags u32 #specified 
+{
+    VK_DATA_GRAPH_OPTICAL_FLOW_CREATE_ENABLE_HINT_BIT_ARM :: (1 << 0);
+    VK_DATA_GRAPH_OPTICAL_FLOW_CREATE_ENABLE_COST_BIT_ARM :: (1 << 1);
+    VK_DATA_GRAPH_OPTICAL_FLOW_CREATE_RESERVED_30_BIT_ARM :: (1 << 30);
+}
+
+
+// Enum VkDataGraphOpticalFlowExecuteFlagBitsARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowExecuteFlagBitsARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+using VkDataGraphOpticalFlowExecuteFlagBitsARM :: enum_flags u32 #specified 
+{
+    VK_DATA_GRAPH_OPTICAL_FLOW_EXECUTE_DISABLE_TEMPORAL_HINTS_BIT_ARM :: (1 << 0);
+    VK_DATA_GRAPH_OPTICAL_FLOW_EXECUTE_INPUT_UNCHANGED_BIT_ARM :: (1 << 1);
+    VK_DATA_GRAPH_OPTICAL_FLOW_EXECUTE_REFERENCE_UNCHANGED_BIT_ARM :: (1 << 2);
+    VK_DATA_GRAPH_OPTICAL_FLOW_EXECUTE_INPUT_IS_PREVIOUS_REFERENCE_BIT_ARM :: (1 << 3);
+    VK_DATA_GRAPH_OPTICAL_FLOW_EXECUTE_REFERENCE_IS_PREVIOUS_INPUT_BIT_ARM :: (1 << 4);
+}
+
+
+// Enum VkNeuralAcceleratorStatisticsModeARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkNeuralAcceleratorStatisticsModeARM.html)
+// Referenced by VK_ARM_data_graph_neural_accelerator_statistics
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+using VkNeuralAcceleratorStatisticsModeARM :: enum s32 #specified
+{
+    VK_NEURAL_ACCELERATOR_STATISTICS_MODE_DISABLED_ARM :: 0;
+    VK_NEURAL_ACCELERATOR_STATISTICS_MODE_STATISTICS0_ARM :: 1;
+    VK_NEURAL_ACCELERATOR_STATISTICS_MODE_STATISTICS1_ARM :: 2;
+}
+
+
+// Enum VkThrottleHintTypeSEC
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkThrottleHintTypeSEC.html)
+// Referenced by VK_SEC_throttle_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_throttle_hint.html)
+using VkThrottleHintTypeSEC :: enum s32 #specified
+{
+    VK_THROTTLE_HINT_TYPE_DEFAULT_SEC :: 0;
+    VK_THROTTLE_HINT_TYPE_LOW_SEC :: 1;
+    VK_THROTTLE_HINT_TYPE_HIGH_SEC :: 2;
 }
 
 
@@ -9197,6 +9906,10 @@ using VkSwapchainCreateFlagBitsKHR :: enum_flags u32 #specified
     // Added for extension VK_KHR_swapchain_maintenance1
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_swapchain_maintenance1.html)
     VK_SWAPCHAIN_CREATE_DEFERRED_MEMORY_ALLOCATION_BIT_KHR :: (1 << 3);
+
+    // Added for extension VK_EXT_multisampled_render_to_swapchain
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_multisampled_render_to_swapchain.html)
+    VK_SWAPCHAIN_CREATE_MULTISAMPLED_RENDER_TO_SINGLE_SAMPLED_BIT_EXT :: (1 << 8);
 }
 
 
@@ -9556,20 +10269,37 @@ using VkOpticalFlowExecuteFlagBitsNV :: enum_flags u32 #specified
 }
 
 
+// Enum VkDeviceFaultAddressTypeKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressTypeKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+using VkDeviceFaultAddressTypeKHR :: enum s32 #specified
+{
+    VK_DEVICE_FAULT_ADDRESS_TYPE_NONE_KHR :: 0; // Currently unused
+    VK_DEVICE_FAULT_ADDRESS_TYPE_READ_INVALID_KHR :: 1;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_WRITE_INVALID_KHR :: 2;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_EXECUTE_INVALID_KHR :: 3;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_UNKNOWN_KHR :: 4;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_INVALID_KHR :: 5;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_KHR :: 6;
+
+    // Added for extension VK_EXT_device_fault
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
+    VK_DEVICE_FAULT_ADDRESS_TYPE_NONE_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_NONE_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_READ_INVALID_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_READ_INVALID_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_WRITE_INVALID_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_WRITE_INVALID_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_EXECUTE_INVALID_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_EXECUTE_INVALID_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_UNKNOWN_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_UNKNOWN_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_INVALID_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_INVALID_KHR;
+    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_EXT :: VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_KHR;
+}
+
+
 // Enum VkDeviceFaultAddressTypeEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressTypeEXT.html)
 // Referenced by VK_EXT_device_fault
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
-using VkDeviceFaultAddressTypeEXT :: enum s32 #specified
-{
-    VK_DEVICE_FAULT_ADDRESS_TYPE_NONE_EXT :: 0; // Currently unused
-    VK_DEVICE_FAULT_ADDRESS_TYPE_READ_INVALID_EXT :: 1;
-    VK_DEVICE_FAULT_ADDRESS_TYPE_WRITE_INVALID_EXT :: 2;
-    VK_DEVICE_FAULT_ADDRESS_TYPE_EXECUTE_INVALID_EXT :: 3;
-    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_UNKNOWN_EXT :: 4;
-    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_INVALID_EXT :: 5;
-    VK_DEVICE_FAULT_ADDRESS_TYPE_INSTRUCTION_POINTER_FAULT_EXT :: 6;
-}
+VkDeviceFaultAddressTypeEXT :: VkDeviceFaultAddressTypeKHR;
 
 
 // Enum VkPresentScalingFlagBitsKHR
@@ -9672,6 +10402,7 @@ using VkOutOfBandQueueTypeNV :: enum s32 #specified
 using VkPhysicalDeviceSchedulingControlsFlagBitsARM :: enum_flags u64 #specified 
 {
     VK_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_SHADER_CORE_COUNT_ARM :: (1 << 0);
+    VK_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_DISPATCH_PARAMETERS_ARM :: (1 << 1);
 }
 
 
@@ -9758,6 +10489,7 @@ using VkVendorId :: enum s32 #specified
     VK_VENDOR_ID_MESA :: 0x10005; // Mesa vendor ID
     VK_VENDOR_ID_POCL :: 0x10006; // PoCL vendor ID
     VK_VENDOR_ID_MOBILEYE :: 0x10007; // Mobileye vendor ID
+    VK_VENDOR_ID_APE :: 0x10008; // Ape vendor ID
 }
 
 
@@ -9796,6 +10528,8 @@ using VkDriverId :: enum s32 #specified
     VK_DRIVER_ID_MESA_HONEYKRISP :: 26; // Mesa open source project
     VK_DRIVER_ID_VULKAN_SC_EMULATION_ON_VULKAN :: 27; // Vulkan SC Emulation on Vulkan
     VK_DRIVER_ID_MESA_KOSMICKRISP :: 28; // Mesa open source project
+    VK_DRIVER_ID_MESA_GFXSTREAM :: 29; // Mesa open source project
+    VK_DRIVER_ID_APE_SOFT :: 30; // Ape open source project
 
     // Added for extension VK_KHR_driver_properties
     // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_driver_properties.html)
@@ -10133,6 +10867,28 @@ using VkVideoEncodeFeedbackFlagBitsKHR :: enum_flags u32 #specified
     VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BUFFER_OFFSET_BIT_KHR :: (1 << 0);
     VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_BYTES_WRITTEN_BIT_KHR :: (1 << 1);
     VK_VIDEO_ENCODE_FEEDBACK_BITSTREAM_HAS_OVERRIDES_BIT_KHR :: (1 << 2);
+
+    // Added for extension VK_KHR_video_encode_feedback2
+    // (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+    VK_VIDEO_ENCODE_FEEDBACK_AVERAGE_QUANTIZATION_BIT_KHR :: (1 << 3);
+    VK_VIDEO_ENCODE_FEEDBACK_MIN_QUANTIZATION_BIT_KHR :: (1 << 4);
+    VK_VIDEO_ENCODE_FEEDBACK_MAX_QUANTIZATION_BIT_KHR :: (1 << 5);
+    VK_VIDEO_ENCODE_FEEDBACK_INTRA_PIXELS_BIT_KHR :: (1 << 6);
+    VK_VIDEO_ENCODE_FEEDBACK_INTER_PIXELS_BIT_KHR :: (1 << 7);
+    VK_VIDEO_ENCODE_FEEDBACK_SKIPPED_PIXELS_BIT_KHR :: (1 << 8);
+    VK_VIDEO_ENCODE_FEEDBACK_PICTURE_PARTITION_COUNT_BIT_KHR :: (1 << 9);
+}
+
+
+// Enum VkVideoEncodePerPartitionFeedbackFlagBitsKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkVideoEncodePerPartitionFeedbackFlagBitsKHR.html)
+// Referenced by VK_KHR_video_encode_feedback2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+using VkVideoEncodePerPartitionFeedbackFlagBitsKHR :: enum_flags u32 #specified 
+{
+    VK_VIDEO_ENCODE_PER_PARTITION_FEEDBACK_STATUS_BIT_KHR :: (1 << 0);
+    VK_VIDEO_ENCODE_PER_PARTITION_FEEDBACK_BITSTREAM_BUFFER_OFFSET_BIT_KHR :: (1 << 1);
+    VK_VIDEO_ENCODE_PER_PARTITION_FEEDBACK_BITSTREAM_BYTES_WRITTEN_BIT_KHR :: (1 << 2);
 }
 
 
@@ -10418,6 +11174,21 @@ using VkAccessFlagBits3KHR :: enum_flags u64 #specified
 }
 
 
+// Enum VkDeviceFaultFlagBitsKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultFlagBitsKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+using VkDeviceFaultFlagBitsKHR :: enum_flags u32 #specified 
+{
+    VK_DEVICE_FAULT_FLAG_DEVICE_LOST_KHR :: (1 << 0);
+    VK_DEVICE_FAULT_FLAG_MEMORY_ADDRESS_KHR :: (1 << 1);
+    VK_DEVICE_FAULT_FLAG_INSTRUCTION_ADDRESS_KHR :: (1 << 2);
+    VK_DEVICE_FAULT_FLAG_VENDOR_KHR :: (1 << 3);
+    VK_DEVICE_FAULT_FLAG_WATCHDOG_TIMEOUT_KHR :: (1 << 4);
+    VK_DEVICE_FAULT_FLAG_OVERFLOW_KHR :: (1 << 5);
+}
+
+
 // Enum VkDefaultVertexAttributeValueKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDefaultVertexAttributeValueKHR.html)
 // Referenced by VK_KHR_maintenance9
@@ -10552,10 +11323,12 @@ VkAccelerationStructureMotionInfoFlagsNV :: VkFlags;
 VkAccelerationStructureMotionInstanceFlagsNV :: VkFlags;
 VkFormatFeatureFlags2 :: VkFormatFeatureFlagBits2;
 VkFormatFeatureFlags2KHR :: VkFormatFeatureFlags2;
+VkFormatFeatureFlags4KHR :: VkFormatFeatureFlagBits4KHR;
 VkRenderingFlags :: VkRenderingFlagBits;
 VkMemoryDecompressionMethodFlagsEXT :: VkMemoryDecompressionMethodFlagBitsEXT;
 VkMemoryDecompressionMethodFlagsNV :: VkMemoryDecompressionMethodFlagsEXT;
 VkRenderingFlagsKHR :: VkRenderingFlags;
+VkDeviceFaultFlagsKHR :: VkDeviceFaultFlagBitsKHR;
 VkBuildMicromapFlagsEXT :: VkBuildMicromapFlagBitsEXT;
 VkMicromapCreateFlagsEXT :: VkMicromapCreateFlagBitsEXT;
 VkIndirectCommandsLayoutUsageFlagsEXT :: VkIndirectCommandsLayoutUsageFlagBitsEXT;
@@ -10565,6 +11338,8 @@ VkPipelineCreateFlags2 :: VkPipelineCreateFlagBits2;
 VkPipelineCreateFlags2KHR :: VkPipelineCreateFlags2;
 VkBufferUsageFlags2 :: VkBufferUsageFlagBits2;
 VkBufferUsageFlags2KHR :: VkBufferUsageFlags2;
+VkImageUsageFlags2KHR :: VkImageUsageFlagBits2KHR;
+VkImageCreateFlags2KHR :: VkImageCreateFlagBits2KHR;
 VkAddressCopyFlagsKHR :: VkAddressCopyFlagBitsKHR;
 VkTensorCreateFlagsARM :: VkTensorCreateFlagBitsARM;
 VkTensorUsageFlagsARM :: VkTensorUsageFlagBitsARM;
@@ -10575,6 +11350,10 @@ VkVideoEncodeRgbModelConversionFlagsVALVE :: VkVideoEncodeRgbModelConversionFlag
 VkVideoEncodeRgbRangeCompressionFlagsVALVE :: VkVideoEncodeRgbRangeCompressionFlagBitsVALVE;
 VkVideoEncodeRgbChromaOffsetFlagsVALVE :: VkVideoEncodeRgbChromaOffsetFlagBitsVALVE;
 VkSpirvResourceTypeFlagsEXT :: VkSpirvResourceTypeFlagBitsEXT;
+VkGpaSqShaderStageFlagsAMD :: VkGpaSqShaderStageFlagBitsAMD;
+VkGpaPerfBlockPropertiesFlagsAMD :: VkFlags;
+VkPhysicalDeviceGpaPropertiesFlagsAMD :: VkFlags;
+VkAddressCommandFlagsKHR :: VkAddressCommandFlagBitsKHR;
 VkCompositeAlphaFlagsKHR :: VkCompositeAlphaFlagBitsKHR;
 VkDisplayPlaneAlphaFlagsKHR :: VkDisplayPlaneAlphaFlagBitsKHR;
 VkSurfaceTransformFlagsKHR :: VkSurfaceTransformFlagBitsKHR;
@@ -10676,6 +11455,12 @@ VkPresentStageFlagsEXT :: VkPresentStageFlagBitsEXT;
 VkPastPresentationTimingFlagsEXT :: VkPastPresentationTimingFlagBitsEXT;
 VkPresentTimingInfoFlagsEXT :: VkPresentTimingInfoFlagBitsEXT;
 VkPerformanceCounterDescriptionFlagsARM :: VkFlags;
+VkShaderInstrumentationValuesFlagsARM :: VkFlags;
+VkDataGraphTOSAQualityFlagsARM :: VkDataGraphTOSAQualityFlagBitsARM;
+VkDataGraphOpticalFlowGridSizeFlagsARM :: VkDataGraphOpticalFlowGridSizeFlagBitsARM;
+VkDataGraphOpticalFlowImageUsageFlagsARM :: VkDataGraphOpticalFlowImageUsageFlagBitsARM;
+VkDataGraphOpticalFlowCreateFlagsARM :: VkDataGraphOpticalFlowCreateFlagBitsARM;
+VkDataGraphOpticalFlowExecuteFlagsARM :: VkDataGraphOpticalFlowExecuteFlagBitsARM;
 VkVideoCodecOperationFlagsKHR :: VkVideoCodecOperationFlagBitsKHR;
 VkVideoCapabilityFlagsKHR :: VkVideoCapabilityFlagBitsKHR;
 VkVideoSessionCreateFlagsKHR :: VkVideoSessionCreateFlagBitsKHR;
@@ -10692,6 +11477,7 @@ VkVideoEncodeUsageFlagsKHR :: VkVideoEncodeUsageFlagBitsKHR;
 VkVideoEncodeContentFlagsKHR :: VkVideoEncodeContentFlagBitsKHR;
 VkVideoEncodeCapabilityFlagsKHR :: VkVideoEncodeCapabilityFlagBitsKHR;
 VkVideoEncodeFeedbackFlagsKHR :: VkVideoEncodeFeedbackFlagBitsKHR;
+VkVideoEncodePerPartitionFeedbackFlagsKHR :: VkVideoEncodePerPartitionFeedbackFlagBitsKHR;
 VkVideoEncodeRateControlFlagsKHR :: VkFlags;
 VkVideoEncodeRateControlModeFlagsKHR :: VkVideoEncodeRateControlModeFlagBitsKHR;
 VkVideoEncodeIntraRefreshModeFlagsKHR :: VkVideoEncodeIntraRefreshModeFlagBitsKHR;
@@ -10900,6 +11686,14 @@ VkTensorViewARM :: *VkTensorViewARM_T;
 // Non-Dispatchable Handle
 VkDataGraphPipelineSessionARM_T :: struct {};
 VkDataGraphPipelineSessionARM :: *VkDataGraphPipelineSessionARM_T;
+
+// Non-Dispatchable Handle
+VkShaderInstrumentationARM_T :: struct {};
+VkShaderInstrumentationARM :: *VkShaderInstrumentationARM_T;
+
+// Non-Dispatchable Handle
+VkGpaSessionAMD_T :: struct {};
+VkGpaSessionAMD :: *VkGpaSessionAMD_T;
 
 // Non-Dispatchable Handle
 VkDisplayKHR_T :: struct {};
@@ -11347,8 +12141,9 @@ VkBufferUsageFlags2CreateInfo :: struct // Can be in the pNext chain of "VkBuffe
 
 // Type VkBufferUsageFlags2CreateInfoKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferUsageFlags2CreateInfoKHR.html)
-// Referenced by VK_KHR_maintenance5
+// Referenced by VK_KHR_maintenance5, VK_KHR_extended_flags
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 VkBufferUsageFlags2CreateInfoKHR :: VkBufferUsageFlags2CreateInfo;
 
 
@@ -11416,6 +12211,8 @@ VkImageSubresourceRange :: struct
 
 // Type VkMemoryBarrier
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMemoryBarrier.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 VkMemoryBarrier :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -11427,6 +12224,8 @@ VkMemoryBarrier :: struct
 
 // Type VkBufferMemoryBarrier
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferMemoryBarrier.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 VkBufferMemoryBarrier :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
@@ -11443,6 +12242,8 @@ VkBufferMemoryBarrier :: struct
 
 // Type VkImageMemoryBarrier
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageMemoryBarrier.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 VkImageMemoryBarrier :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -11477,6 +12278,30 @@ VkImageCreateInfo :: struct
     queueFamilyIndexCount : u32; // Number of queue families to share across
     pQueueFamilyIndices : *u32; // Array of queue family indices to share across
     initialLayout : VkImageLayout; // Initial image layout for all subresources
+}
+
+
+// Type VkImageCreateFlags2CreateInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageCreateFlags2CreateInfoKHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkImageCreateFlags2CreateInfoKHR :: struct // Can be in the pNext chain of "VkImageCreateInfo,VkPhysicalDeviceImageFormatInfo2,VkFramebufferAttachmentImageInfo,VkVideoFormatPropertiesKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_IMAGE_CREATE_FLAGS_2_CREATE_INFO_KHR;
+    pNext : *void;
+    flags : VkImageCreateFlags2KHR;
+}
+
+
+// Type VkImageUsageFlags2CreateInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageUsageFlags2CreateInfoKHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkImageUsageFlags2CreateInfoKHR :: struct // Can be in the pNext chain of "VkFramebufferAttachmentImageInfo,VkImageCreateInfo,VkPhysicalDeviceImageFormatInfo2,VkPhysicalDeviceSparseImageFormatInfo2,VkPhysicalDeviceVideoFormatInfoKHR,VkSurfaceCapabilities2KHR,VkSwapchainCreateInfoKHR,VkVideoFormatPropertiesKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_IMAGE_USAGE_FLAGS_2_CREATE_INFO_KHR;
+    pNext : *void;
+    usage : VkImageUsageFlags2KHR;
 }
 
 
@@ -11629,7 +12454,8 @@ VkBufferImageCopy :: struct
 
 // Type VkStridedDeviceAddressRangeKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkStridedDeviceAddressRangeKHR.html)
-// Referenced by VK_KHR_copy_memory_indirect
+// Referenced by VK_KHR_device_address_commands, VK_KHR_copy_memory_indirect
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_copy_memory_indirect.html)
 VkStridedDeviceAddressRangeKHR :: struct
 {
@@ -11879,8 +12705,9 @@ VkPipelineCreateFlags2CreateInfo :: struct // Can be in the pNext chain of "VkCo
 
 // Type VkPipelineCreateFlags2CreateInfoKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPipelineCreateFlags2CreateInfoKHR.html)
-// Referenced by VK_KHR_maintenance5
+// Referenced by VK_KHR_maintenance5, VK_KHR_extended_flags
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance5.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
 VkPipelineCreateFlags2CreateInfoKHR :: VkPipelineCreateFlags2CreateInfo;
 
 
@@ -12844,6 +13671,8 @@ VkMultiDrawIndexedInfoEXT :: struct
 
 // Type VkSubmitInfo
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSubmitInfo.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 VkSubmitInfo :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -12985,8 +13814,9 @@ VkDisplayPresentInfoKHR :: struct // Can be in the pNext chain of "VkPresentInfo
 
 // Type VkSurfaceCapabilitiesKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSurfaceCapabilitiesKHR.html)
-// Referenced by VK_KHR_surface
+// Referenced by VK_KHR_surface, VK_KHR_get_surface_capabilities2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_surface.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_get_surface_capabilities2.html)
 VkSurfaceCapabilitiesKHR :: struct
 {
     minImageCount : u32; // Supported minimum number of images for the surface
@@ -13004,8 +13834,9 @@ VkSurfaceCapabilitiesKHR :: struct
 
 // Type VkSurfaceFormatKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSurfaceFormatKHR.html)
-// Referenced by VK_KHR_surface
+// Referenced by VK_KHR_surface, VK_KHR_get_surface_capabilities2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_surface.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_get_surface_capabilities2.html)
 VkSurfaceFormatKHR :: struct
 {
     format : VkFormat; // Supported pair of rendering format
@@ -15738,6 +16569,30 @@ VkSharedPresentSurfaceCapabilitiesKHR :: struct // Can be in the pNext chain of 
 }
 
 
+// Type VkSwapchainFlagsSurfaceCapabilitiesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSwapchainFlagsSurfaceCapabilitiesEXT.html)
+// Referenced by VK_EXT_multisampled_render_to_swapchain
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_multisampled_render_to_swapchain.html)
+VkSwapchainFlagsSurfaceCapabilitiesEXT :: struct // Can be in the pNext chain of "VkSurfaceCapabilities2KHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_SWAPCHAIN_FLAGS_SURFACE_CAPABILITIES_EXT;
+    pNext : *void;
+    swapchainSupportedFlags : VkSwapchainCreateFlagsKHR; // Supported swapchain create flags for this surface and, if provided, a specific present mode in VkSurfacePresentModeKHR
+}
+
+
+// Type VkSharedPresentSurfaceCapabilities2KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSharedPresentSurfaceCapabilities2KHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkSharedPresentSurfaceCapabilities2KHR :: struct // Can be in the pNext chain of "VkSurfaceCapabilities2KHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_SHARED_PRESENT_SURFACE_CAPABILITIES_2_KHR;
+    pNext : *void;
+    sharedPresentSupportedUsageFlags : VkImageUsageFlags2KHR;
+}
+
+
 // Type VkPhysicalDevice16BitStorageFeatures
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevice16BitStorageFeatures.html)
 VkPhysicalDevice16BitStorageFeatures :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
@@ -15972,6 +16827,18 @@ VkImageViewUsageCreateInfo :: struct // Can be in the pNext chain of "VkImageVie
 }
 
 
+// Type VkImageViewUsage2CreateInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageViewUsage2CreateInfoKHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkImageViewUsage2CreateInfoKHR :: struct // Can be in the pNext chain of "VkImageViewCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_IMAGE_VIEW_USAGE_2_CREATE_INFO_KHR;
+    pNext : *void;
+    usage : VkImageUsageFlags2KHR;
+}
+
+
 // Type VkImageViewSlicedCreateInfoEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageViewSlicedCreateInfoEXT.html)
 // Referenced by VK_EXT_image_sliced_view_of_3d
@@ -16132,8 +16999,9 @@ VkTextureLODGatherFormatPropertiesAMD :: struct // Can be in the pNext chain of 
 
 // Type VkConditionalRenderingBeginInfoEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkConditionalRenderingBeginInfoEXT.html)
-// Referenced by VK_EXT_conditional_rendering
+// Referenced by VK_EXT_conditional_rendering, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_conditional_rendering.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkConditionalRenderingBeginInfoEXT :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_CONDITIONAL_RENDERING_BEGIN_INFO_EXT;
@@ -16772,6 +17640,18 @@ VkPhysicalDeviceMaintenance9PropertiesKHR :: struct // Can be in the pNext chain
 }
 
 
+// Type VkPhysicalDeviceMaintenance11FeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceMaintenance11FeaturesKHR.html)
+// Referenced by VK_KHR_maintenance11
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+VkPhysicalDeviceMaintenance11FeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_11_FEATURES_KHR;
+    pNext : *void;
+    maintenance11 : VkBool32;
+}
+
+
 // Type VkPhysicalDeviceMaintenance10PropertiesKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceMaintenance10PropertiesKHR.html)
 // Referenced by VK_KHR_maintenance10
@@ -16807,6 +17687,18 @@ VkQueueFamilyOwnershipTransferPropertiesKHR :: struct // Can be in the pNext cha
     sType : VkStructureType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_OWNERSHIP_TRANSFER_PROPERTIES_KHR;
     pNext : *void;
     optimalImageTransferToQueueFamilies : u32;
+}
+
+
+// Type VkQueueFamilyOptimalImageTransferGranularityPropertiesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkQueueFamilyOptimalImageTransferGranularityPropertiesKHR.html)
+// Referenced by VK_KHR_maintenance11
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+VkQueueFamilyOptimalImageTransferGranularityPropertiesKHR :: struct // Can be in the pNext chain of "VkQueueFamilyProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_OPTIMAL_IMAGE_TRANSFER_GRANULARITY_PROPERTIES_KHR;
+    pNext : *void;
+    optimalImageTransferGranularity : VkExtent3D;
 }
 
 
@@ -16965,6 +17857,18 @@ VkShaderStatisticsInfoAMD :: struct
     numAvailableVgprs : u32;
     numAvailableSgprs : u32;
     computeWorkGroupSize : [3] u32;
+}
+
+
+// Type VkPhysicalDeviceElapsedTimerQueryFeaturesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceElapsedTimerQueryFeaturesQCOM.html)
+// Referenced by VK_QCOM_elapsed_timer_query
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_elapsed_timer_query.html)
+VkPhysicalDeviceElapsedTimerQueryFeaturesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ELAPSED_TIMER_QUERY_FEATURES_QCOM;
+    pNext : *void;
+    elapsedTimerQuery : VkBool32;
 }
 
 
@@ -18658,7 +19562,7 @@ VkAccelerationStructureInfoNV :: struct
     sType : VkStructureType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_INFO_NV;
     pNext : *void;
     type : VkAccelerationStructureTypeNV;
-    flags : VkBuildAccelerationStructureFlagsNV;
+    flags : VkBuildAccelerationStructureFlagsKHR;
     instanceCount : u32;
     geometryCount : u32;
     pGeometries : *VkGeometryNV;
@@ -18989,6 +19893,18 @@ VkImageStencilUsageCreateInfo :: struct // Can be in the pNext chain of "VkImage
 // Referenced by VK_EXT_separate_stencil_usage
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_separate_stencil_usage.html)
 VkImageStencilUsageCreateInfoEXT :: VkImageStencilUsageCreateInfo;
+
+
+// Type VkImageStencilUsage2CreateInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkImageStencilUsage2CreateInfoKHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkImageStencilUsage2CreateInfoKHR :: struct // Can be in the pNext chain of "VkImageCreateInfo,VkPhysicalDeviceImageFormatInfo2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_IMAGE_STENCIL_USAGE_2_CREATE_INFO_KHR;
+    pNext : *void;
+    stencilUsage : VkImageUsageFlags2KHR;
+}
 
 
 // Type VkDeviceMemoryOverallocationCreateInfoAMD
@@ -20767,6 +21683,143 @@ VkPhysicalDeviceCoherentMemoryFeaturesAMD :: struct // Can be in the pNext chain
 }
 
 
+// Type VkGpaPerfBlockPropertiesAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaPerfBlockPropertiesAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaPerfBlockPropertiesAMD :: struct
+{
+    blockType : VkGpaPerfBlockAMD;
+    flags : VkGpaPerfBlockPropertiesFlagsAMD;
+    instanceCount : u32;
+    maxEventID : u32;
+    maxGlobalOnlyCounters : u32;
+    maxGlobalSharedCounters : u32;
+    maxStreamingCounters : u32;
+}
+
+
+// Type VkPhysicalDeviceGpaFeaturesAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceGpaFeaturesAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkPhysicalDeviceGpaFeaturesAMD :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_FEATURES_AMD;
+    pNext : *void;
+    perfCounters : VkBool32;
+    streamingPerfCounters : VkBool32;
+    sqThreadTracing : VkBool32;
+    clockModes : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceGpaPropertiesAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceGpaPropertiesAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkPhysicalDeviceGpaPropertiesAMD :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_PROPERTIES_AMD;
+    pNext : *void;
+    flags : VkPhysicalDeviceGpaPropertiesFlagsAMD;
+    maxSqttSeBufferSize : VkDeviceSize;
+    shaderEngineCount : u32;
+    perfBlockCount : u32;
+    pPerfBlocks : *VkGpaPerfBlockPropertiesAMD;
+}
+
+
+// Type VkPhysicalDeviceGpaProperties2AMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceGpaProperties2AMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkPhysicalDeviceGpaProperties2AMD :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_GPA_PROPERTIES_2_AMD;
+    pNext : *void;
+    revisionId : u32;
+}
+
+
+// Type VkGpaPerfCounterAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaPerfCounterAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaPerfCounterAMD :: struct
+{
+    blockType : VkGpaPerfBlockAMD;
+    blockInstance : u32;
+    eventID : u32;
+}
+
+
+// Type VkGpaSampleBeginInfoAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaSampleBeginInfoAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaSampleBeginInfoAMD :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_GPA_SAMPLE_BEGIN_INFO_AMD;
+    pNext : *void;
+    sampleType : VkGpaSampleTypeAMD;
+    sampleInternalOperations : VkBool32;
+    cacheFlushOnCounterCollection : VkBool32;
+    sqShaderMaskEnable : VkBool32;
+    sqShaderMask : VkGpaSqShaderStageFlagsAMD;
+    perfCounterCount : u32;
+    pPerfCounters : *VkGpaPerfCounterAMD;
+    streamingPerfTraceSampleInterval : u32;
+    perfCounterDeviceMemoryLimit : VkDeviceSize;
+    sqThreadTraceEnable : VkBool32;
+    sqThreadTraceSuppressInstructionTokens : VkBool32;
+    sqThreadTraceDeviceMemoryLimit : VkDeviceSize;
+    timingPreSample : VkPipelineStageFlags;
+    timingPostSample : VkPipelineStageFlags;
+}
+
+
+// Type VkGpaDeviceClockModeInfoAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaDeviceClockModeInfoAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaDeviceClockModeInfoAMD :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_GPA_DEVICE_CLOCK_MODE_INFO_AMD;
+    pNext : *void;
+    clockMode : VkGpaDeviceClockModeAMD;
+    memoryClockRatioToPeak : float32;
+    engineClockRatioToPeak : float32;
+}
+
+
+// Type VkGpaDeviceGetClockInfoAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaDeviceGetClockInfoAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaDeviceGetClockInfoAMD :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_GPA_DEVICE_GET_CLOCK_INFO_AMD;
+    pNext : *void;
+    memoryClockRatioToPeak : float32;
+    engineClockRatioToPeak : float32;
+    memoryClockFrequency : u32;
+    engineClockFrequency : u32;
+}
+
+
+// Type VkGpaSessionCreateInfoAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkGpaSessionCreateInfoAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VkGpaSessionCreateInfoAMD :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_GPA_SESSION_CREATE_INFO_AMD;
+    pNext : *void;
+    secondaryCopySource : VkGpaSessionAMD;
+}
+
+
 // Type VkFaultData
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkFaultData.html)
 VkFaultData :: struct
@@ -21046,8 +22099,9 @@ VkAccelerationStructureBuildRangeInfoKHR :: struct
 
 // Type VkAccelerationStructureCreateInfoKHR
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccelerationStructureCreateInfoKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkAccelerationStructureCreateInfoKHR :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_KHR;
@@ -21318,6 +22372,18 @@ VkPhysicalDeviceExtendedDynamicState3PropertiesEXT :: struct // Can be in the pN
 }
 
 
+// Type VkPhysicalDeviceExtendedFlagsFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceExtendedFlagsFeaturesKHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkPhysicalDeviceExtendedFlagsFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_FLAGS_FEATURES_KHR;
+    pNext : *void;
+    extendedFlags : VkBool32;
+}
+
+
 // Type VkColorBlendEquationEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkColorBlendEquationEXT.html)
 // Referenced by VK_EXT_extended_dynamic_state3, VK_EXT_shader_object
@@ -21365,7 +22431,7 @@ VkRenderPassTransformBeginInfoQCOM :: struct // Can be in the pNext chain of "Vk
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyCommandTransformInfoQCOM.html)
 // Referenced by VK_QCOM_rotated_copy_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_rotated_copy_commands.html)
-VkCopyCommandTransformInfoQCOM :: struct // Can be in the pNext chain of "VkBufferImageCopy2,VkImageBlit2"
+VkCopyCommandTransformInfoQCOM :: struct // Can be in the pNext chain of "VkBufferImageCopy2,VkImageBlit2,VkDeviceMemoryImageCopyKHR"
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_COMMAND_TRANSFORM_INFO_QCOM;
     pNext : *void;
@@ -21711,6 +22777,8 @@ VkPhysicalDeviceClusterCullingShaderVrsFeaturesHUAWEI :: struct // Can be in the
 
 // Type VkBufferCopy2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferCopy2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkBufferCopy2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_BUFFER_COPY_2;
@@ -21771,6 +22839,8 @@ VkImageBlit2KHR :: VkImageBlit2;
 
 // Type VkBufferImageCopy2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferImageCopy2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkBufferImageCopy2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_BUFFER_IMAGE_COPY_2;
@@ -21814,6 +22884,8 @@ VkImageResolve2KHR :: VkImageResolve2;
 
 // Type VkCopyBufferInfo2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyBufferInfo2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkCopyBufferInfo2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_BUFFER_INFO_2;
@@ -21879,6 +22951,8 @@ VkBlitImageInfo2KHR :: VkBlitImageInfo2;
 
 // Type VkCopyBufferToImageInfo2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyBufferToImageInfo2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkCopyBufferToImageInfo2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_BUFFER_TO_IMAGE_INFO_2;
@@ -21900,6 +22974,8 @@ VkCopyBufferToImageInfo2KHR :: VkCopyBufferToImageInfo2;
 
 // Type VkCopyImageToBufferInfo2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyImageToBufferInfo2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkCopyImageToBufferInfo2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2;
@@ -22780,6 +23856,8 @@ VkImageMemoryBarrier2KHR :: VkImageMemoryBarrier2;
 
 // Type VkBufferMemoryBarrier2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBufferMemoryBarrier2.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 VkBufferMemoryBarrier2 :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2;
@@ -22807,7 +23885,7 @@ VkBufferMemoryBarrier2KHR :: VkBufferMemoryBarrier2;
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMemoryBarrierAccessFlags3KHR.html)
 // Referenced by VK_KHR_maintenance8
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance8.html)
-VkMemoryBarrierAccessFlags3KHR :: struct // Can be in the pNext chain of "VkSubpassDependency2,VkBufferMemoryBarrier2,VkImageMemoryBarrier2"
+VkMemoryBarrierAccessFlags3KHR :: struct // Can be in the pNext chain of "VkSubpassDependency2,VkBufferMemoryBarrier2,VkImageMemoryBarrier2,VkMemoryRangeBarriersInfoKHR"
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_ACCESS_FLAGS_3_KHR;
     pNext : *void;
@@ -23363,6 +24441,18 @@ VkMultisampledRenderToSingleSampledInfoEXT :: struct // Can be in the pNext chai
     pNext : *void;
     multisampledRenderToSingleSampledEnable : VkBool32;
     rasterizationSamples : VkSampleCountFlagBits;
+}
+
+
+// Type VkPhysicalDeviceMultisampledRenderToSwapchainFeaturesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceMultisampledRenderToSwapchainFeaturesEXT.html)
+// Referenced by VK_EXT_multisampled_render_to_swapchain
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_multisampled_render_to_swapchain.html)
+VkPhysicalDeviceMultisampledRenderToSwapchainFeaturesEXT :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MULTISAMPLED_RENDER_TO_SWAPCHAIN_FEATURES_EXT;
+    pNext : *void;
+    multisampledRenderToSwapchain : VkBool32;
 }
 
 
@@ -23998,6 +25088,44 @@ VkVideoEncodeCapabilitiesKHR :: struct // Can be in the pNext chain of "VkVideoC
     maxQualityLevels : u32;
     encodeInputPictureGranularity : VkExtent2D;
     supportedEncodeFeedbackFlags : VkVideoEncodeFeedbackFlagsKHR;
+}
+
+
+// Type VkPhysicalDeviceVideoEncodeFeedback2FeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceVideoEncodeFeedback2FeaturesKHR.html)
+// Referenced by VK_KHR_video_encode_feedback2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+VkPhysicalDeviceVideoEncodeFeedback2FeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VIDEO_ENCODE_FEEDBACK_2_FEATURES_KHR;
+    pNext : *void;
+    videoEncodeFeedback2 : VkBool32;
+}
+
+
+// Type VkVideoEncodeFeedback2CapabilitiesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkVideoEncodeFeedback2CapabilitiesKHR.html)
+// Referenced by VK_KHR_video_encode_feedback2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+VkVideoEncodeFeedback2CapabilitiesKHR :: struct // Can be in the pNext chain of "VkVideoCapabilitiesKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_VIDEO_ENCODE_FEEDBACK_2_CAPABILITIES_KHR;
+    pNext : *void;
+    maxPerPartitionFeedbackEntries : u32;
+    supportedPerPartitionEncodeFeedbackFlags : VkVideoEncodePerPartitionFeedbackFlagsKHR;
+}
+
+
+// Type VkQueryPoolVideoEncodePerPartitionFeedbackCreateInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkQueryPoolVideoEncodePerPartitionFeedbackCreateInfoKHR.html)
+// Referenced by VK_KHR_video_encode_feedback2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+VkQueryPoolVideoEncodePerPartitionFeedbackCreateInfoKHR :: struct // Can be in the pNext chain of "VkQueryPoolCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_QUERY_POOL_VIDEO_ENCODE_PER_PARTITION_FEEDBACK_CREATE_INFO_KHR;
+    pNext : *void;
+    maxPerPartitionFeedbackEntries : u32;
+    perPartitionEncodeFeedbackFlags : VkVideoEncodePerPartitionFeedbackFlagsKHR;
 }
 
 
@@ -24776,7 +25904,7 @@ VkAccelerationStructureCaptureDescriptorDataInfoEXT :: struct
 // Referenced by VK_EXT_descriptor_heap, VK_EXT_descriptor_buffer
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_buffer.html)
-VkOpaqueCaptureDescriptorDataCreateInfoEXT :: struct // Can be in the pNext chain of "VkBufferCreateInfo,VkImageCreateInfo,VkImageViewCreateInfo,VkSamplerCreateInfo,VkAccelerationStructureCreateInfoKHR,VkAccelerationStructureCreateInfoNV,VkTensorCreateInfoARM,VkTensorViewCreateInfoARM"
+VkOpaqueCaptureDescriptorDataCreateInfoEXT :: struct // Can be in the pNext chain of "VkBufferCreateInfo,VkImageCreateInfo,VkImageViewCreateInfo,VkSamplerCreateInfo,VkAccelerationStructureCreateInfoKHR,VkAccelerationStructureCreateInfoNV,VkTensorCreateInfoARM,VkTensorViewCreateInfoARM,VkAccelerationStructureCreateInfo2KHR"
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_OPAQUE_CAPTURE_DESCRIPTOR_DATA_CREATE_INFO_EXT;
     pNext : *void;
@@ -25086,6 +26214,20 @@ VkFormatProperties3 :: struct // Can be in the pNext chain of "VkFormatPropertie
 // Referenced by VK_KHR_format_feature_flags2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_format_feature_flags2.html)
 VkFormatProperties3KHR :: VkFormatProperties3;
+
+
+// Type VkFormatProperties4KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkFormatProperties4KHR.html)
+// Referenced by VK_KHR_extended_flags
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VkFormatProperties4KHR :: struct // Can be in the pNext chain of "VkFormatProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_FORMAT_PROPERTIES_4_KHR;
+    pNext : *void;
+    linearTilingFeatures : VkFormatFeatureFlags4KHR;
+    optimalTilingFeatures : VkFormatFeatureFlags4KHR;
+    bufferFeatures : VkFormatFeatureFlags4KHR;
+}
 
 
 // Type VkDrmFormatModifierPropertiesList2EXT
@@ -25436,6 +26578,70 @@ VkGraphicsPipelineLibraryCreateInfoEXT :: struct // Can be in the pNext chain of
 }
 
 
+// Type VkPhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM.html)
+// Referenced by VK_ARM_data_graph_neural_accelerator_statistics
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+VkPhysicalDeviceDataGraphNeuralAcceleratorStatisticsFeaturesARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DATA_GRAPH_NEURAL_ACCELERATOR_STATISTICS_FEATURES_ARM;
+    pNext : *void;
+    dataGraphNeuralAcceleratorStatistics : VkBool32;
+}
+
+
+// Type VkDataGraphPipelineNeuralStatisticsCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineNeuralStatisticsCreateInfoARM.html)
+// Referenced by VK_ARM_data_graph_neural_accelerator_statistics
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+VkDataGraphPipelineNeuralStatisticsCreateInfoARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineCreateInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_NEURAL_STATISTICS_CREATE_INFO_ARM;
+    pNext : *void;
+    allowNeuralStatistics : VkBool32;
+}
+
+
+// Type VkDataGraphPipelineSessionNeuralStatisticsCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineSessionNeuralStatisticsCreateInfoARM.html)
+// Referenced by VK_ARM_data_graph_neural_accelerator_statistics
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+VkDataGraphPipelineSessionNeuralStatisticsCreateInfoARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineSessionCreateInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SESSION_NEURAL_STATISTICS_CREATE_INFO_ARM;
+    pNext : *void;
+    mode : VkNeuralAcceleratorStatisticsModeARM;
+}
+
+
+// Type VkTensorExplicitTilingFormatPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkTensorExplicitTilingFormatPropertiesARM.html)
+// Referenced by VK_ARM_tensor_controls
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_tensor_controls.html)
+VkTensorExplicitTilingFormatPropertiesARM :: struct // Can be in the pNext chain of "VkFormatProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_TENSOR_EXPLICIT_TILING_FORMAT_PROPERTIES_ARM;
+    pNext : *void;
+    brick16TilingTensorFeatures : VkFormatFeatureFlags2;
+    brick8TilingTensorFeatures : VkFormatFeatureFlags2;
+    brick4TilingTensorFeatures : VkFormatFeatureFlags2;
+    blockUTilingTensorFeatures : VkFormatFeatureFlags2;
+    blockU64kTilingTensorFeatures : VkFormatFeatureFlags2;
+}
+
+
+// Type VkTensorRollingBackingCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkTensorRollingBackingCreateInfoARM.html)
+// Referenced by VK_ARM_tensor_controls
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_tensor_controls.html)
+VkTensorRollingBackingCreateInfoARM :: struct // Can be in the pNext chain of "VkTensorCreateInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_TENSOR_ROLLING_BACKING_CREATE_INFO_ARM;
+    pNext : *void;
+    wraps : [VK_MAX_TENSOR_CREATE_INFO_ROLLING_BACKING_WRAP_COUNT_ARM] u32;
+}
+
+
 // Type VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDescriptorSetHostMappingFeaturesVALVE.html)
 // Referenced by VK_VALVE_descriptor_set_host_mapping
@@ -25748,6 +26954,23 @@ VkMicromapBuildInfoEXT :: struct
 }
 
 
+// Type VkAccelerationStructureGeometryMicromapDataKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccelerationStructureGeometryMicromapDataKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkAccelerationStructureGeometryMicromapDataKHR :: struct // Can be in the pNext chain of "VkAccelerationStructureGeometryKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_MICROMAP_DATA_KHR;
+    pNext : *void;
+    usageCountsCount : u32;
+    pUsageCounts : *VkMicromapUsageKHR;
+    ppUsageCounts : **VkMicromapUsageKHR;
+    data : VkDeviceAddress;
+    triangleArray : VkDeviceAddress;
+    triangleArrayStride : VkDeviceSize;
+}
+
+
 // Type VkMicromapCreateInfoEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapCreateInfoEXT.html)
 // Referenced by VK_EXT_opacity_micromap
@@ -25833,6 +27056,18 @@ VkMicromapBuildSizesInfoEXT :: struct
 }
 
 
+// Type VkMicromapUsageKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapUsageKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkMicromapUsageKHR :: struct
+{
+    count : u32;
+    subdivisionLevel : u32;
+    format : VkOpacityMicromapFormatKHR;
+}
+
+
 // Type VkMicromapUsageEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapUsageEXT.html)
 // Referenced by VK_EXT_opacity_micromap
@@ -25845,15 +27080,34 @@ VkMicromapUsageEXT :: struct
 }
 
 
-// Type VkMicromapTriangleEXT
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapTriangleEXT.html)
-// Referenced by VK_EXT_opacity_micromap
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
-VkMicromapTriangleEXT :: struct
+// Type VkMicromapTriangleKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapTriangleKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkMicromapTriangleKHR :: struct
 {
     dataOffset : u32; // Specified in bytes
     subdivisionLevel : u16;
     format : u16;
+}
+
+
+// Type VkMicromapTriangleEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMicromapTriangleEXT.html)
+// Referenced by VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
+VkMicromapTriangleEXT :: VkMicromapTriangleKHR;
+
+
+// Type VkPhysicalDeviceOpacityMicromapFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceOpacityMicromapFeaturesKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkPhysicalDeviceOpacityMicromapFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPACITY_MICROMAP_FEATURES_KHR;
+    pNext : *void;
+    micromap : VkBool32;
 }
 
 
@@ -25871,6 +27125,21 @@ VkPhysicalDeviceOpacityMicromapFeaturesEXT :: struct // Can be in the pNext chai
 }
 
 
+// Type VkPhysicalDeviceOpacityMicromapPropertiesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceOpacityMicromapPropertiesKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkPhysicalDeviceOpacityMicromapPropertiesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_OPACITY_MICROMAP_PROPERTIES_KHR;
+    pNext : *void;
+    maxOpacity2StateSubdivisionLevel : u32;
+    maxOpacity4StateSubdivisionLevel : u32;
+    maxOpacityLossy4StateSubdivisionLevel : u32;
+    maxMicromapTriangles : u64;
+}
+
+
 // Type VkPhysicalDeviceOpacityMicromapPropertiesEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceOpacityMicromapPropertiesEXT.html)
 // Referenced by VK_EXT_opacity_micromap
@@ -25881,6 +27150,22 @@ VkPhysicalDeviceOpacityMicromapPropertiesEXT :: struct // Can be in the pNext ch
     pNext : *void;
     maxOpacity2StateSubdivisionLevel : u32;
     maxOpacity4StateSubdivisionLevel : u32;
+}
+
+
+// Type VkAccelerationStructureTrianglesOpacityMicromapKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccelerationStructureTrianglesOpacityMicromapKHR.html)
+// Referenced by VK_KHR_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VkAccelerationStructureTrianglesOpacityMicromapKHR :: struct // Can be in the pNext chain of "VkAccelerationStructureGeometryTrianglesDataKHR,VkAccelerationStructureDenseGeometryFormatTrianglesDataAMDX"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_TRIANGLES_OPACITY_MICROMAP_KHR;
+    pNext : *void;
+    indexType : VkIndexType;
+    indexBuffer : VkDeviceAddress;
+    indexStride : VkDeviceSize;
+    baseTriangle : u32;
+    micromap : VkAccelerationStructureKHR;
 }
 
 
@@ -26031,6 +27316,30 @@ VkImageViewSampleWeightCreateInfoQCOM :: struct // Can be in the pNext chain of 
     filterCenter : VkOffset2D;
     filterSize : VkExtent2D;
     numPhases : u32;
+}
+
+
+// Type VkPhysicalDeviceShaderMultipleWaitQueuesFeaturesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderMultipleWaitQueuesFeaturesQCOM.html)
+// Referenced by VK_QCOM_shader_multiple_wait_queues
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_shader_multiple_wait_queues.html)
+VkPhysicalDeviceShaderMultipleWaitQueuesFeaturesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MULTIPLE_WAIT_QUEUES_FEATURES_QCOM;
+    pNext : *void;
+    shaderMultipleWaitQueues : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceShaderMultipleWaitQueuesPropertiesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderMultipleWaitQueuesPropertiesQCOM.html)
+// Referenced by VK_QCOM_shader_multiple_wait_queues
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_shader_multiple_wait_queues.html)
+VkPhysicalDeviceShaderMultipleWaitQueuesPropertiesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MULTIPLE_WAIT_QUEUES_PROPERTIES_QCOM;
+    pNext : *void;
+    maxShaderWaitQueues : u32;
 }
 
 
@@ -26330,15 +27639,34 @@ VkPhysicalDeviceFaultFeaturesEXT :: struct // Can be in the pNext chain of "VkPh
 }
 
 
+// Type VkDeviceFaultAddressInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressInfoKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkDeviceFaultAddressInfoKHR :: struct
+{
+    addressType : VkDeviceFaultAddressTypeKHR;
+    reportedAddress : VkDeviceAddress;
+    addressPrecision : VkDeviceSize;
+}
+
+
 // Type VkDeviceFaultAddressInfoEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultAddressInfoEXT.html)
 // Referenced by VK_EXT_device_fault
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
-VkDeviceFaultAddressInfoEXT :: struct
+VkDeviceFaultAddressInfoEXT :: VkDeviceFaultAddressInfoKHR;
+
+
+// Type VkDeviceFaultVendorInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorInfoKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkDeviceFaultVendorInfoKHR :: struct
 {
-    addressType : VkDeviceFaultAddressTypeEXT;
-    reportedAddress : VkDeviceAddress;
-    addressPrecision : VkDeviceSize;
+    description : [VK_MAX_DESCRIPTION_SIZE] u8; // Free-form description of the fault
+    vendorFaultCode : u64;
+    vendorFaultData : u64;
 }
 
 
@@ -26346,11 +27674,36 @@ VkDeviceFaultAddressInfoEXT :: struct
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorInfoEXT.html)
 // Referenced by VK_EXT_device_fault
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
-VkDeviceFaultVendorInfoEXT :: struct
+VkDeviceFaultVendorInfoEXT :: VkDeviceFaultVendorInfoKHR;
+
+
+// Type VkDeviceFaultInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultInfoKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkDeviceFaultInfoKHR :: struct
 {
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_KHR;
+    pNext : *void;
+    flags : VkDeviceFaultFlagsKHR;
+    groupId : u64;
     description : [VK_MAX_DESCRIPTION_SIZE] u8; // Free-form description of the fault
-    vendorFaultCode : u64;
-    vendorFaultData : u64;
+    faultAddressInfo : VkDeviceFaultAddressInfoKHR;
+    instructionAddressInfo : VkDeviceFaultAddressInfoKHR;
+    vendorInfo : VkDeviceFaultVendorInfoKHR;
+}
+
+
+// Type VkDeviceFaultDebugInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultDebugInfoKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkDeviceFaultDebugInfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_FAULT_DEBUG_INFO_KHR;
+    pNext : *void;
+    vendorBinarySize : u32;
+    pVendorBinaryData : *void;
 }
 
 
@@ -26377,21 +27730,21 @@ VkDeviceFaultInfoEXT :: struct
     sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_FAULT_INFO_EXT;
     pNext : *void;
     description : [VK_MAX_DESCRIPTION_SIZE] u8; // Free-form description of the fault
-    pAddressInfos : *VkDeviceFaultAddressInfoEXT;
-    pVendorInfos : *VkDeviceFaultVendorInfoEXT;
+    pAddressInfos : *VkDeviceFaultAddressInfoKHR;
+    pVendorInfos : *VkDeviceFaultVendorInfoKHR;
     pVendorBinaryData : *void;
 }
 
 
-// Type VkDeviceFaultVendorBinaryHeaderVersionOneEXT
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionOneEXT.html)
-// Referenced by VK_EXT_device_fault
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
-VkDeviceFaultVendorBinaryHeaderVersionOneEXT :: struct
+// Type VkDeviceFaultVendorBinaryHeaderVersionOneKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionOneKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkDeviceFaultVendorBinaryHeaderVersionOneKHR :: struct
 {
     // The fields in this structure are non-normative since structure packing is implementation-defined in C. The specification defines the normative layout.
     headerSize : u32;
-    headerVersion : VkDeviceFaultVendorBinaryHeaderVersionEXT;
+    headerVersion : VkDeviceFaultVendorBinaryHeaderVersionKHR;
     vendorID : u32;
     deviceID : u32;
     driverVersion : u32;
@@ -26401,6 +27754,40 @@ VkDeviceFaultVendorBinaryHeaderVersionOneEXT :: struct
     engineNameOffset : u32;
     engineVersion : u32;
     apiVersion : u32;
+}
+
+
+// Type VkDeviceFaultVendorBinaryHeaderVersionOneEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultVendorBinaryHeaderVersionOneEXT.html)
+// Referenced by VK_EXT_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_device_fault.html)
+VkDeviceFaultVendorBinaryHeaderVersionOneEXT :: VkDeviceFaultVendorBinaryHeaderVersionOneKHR;
+
+
+// Type VkPhysicalDeviceFaultFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceFaultFeaturesKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkPhysicalDeviceFaultFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_FEATURES_KHR;
+    pNext : *void;
+    deviceFault : VkBool32;
+    deviceFaultVendorBinary : VkBool32;
+    deviceFaultReportMasked : VkBool32;
+    deviceFaultDeviceLostOnMasked : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceFaultPropertiesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceFaultPropertiesKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VkPhysicalDeviceFaultPropertiesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FAULT_PROPERTIES_KHR;
+    pNext : *void;
+    maxDeviceFaultCount : u32;
 }
 
 
@@ -26453,7 +27840,7 @@ VkDecompressMemoryRegionNV :: struct
     dstAddress : VkDeviceAddress;
     compressedSize : VkDeviceSize; // Specified in bytes
     decompressedSize : VkDeviceSize; // Specified in bytes
-    decompressionMethod : VkMemoryDecompressionMethodFlagsNV;
+    decompressionMethod : VkMemoryDecompressionMethodFlagsEXT;
 }
 
 
@@ -27464,6 +28851,20 @@ VkSamplerBlockMatchWindowCreateInfoQCOM :: struct // Can be in the pNext chain o
 }
 
 
+// Type VkPhysicalDeviceImageProcessing3FeaturesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceImageProcessing3FeaturesQCOM.html)
+// Referenced by VK_QCOM_image_processing3
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_image_processing3.html)
+VkPhysicalDeviceImageProcessing3FeaturesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_PROCESSING_3_FEATURES_QCOM;
+    pNext : *void;
+    imageGatherLinear : VkBool32;
+    imageGatherExtendedModes : VkBool32;
+    blockMatchExtendedClampToEdge : VkBool32;
+}
+
+
 // Type VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDescriptorPoolOverallocationFeaturesNV.html)
 // Referenced by VK_NV_descriptor_pool_overallocation
@@ -27661,6 +29062,34 @@ VkPhysicalDeviceSchedulingControlsPropertiesARM :: struct // Can be in the pNext
     sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_PROPERTIES_ARM;
     pNext : *void;
     schedulingControlsFlags : VkPhysicalDeviceSchedulingControlsFlagsARM;
+}
+
+
+// Type VkPhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM.html)
+// Referenced by VK_ARM_scheduling_controls
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_scheduling_controls.html)
+VkPhysicalDeviceSchedulingControlsDispatchParametersPropertiesARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SCHEDULING_CONTROLS_DISPATCH_PARAMETERS_PROPERTIES_ARM;
+    pNext : *void;
+    schedulingControlsMaxWarpsCount : u32;
+    schedulingControlsMaxQueuedBatchesCount : u32;
+    schedulingControlsMaxWorkGroupBatchSize : u32;
+}
+
+
+// Type VkDispatchParametersARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDispatchParametersARM.html)
+// Referenced by VK_ARM_scheduling_controls
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_scheduling_controls.html)
+VkDispatchParametersARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DISPATCH_PARAMETERS_ARM;
+    pNext : *void;
+    workGroupBatchSize : u32;
+    maxQueuedWorkGroupBatches : u32;
+    maxWarpsPerShaderCore : u32;
 }
 
 
@@ -28101,6 +29530,18 @@ VkCooperativeMatrixFlexibleDimensionsPropertiesNV :: struct
 }
 
 
+// Type VkPhysicalDeviceCooperativeMatrixDecodeVectorFeaturesNV
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceCooperativeMatrixDecodeVectorFeaturesNV.html)
+// Referenced by VK_NV_cooperative_matrix_decode_vector
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cooperative_matrix_decode_vector.html)
+VkPhysicalDeviceCooperativeMatrixDecodeVectorFeaturesNV :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_COOPERATIVE_MATRIX_DECODE_VECTOR_FEATURES_NV;
+    pNext : *void;
+    cooperativeMatrixDecodeVector : VkBool32;
+}
+
+
 // Type VkPhysicalDeviceHdrVividFeaturesHUAWEI
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceHdrVividFeaturesHUAWEI.html)
 // Referenced by VK_HUAWEI_hdr_vivid
@@ -28327,6 +29768,31 @@ VkPipelineFragmentDensityMapLayeredCreateInfoVALVE :: struct // Can be in the pN
 }
 
 
+// Type VkSetPresentConfigNV
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSetPresentConfigNV.html)
+// Referenced by VK_NV_present_metering
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_present_metering.html)
+VkSetPresentConfigNV :: struct // Can be in the pNext chain of "VkPresentInfoKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_SET_PRESENT_CONFIG_NV;
+    pNext : *void;
+    numFramesPerBatch : u32;
+    presentConfigFeedback : u32;
+}
+
+
+// Type VkPhysicalDevicePresentMeteringFeaturesNV
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevicePresentMeteringFeaturesNV.html)
+// Referenced by VK_NV_present_metering
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_present_metering.html)
+VkPhysicalDevicePresentMeteringFeaturesNV :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_METERING_FEATURES_NV;
+    pNext : *void;
+    presentMetering : VkBool32;
+}
+
+
 // Type VkExternalComputeQueueDeviceCreateInfoNV
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkExternalComputeQueueDeviceCreateInfoNV.html)
 // Referenced by VK_NV_external_compute_queue
@@ -28388,6 +29854,33 @@ VkPhysicalDeviceShaderUniformBufferUnsizedArrayFeaturesEXT :: struct // Can be i
 }
 
 
+// Type VkPhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE.html)
+// Referenced by VK_VALVE_shader_mixed_float_dot_product
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_VALVE_shader_mixed_float_dot_product.html)
+VkPhysicalDeviceShaderMixedFloatDotProductFeaturesVALVE :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_MIXED_FLOAT_DOT_PRODUCT_FEATURES_VALVE;
+    pNext : *void;
+    shaderMixedFloatDotProductFloat16AccFloat32 : VkBool32;
+    shaderMixedFloatDotProductFloat16AccFloat16 : VkBool32;
+    shaderMixedFloatDotProductBFloat16Acc : VkBool32;
+    shaderMixedFloatDotProductFloat8AccFloat32 : VkBool32;
+}
+
+
+// Type VkPhysicalDevicePrimitiveRestartIndexFeaturesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevicePrimitiveRestartIndexFeaturesEXT.html)
+// Referenced by VK_EXT_primitive_restart_index
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_primitive_restart_index.html)
+VkPhysicalDevicePrimitiveRestartIndexFeaturesEXT :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRIMITIVE_RESTART_INDEX_FEATURES_EXT;
+    pNext : *void;
+    primitiveRestartIndex : VkBool32;
+}
+
+
 // Type VkPhysicalDeviceFormatPackFeaturesARM
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceFormatPackFeaturesARM.html)
 // Referenced by VK_ARM_format_pack
@@ -28397,6 +29890,30 @@ VkPhysicalDeviceFormatPackFeaturesARM :: struct // Can be in the pNext chain of 
     sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FORMAT_PACK_FEATURES_ARM;
     pNext : *void;
     formatPack : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceThrottleHintFeaturesSEC
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceThrottleHintFeaturesSEC.html)
+// Referenced by VK_SEC_throttle_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_throttle_hint.html)
+VkPhysicalDeviceThrottleHintFeaturesSEC :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_THROTTLE_HINT_FEATURES_SEC;
+    pNext : *void;
+    throttleHint : VkBool32;
+}
+
+
+// Type VkThrottleHintSubmitInfoSEC
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkThrottleHintSubmitInfoSEC.html)
+// Referenced by VK_SEC_throttle_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_throttle_hint.html)
+VkThrottleHintSubmitInfoSEC :: struct // Can be in the pNext chain of "VkSubmitInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_THROTTLE_HINT_SUBMIT_INFO_SEC;
+    pNext : *void;
+    throttleHint : VkThrottleHintTypeSEC;
 }
 
 
@@ -28809,6 +30326,18 @@ VkDataGraphPipelineResourceInfoARM :: struct
 }
 
 
+// Type VkDataGraphPipelineResourceInfoImageLayoutARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineResourceInfoImageLayoutARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphPipelineResourceInfoImageLayoutARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineResourceInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_RESOURCE_INFO_IMAGE_LAYOUT_ARM;
+    pNext : *void;
+    layout : VkImageLayout;
+}
+
+
 // Type VkDataGraphPipelineCompilerControlCreateInfoARM
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineCompilerControlCreateInfoARM.html)
 // Referenced by VK_ARM_data_graph
@@ -28829,7 +30358,7 @@ VkDataGraphPipelineCreateInfoARM :: struct
 {
     sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_CREATE_INFO_ARM;
     pNext : *void;
-    flags : VkPipelineCreateFlags2KHR;
+    flags : VkPipelineCreateFlags2;
     layout : VkPipelineLayout;
     resourceInfoCount : u32;
     pResourceInfos : *VkDataGraphPipelineResourceInfoARM;
@@ -29162,6 +30691,43 @@ VkPhysicalDeviceShader64BitIndexingFeaturesEXT :: struct // Can be in the pNext 
 }
 
 
+// Type VkPerfHintInfoQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPerfHintInfoQCOM.html)
+// Referenced by VK_QCOM_queue_perf_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+VkPerfHintInfoQCOM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PERF_HINT_INFO_QCOM;
+    pNext : *void; // Pointer to next structure
+    type : VkPerfHintTypeQCOM;
+    scale : u32;
+}
+
+
+// Type VkPhysicalDeviceQueuePerfHintFeaturesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceQueuePerfHintFeaturesQCOM.html)
+// Referenced by VK_QCOM_queue_perf_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+VkPhysicalDeviceQueuePerfHintFeaturesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_QUEUE_PERF_HINT_FEATURES_QCOM;
+    pNext : *void;
+    queuePerfHint : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceQueuePerfHintPropertiesQCOM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceQueuePerfHintPropertiesQCOM.html)
+// Referenced by VK_QCOM_queue_perf_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+VkPhysicalDeviceQueuePerfHintPropertiesQCOM :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_QUEUE_PERF_HINT_PROPERTIES_QCOM;
+    pNext : *void;
+    supportedQueues : VkQueueFlags;
+}
+
+
 // Type VkPhysicalDevicePerformanceCountersByRegionFeaturesARM
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevicePerformanceCountersByRegionFeaturesARM.html)
 // Referenced by VK_ARM_performance_counters_by_region
@@ -29323,17 +30889,6 @@ VkHostAddressRangeConstEXT :: struct
 {
     address : *void;
     size : u64;
-}
-
-
-// Type VkDeviceAddressRangeEXT
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceAddressRangeEXT.html)
-// Referenced by VK_EXT_descriptor_heap
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
-VkDeviceAddressRangeEXT :: struct
-{
-    address : VkDeviceAddress;
-    size : VkDeviceSize;
 }
 
 
@@ -29629,6 +31184,30 @@ VkSubsampledImageFormatPropertiesEXT :: struct // Can be in the pNext chain of "
 }
 
 
+// Type VkPhysicalDeviceShaderSplitBarrierFeaturesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderSplitBarrierFeaturesEXT.html)
+// Referenced by VK_EXT_shader_split_barrier
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_split_barrier.html)
+VkPhysicalDeviceShaderSplitBarrierFeaturesEXT :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SPLIT_BARRIER_FEATURES_EXT;
+    pNext : *void;
+    shaderSplitBarrier : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceShaderSplitBarrierPropertiesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderSplitBarrierPropertiesEXT.html)
+// Referenced by VK_EXT_shader_split_barrier
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_split_barrier.html)
+VkPhysicalDeviceShaderSplitBarrierPropertiesEXT :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SPLIT_BARRIER_PROPERTIES_EXT;
+    pNext : *void;
+    splitBarrierReservedSharedMemory : u32;
+}
+
+
 // Type VkPhysicalDeviceDescriptorHeapFeaturesEXT
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDescriptorHeapFeaturesEXT.html)
 // Referenced by VK_EXT_descriptor_heap
@@ -29696,6 +31275,526 @@ VkPhysicalDeviceDescriptorHeapTensorPropertiesARM :: struct // Can be in the pNe
     tensorDescriptorSize : VkDeviceSize;
     tensorDescriptorAlignment : VkDeviceSize;
     tensorCaptureReplayOpaqueDataSize : u64;
+}
+
+
+// Type VkPhysicalDeviceShaderInstrumentationFeaturesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderInstrumentationFeaturesARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VkPhysicalDeviceShaderInstrumentationFeaturesARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INSTRUMENTATION_FEATURES_ARM;
+    pNext : *void;
+    shaderInstrumentation : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceShaderInstrumentationPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderInstrumentationPropertiesARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VkPhysicalDeviceShaderInstrumentationPropertiesARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_INSTRUMENTATION_PROPERTIES_ARM;
+    pNext : *void;
+    numMetrics : u32;
+    perBasicBlockGranularity : VkBool32;
+}
+
+
+// Type VkShaderInstrumentationCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkShaderInstrumentationCreateInfoARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VkShaderInstrumentationCreateInfoARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_SHADER_INSTRUMENTATION_CREATE_INFO_ARM;
+    pNext : *void;
+}
+
+
+// Type VkShaderInstrumentationMetricDescriptionARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkShaderInstrumentationMetricDescriptionARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VkShaderInstrumentationMetricDescriptionARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_SHADER_INSTRUMENTATION_METRIC_DESCRIPTION_ARM;
+    pNext : *void;
+    name : [VK_MAX_DESCRIPTION_SIZE] u8;
+    description : [VK_MAX_DESCRIPTION_SIZE] u8;
+}
+
+
+// Type VkShaderInstrumentationMetricDataHeaderARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkShaderInstrumentationMetricDataHeaderARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VkShaderInstrumentationMetricDataHeaderARM :: struct
+{
+    resultIndex : u32;
+    resultSubIndex : u32;
+    stages : VkShaderStageFlags;
+    basicBlockIndex : u32;
+}
+
+
+// Type VkDeviceAddressRangeKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceAddressRangeKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDeviceAddressRangeKHR :: struct
+{
+    address : VkDeviceAddress;
+    size : VkDeviceSize;
+}
+
+
+// Type VkDeviceAddressRangeEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceAddressRangeEXT.html)
+// Referenced by VK_EXT_descriptor_heap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_descriptor_heap.html)
+VkDeviceAddressRangeEXT :: VkDeviceAddressRangeKHR;
+
+
+// Type VkDeviceMemoryCopyKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceMemoryCopyKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDeviceMemoryCopyKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_MEMORY_COPY_KHR;
+    pNext : *void;
+    srcRange : VkDeviceAddressRangeKHR;
+    srcFlags : VkAddressCommandFlagsKHR;
+    dstRange : VkDeviceAddressRangeKHR;
+    dstFlags : VkAddressCommandFlagsKHR;
+}
+
+
+// Type VkCopyDeviceMemoryInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyDeviceMemoryInfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkCopyDeviceMemoryInfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_DEVICE_MEMORY_INFO_KHR;
+    pNext : *void;
+    regionCount : u32;
+    pRegions : *VkDeviceMemoryCopyKHR;
+}
+
+
+// Type VkDeviceMemoryImageCopyKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceMemoryImageCopyKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDeviceMemoryImageCopyKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_MEMORY_IMAGE_COPY_KHR;
+    pNext : *void;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    addressRowLength : u32;
+    addressImageHeight : u32;
+    imageSubresource : VkImageSubresourceLayers;
+    imageLayout : VkImageLayout;
+    imageOffset : VkOffset3D;
+    imageExtent : VkExtent3D;
+}
+
+
+// Type VkCopyDeviceMemoryImageInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkCopyDeviceMemoryImageInfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkCopyDeviceMemoryImageInfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_COPY_DEVICE_MEMORY_IMAGE_INFO_KHR;
+    pNext : *void;
+    image : VkImage;
+    regionCount : u32;
+    pRegions : *VkDeviceMemoryImageCopyKHR;
+}
+
+
+// Type VkMemoryRangeBarriersInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMemoryRangeBarriersInfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkMemoryRangeBarriersInfoKHR :: struct // Can be in the pNext chain of "VkDependencyInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_MEMORY_RANGE_BARRIERS_INFO_KHR;
+    pNext : *void;
+    memoryRangeBarrierCount : u32;
+    pMemoryRangeBarriers : *VkMemoryRangeBarrierKHR;
+}
+
+
+// Type VkMemoryRangeBarrierKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMemoryRangeBarrierKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkMemoryRangeBarrierKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_MEMORY_RANGE_BARRIER_KHR;
+    pNext : *void;
+    srcStageMask : VkPipelineStageFlags2;
+    srcAccessMask : VkAccessFlags2;
+    dstStageMask : VkPipelineStageFlags2;
+    dstAccessMask : VkAccessFlags2;
+    srcQueueFamilyIndex : u32;
+    dstQueueFamilyIndex : u32;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+}
+
+
+// Type VkPhysicalDeviceDeviceAddressCommandsFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDeviceAddressCommandsFeaturesKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkPhysicalDeviceDeviceAddressCommandsFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_ADDRESS_COMMANDS_FEATURES_KHR;
+    pNext : *void;
+    deviceAddressCommands : VkBool32;
+}
+
+
+// Type VkConditionalRenderingBeginInfo2EXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkConditionalRenderingBeginInfo2EXT.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkConditionalRenderingBeginInfo2EXT :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_CONDITIONAL_RENDERING_BEGIN_INFO_2_EXT;
+    pNext : *void;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    flags : VkConditionalRenderingFlagsEXT;
+}
+
+
+// Type VkAccelerationStructureCreateInfo2KHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkAccelerationStructureCreateInfo2KHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkAccelerationStructureCreateInfo2KHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_CREATE_INFO_2_KHR;
+    pNext : *void;
+    createFlags : VkAccelerationStructureCreateFlagsKHR;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    type : VkAccelerationStructureTypeKHR;
+}
+
+
+// Type VkBindIndexBuffer3InfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBindIndexBuffer3InfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkBindIndexBuffer3InfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_BIND_INDEX_BUFFER_3_INFO_KHR;
+    pNext : *void;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    indexType : VkIndexType;
+}
+
+
+// Type VkBindVertexBuffer3InfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBindVertexBuffer3InfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkBindVertexBuffer3InfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_BIND_VERTEX_BUFFER_3_INFO_KHR;
+    pNext : *void;
+    setStride : VkBool32;
+    addressRange : VkStridedDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+}
+
+
+// Type VkDrawIndirect2InfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDrawIndirect2InfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDrawIndirect2InfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DRAW_INDIRECT_2_INFO_KHR;
+    pNext : *void;
+    addressRange : VkStridedDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    drawCount : u32;
+}
+
+
+// Type VkDrawIndirectCount2InfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDrawIndirectCount2InfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDrawIndirectCount2InfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DRAW_INDIRECT_COUNT_2_INFO_KHR;
+    pNext : *void;
+    addressRange : VkStridedDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+    countAddressRange : VkDeviceAddressRangeKHR;
+    countAddressFlags : VkAddressCommandFlagsKHR;
+    maxDrawCount : u32;
+}
+
+
+// Type VkDispatchIndirect2InfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDispatchIndirect2InfoKHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkDispatchIndirect2InfoKHR :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DISPATCH_INDIRECT_2_INFO_KHR;
+    pNext : *void;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+}
+
+
+// Type VkBindTransformFeedbackBuffer2InfoEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkBindTransformFeedbackBuffer2InfoEXT.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkBindTransformFeedbackBuffer2InfoEXT :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_BIND_TRANSFORM_FEEDBACK_BUFFER_2_INFO_EXT;
+    pNext : *void;
+    addressRange : VkDeviceAddressRangeKHR;
+    addressFlags : VkAddressCommandFlagsKHR;
+}
+
+
+// Type VkMemoryMarkerInfoAMD
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkMemoryMarkerInfoAMD.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VkMemoryMarkerInfoAMD :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_MEMORY_MARKER_INFO_AMD;
+    pNext : *void;
+    stage : VkPipelineStageFlags2KHR;
+    dstRange : VkDeviceAddressRangeKHR;
+    dstFlags : VkAddressCommandFlagsKHR;
+    marker : u32;
+}
+
+
+// Type VkPhysicalDeviceShaderConstantDataFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderConstantDataFeaturesKHR.html)
+// Referenced by VK_KHR_shader_constant_data
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_constant_data.html)
+VkPhysicalDeviceShaderConstantDataFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_CONSTANT_DATA_FEATURES_KHR;
+    pNext : *void;
+    shaderConstantData : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceShaderAbortFeaturesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderAbortFeaturesKHR.html)
+// Referenced by VK_KHR_shader_abort
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_abort.html)
+VkPhysicalDeviceShaderAbortFeaturesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ABORT_FEATURES_KHR;
+    pNext : *void;
+    shaderAbort : VkBool32;
+}
+
+
+// Type VkPhysicalDeviceShaderAbortPropertiesKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderAbortPropertiesKHR.html)
+// Referenced by VK_KHR_shader_abort
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_abort.html)
+VkPhysicalDeviceShaderAbortPropertiesKHR :: struct // Can be in the pNext chain of "VkPhysicalDeviceProperties2"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ABORT_PROPERTIES_KHR;
+    pNext : *void;
+    maxShaderAbortMessageSize : u64;
+}
+
+
+// Type VkDeviceFaultShaderAbortMessageInfoKHR
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDeviceFaultShaderAbortMessageInfoKHR.html)
+// Referenced by VK_KHR_shader_abort
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_abort.html)
+VkDeviceFaultShaderAbortMessageInfoKHR :: struct // Can be in the pNext chain of "VkDeviceFaultDebugInfoKHR"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DEVICE_FAULT_SHADER_ABORT_MESSAGE_INFO_KHR;
+    pNext : *void;
+    messageDataSize : u64;
+    pMessageData : *void;
+}
+
+
+// Type VkDataGraphTOSANameQualityARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphTOSANameQualityARM.html)
+// Referenced by VK_ARM_data_graph_instruction_set_tosa
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+VkDataGraphTOSANameQualityARM :: struct
+{
+    name : [VK_MAX_DATA_GRAPH_TOSA_NAME_SIZE_ARM] u8;
+    qualityFlags : VkDataGraphTOSAQualityFlagsARM;
+}
+
+
+// Type VkQueueFamilyDataGraphTOSAPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkQueueFamilyDataGraphTOSAPropertiesARM.html)
+// Referenced by VK_ARM_data_graph_instruction_set_tosa
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+VkQueueFamilyDataGraphTOSAPropertiesARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_DATA_GRAPH_TOSA_PROPERTIES_ARM;
+    pNext : *void;
+    profileCount : u32;
+    pProfiles : *VkDataGraphTOSANameQualityARM;
+    extensionCount : u32;
+    pExtensions : *VkDataGraphTOSANameQualityARM;
+    level : VkDataGraphTOSALevelARM;
+}
+
+
+// Type VkDataGraphPipelineSingleNodeConnectionARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineSingleNodeConnectionARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphPipelineSingleNodeConnectionARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SINGLE_NODE_CONNECTION_ARM;
+    pNext : *void;
+    set : u32;
+    binding : u32;
+    connection : VkDataGraphPipelineNodeConnectionTypeARM;
+}
+
+
+// Type VkPhysicalDeviceDataGraphOpticalFlowFeaturesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceDataGraphOpticalFlowFeaturesARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkPhysicalDeviceDataGraphOpticalFlowFeaturesARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DATA_GRAPH_OPTICAL_FLOW_FEATURES_ARM;
+    pNext : *void;
+    dataGraphOpticalFlow : VkBool32;
+}
+
+
+// Type VkQueueFamilyDataGraphOpticalFlowPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkQueueFamilyDataGraphOpticalFlowPropertiesARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkQueueFamilyDataGraphOpticalFlowPropertiesARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_DATA_GRAPH_OPTICAL_FLOW_PROPERTIES_ARM;
+    pNext : *void;
+    supportedOutputGridSizes : VkDataGraphOpticalFlowGridSizeFlagsARM;
+    supportedHintGridSizes : VkDataGraphOpticalFlowGridSizeFlagsARM;
+    hintSupported : VkBool32;
+    costSupported : VkBool32;
+    minWidth : u32;
+    minHeight : u32;
+    maxWidth : u32;
+    maxHeight : u32;
+}
+
+
+// Type VkDataGraphOpticalFlowImageFormatInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowImageFormatInfoARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphOpticalFlowImageFormatInfoARM :: struct // Can be in the pNext chain of "VkPhysicalDeviceImageFormatInfo2,VkImageCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_OPTICAL_FLOW_IMAGE_FORMAT_INFO_ARM;
+    pNext : *void;
+    usage : VkDataGraphOpticalFlowImageUsageFlagsARM;
+}
+
+
+// Type VkDataGraphOpticalFlowImageFormatPropertiesARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphOpticalFlowImageFormatPropertiesARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphOpticalFlowImageFormatPropertiesARM :: struct
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_OPTICAL_FLOW_IMAGE_FORMAT_PROPERTIES_ARM;
+    pNext : *void;
+    format : VkFormat;
+}
+
+
+// Type VkDataGraphPipelineSingleNodeCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineSingleNodeCreateInfoARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphPipelineSingleNodeCreateInfoARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineCreateInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_SINGLE_NODE_CREATE_INFO_ARM;
+    pNext : *void;
+    nodeType : VkDataGraphPipelineNodeTypeARM;
+    connectionCount : u32;
+    pConnections : *VkDataGraphPipelineSingleNodeConnectionARM;
+}
+
+
+// Type VkDataGraphPipelineOpticalFlowCreateInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineOpticalFlowCreateInfoARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphPipelineOpticalFlowCreateInfoARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineCreateInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_OPTICAL_FLOW_CREATE_INFO_ARM;
+    pNext : *void;
+    width : u32;
+    height : u32;
+    imageFormat : VkFormat;
+    flowVectorFormat : VkFormat;
+    costFormat : VkFormat;
+    outputGridSize : VkDataGraphOpticalFlowGridSizeFlagsARM;
+    hintGridSize : VkDataGraphOpticalFlowGridSizeFlagsARM;
+    performanceLevel : VkDataGraphOpticalFlowPerformanceLevelARM;
+    flags : VkDataGraphOpticalFlowCreateFlagsARM;
+}
+
+
+// Type VkDataGraphPipelineOpticalFlowDispatchInfoARM
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkDataGraphPipelineOpticalFlowDispatchInfoARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VkDataGraphPipelineOpticalFlowDispatchInfoARM :: struct // Can be in the pNext chain of "VkDataGraphPipelineDispatchInfoARM"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_DATA_GRAPH_PIPELINE_OPTICAL_FLOW_DISPATCH_INFO_ARM;
+    pNext : *void;
+    flags : VkDataGraphOpticalFlowExecuteFlagsARM;
+    meanFlowL1NormHint : u32;
+}
+
+
+// Type VkPhysicalDeviceShaderOCPMicroscalingTypesFeaturesEXT
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDeviceShaderOCPMicroscalingTypesFeaturesEXT.html)
+// Referenced by VK_EXT_shader_ocp_microscaling_types
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_ocp_microscaling_types.html)
+VkPhysicalDeviceShaderOCPMicroscalingTypesFeaturesEXT :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
+{
+    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OCP_MICROSCALING_TYPES_FEATURES_EXT;
+    pNext : *void;
+    shaderFloat4 : VkBool32;
+    shaderFloat6 : VkBool32;
+    shaderFloat8UnsignedE8M0 : VkBool32;
+    shaderMXInt8 : VkBool32;
 }
 
 
@@ -30022,8 +32121,9 @@ PFN_vkGetPhysicalDeviceSurfaceSupportKHR :: #type (physicalDevice : VkPhysicalDe
 
 // Command vkGetPhysicalDeviceSurfaceCapabilitiesKHR (Instance Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetPhysicalDeviceSurfaceCapabilitiesKHR.html)
-// Referenced by VK_KHR_surface
+// Referenced by VK_KHR_surface, VK_KHR_get_surface_capabilities2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_surface.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_get_surface_capabilities2.html)
 PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR :: #type (physicalDevice : VkPhysicalDevice,
                                                         surface : VkSurfaceKHR,
                                                         pSurfaceCapabilities : *VkSurfaceCapabilitiesKHR) -> VkResult #foreign;
@@ -30031,8 +32131,9 @@ PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR :: #type (physicalDevice : VkPhysi
 
 // Command vkGetPhysicalDeviceSurfaceFormatsKHR (Instance Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetPhysicalDeviceSurfaceFormatsKHR.html)
-// Referenced by VK_KHR_surface
+// Referenced by VK_KHR_surface, VK_KHR_get_surface_capabilities2
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_surface.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_get_surface_capabilities2.html)
 PFN_vkGetPhysicalDeviceSurfaceFormatsKHR :: #type (physicalDevice : VkPhysicalDevice,
                                                    surface : VkSurfaceKHR,
                                                    pSurfaceFormatCount : *u32,
@@ -30621,6 +32722,15 @@ PFN_vkGetPhysicalDeviceCooperativeVectorPropertiesNV :: #type (physicalDevice : 
                                                                pProperties : *VkCooperativeVectorPropertiesNV) -> VkResult #foreign;
 
 
+// Command vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM (Instance Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkEnumeratePhysicalDeviceShaderInstrumentationMetricsARM :: #type (physicalDevice : VkPhysicalDevice,
+                                                                       pDescriptionCount : *u32,
+                                                                       pDescriptions : *VkShaderInstrumentationMetricDescriptionARM) -> VkResult #foreign;
+
+
 // Command vkGetPhysicalDeviceExternalTensorPropertiesARM (Instance Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetPhysicalDeviceExternalTensorPropertiesARM.html)
 // Referenced by VK_ARM_tensors
@@ -30668,6 +32778,29 @@ PFN_vkGetPhysicalDeviceDescriptorSizeEXT :: #type (physicalDevice : VkPhysicalDe
                                                    descriptorType : VkDescriptorType) -> VkDeviceSize #foreign;
 
 
+// Command vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM (Instance Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM.html)
+// Referenced by VK_ARM_data_graph_instruction_set_tosa, VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+PFN_vkGetPhysicalDeviceQueueFamilyDataGraphEngineOperationPropertiesARM :: #type (physicalDevice : VkPhysicalDevice,
+                                                                                  queueFamilyIndex : u32,
+                                                                                  pQueueFamilyDataGraphProperties : *VkQueueFamilyDataGraphPropertiesARM,
+                                                                                  pProperties : *VkBaseOutStructure) -> VkResult #foreign;
+
+
+// Command vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM (Instance Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM.html)
+// Referenced by VK_ARM_data_graph_optical_flow
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+PFN_vkGetPhysicalDeviceQueueFamilyDataGraphOpticalFlowImageFormatsARM :: #type (physicalDevice : VkPhysicalDevice,
+                                                                                queueFamilyIndex : u32,
+                                                                                pQueueFamilyDataGraphProperties : *VkQueueFamilyDataGraphPropertiesARM,
+                                                                                pOpticalFlowImageFormatInfo : *VkDataGraphOpticalFlowImageFormatInfoARM,
+                                                                                pFormatCount : *u32,
+                                                                                pImageFormatProperties : *VkDataGraphOpticalFlowImageFormatPropertiesARM) -> VkResult #foreign;
+
+
 // Command vkDestroyDevice (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkDestroyDevice.html)
 PFN_vkDestroyDevice :: #type (device : VkDevice,
@@ -30684,6 +32817,8 @@ PFN_vkGetDeviceQueue :: #type (device : VkDevice,
 
 // Command vkQueueSubmit (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkQueueSubmit.html)
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkQueueSubmit :: #type (queue : VkQueue,
                             submitCount : u32,
                             pSubmits : *VkSubmitInfo,
@@ -31368,6 +33503,17 @@ PFN_vkCmdBindPipeline :: #type (commandBuffer : VkCommandBuffer,
                                 pipeline : VkPipeline) #foreign;
 
 
+// Command vkCmdSetPrimitiveRestartIndexEXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdSetPrimitiveRestartIndexEXT.html)
+// Can be submitted to a Graphics queue
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_EXT_primitive_restart_index
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_primitive_restart_index.html)
+PFN_vkCmdSetPrimitiveRestartIndexEXT :: #type (commandBuffer : VkCommandBuffer,
+                                               primitiveRestartIndex : u32) #foreign;
+
+
 // Command vkCmdSetAttachmentFeedbackLoopEnableEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdSetAttachmentFeedbackLoopEnableEXT.html)
 // Can be submitted to a Graphics queue
@@ -31571,6 +33717,8 @@ PFN_vkCmdDrawMultiIndexedEXT :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDrawIndirect :: #type (commandBuffer : VkCommandBuffer,
                                 buffer : VkBuffer,
                                 offset : VkDeviceSize,
@@ -31583,6 +33731,8 @@ PFN_vkCmdDrawIndirect :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDrawIndexedIndirect :: #type (commandBuffer : VkCommandBuffer,
                                        buffer : VkBuffer,
                                        offset : VkDeviceSize,
@@ -31606,6 +33756,8 @@ PFN_vkCmdDispatch :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Compute queue
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDispatchIndirect :: #type (commandBuffer : VkCommandBuffer,
                                     buffer : VkBuffer,
                                     offset : VkDeviceSize) #foreign;
@@ -31781,6 +33933,8 @@ PFN_vkCmdCopyMemoryToImageIndirectKHR :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdUpdateBuffer :: #type (commandBuffer : VkCommandBuffer,
                                 dstBuffer : VkBuffer,
                                 dstOffset : VkDeviceSize,
@@ -31793,6 +33947,8 @@ PFN_vkCmdUpdateBuffer :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdFillBuffer :: #type (commandBuffer : VkCommandBuffer,
                               dstBuffer : VkBuffer,
                               dstOffset : VkDeviceSize,
@@ -31857,6 +34013,8 @@ PFN_vkCmdResolveImage :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics, Compute, Decode and Encode queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkCmdSetEvent :: #type (commandBuffer : VkCommandBuffer,
                             event : VkEvent,
                             stageMask : VkPipelineStageFlags) #foreign;
@@ -31867,6 +34025,8 @@ PFN_vkCmdSetEvent :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics, Compute, Decode and Encode queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkCmdResetEvent :: #type (commandBuffer : VkCommandBuffer,
                               event : VkEvent,
                               stageMask : VkPipelineStageFlags) #foreign;
@@ -31877,6 +34037,8 @@ PFN_vkCmdResetEvent :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics, Compute, Decode and Encode queues
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkCmdWaitEvents :: #type (commandBuffer : VkCommandBuffer,
                               eventCount : u32,
                               pEvents : *VkEvent,
@@ -31895,6 +34057,8 @@ PFN_vkCmdWaitEvents :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Transfer, Graphics, Compute, Decode and Encode queues
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkCmdPipelineBarrier :: #type (commandBuffer : VkCommandBuffer,
                                    srcStageMask : VkPipelineStageFlags,
                                    dstStageMask : VkPipelineStageFlags,
@@ -31933,8 +34097,9 @@ PFN_vkCmdEndQuery :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics and Compute queues
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_conditional_rendering
+// Referenced by VK_EXT_conditional_rendering, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_conditional_rendering.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdBeginConditionalRenderingEXT :: #type (commandBuffer : VkCommandBuffer,
                                                 pConditionalRenderingBegin : *VkConditionalRenderingBeginInfoEXT) #foreign;
 
@@ -31976,6 +34141,8 @@ PFN_vkCmdResetQueryPool :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Transfer, Graphics, Compute, Decode, Encode and Optical Flow queues
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_synchronization2
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_synchronization2.html)
 PFN_vkCmdWriteTimestamp :: #type (commandBuffer : VkCommandBuffer,
                                   pipelineStage : VkPipelineStageFlagBits,
                                   queryPool : VkQueryPool,
@@ -31987,6 +34154,8 @@ PFN_vkCmdWriteTimestamp :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdCopyQueryPoolResults :: #type (commandBuffer : VkCommandBuffer,
                                         queryPool : VkQueryPool,
                                         firstQuery : u32,
@@ -33145,6 +35314,8 @@ PFN_vkSignalSemaphoreKHR :: PFN_vkSignalSemaphore;
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDrawIndirectCount :: #type (commandBuffer : VkCommandBuffer,
                                      buffer : VkBuffer,
                                      offset : VkDeviceSize,
@@ -33173,6 +35344,8 @@ PFN_vkCmdDrawIndirectCountAMD :: PFN_vkCmdDrawIndirectCount;
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDrawIndexedIndirectCount :: #type (commandBuffer : VkCommandBuffer,
                                             buffer : VkBuffer,
                                             offset : VkDeviceSize,
@@ -33221,8 +35394,9 @@ PFN_vkGetQueueCheckpointDataNV :: #type (queue : VkQueue,
 // Can be submitted to a Graphics queue
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_transform_feedback
+// Referenced by VK_EXT_transform_feedback, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_transform_feedback.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdBindTransformFeedbackBuffersEXT :: #type (commandBuffer : VkCommandBuffer,
                                                    firstBinding : u32,
                                                    bindingCount : u32,
@@ -33236,8 +35410,9 @@ PFN_vkCmdBindTransformFeedbackBuffersEXT :: #type (commandBuffer : VkCommandBuff
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_transform_feedback
+// Referenced by VK_EXT_transform_feedback, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_transform_feedback.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdBeginTransformFeedbackEXT :: #type (commandBuffer : VkCommandBuffer,
                                              firstCounterBuffer : u32,
                                              counterBufferCount : u32,
@@ -33250,8 +35425,9 @@ PFN_vkCmdBeginTransformFeedbackEXT :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_transform_feedback
+// Referenced by VK_EXT_transform_feedback, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_transform_feedback.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdEndTransformFeedbackEXT :: #type (commandBuffer : VkCommandBuffer,
                                            firstCounterBuffer : u32,
                                            counterBufferCount : u32,
@@ -33291,8 +35467,9 @@ PFN_vkCmdEndQueryIndexedEXT :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_transform_feedback
+// Referenced by VK_EXT_transform_feedback, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_transform_feedback.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdDrawIndirectByteCountEXT :: #type (commandBuffer : VkCommandBuffer,
                                             instanceCount : u32,
                                             firstInstance : u32,
@@ -33426,7 +35603,8 @@ PFN_vkCmdDrawMeshTasksEXT :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_mesh_shader
+// Referenced by VK_KHR_device_address_commands, VK_EXT_mesh_shader
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_mesh_shader.html)
 PFN_vkCmdDrawMeshTasksIndirectEXT :: #type (commandBuffer : VkCommandBuffer,
                                             buffer : VkBuffer,
@@ -33440,7 +35618,8 @@ PFN_vkCmdDrawMeshTasksIndirectEXT :: #type (commandBuffer : VkCommandBuffer,
 // Can be submitted to a Graphics queue
 // Has to be used inside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_EXT_mesh_shader
+// Referenced by VK_KHR_device_address_commands, VK_EXT_mesh_shader
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_mesh_shader.html)
 PFN_vkCmdDrawMeshTasksIndirectCountEXT :: #type (commandBuffer : VkCommandBuffer,
                                                  buffer : VkBuffer,
@@ -33506,7 +35685,7 @@ PFN_vkDestroyAccelerationStructureNV :: #type (device : VkDevice,
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_ray_tracing.html)
 PFN_vkGetAccelerationStructureMemoryRequirementsNV :: #type (device : VkDevice,
                                                              pInfo : *VkAccelerationStructureMemoryRequirementsInfoNV,
-                                                             pMemoryRequirements : *VkMemoryRequirements2KHR) #foreign;
+                                                             pMemoryRequirements : *VkMemoryRequirements2) #foreign;
 
 
 // Command vkBindAccelerationStructureMemoryNV (Device Command)
@@ -33544,7 +35723,8 @@ PFN_vkCmdCopyAccelerationStructureKHR :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkCopyAccelerationStructureKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyAccelerationStructureKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_acceleration_structure
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 PFN_vkCopyAccelerationStructureKHR :: #type (device : VkDevice,
                                              deferredOperation : VkDeferredOperationKHR,
@@ -33564,7 +35744,8 @@ PFN_vkCmdCopyAccelerationStructureToMemoryKHR :: #type (commandBuffer : VkComman
 
 // Command vkCopyAccelerationStructureToMemoryKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyAccelerationStructureToMemoryKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_acceleration_structure
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 PFN_vkCopyAccelerationStructureToMemoryKHR :: #type (device : VkDevice,
                                                      deferredOperation : VkDeferredOperationKHR,
@@ -33584,7 +35765,8 @@ PFN_vkCmdCopyMemoryToAccelerationStructureKHR :: #type (commandBuffer : VkComman
 
 // Command vkCopyMemoryToAccelerationStructureKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyMemoryToAccelerationStructureKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_acceleration_structure
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 PFN_vkCopyMemoryToAccelerationStructureKHR :: #type (device : VkDevice,
                                                      deferredOperation : VkDeferredOperationKHR,
@@ -33641,7 +35823,8 @@ PFN_vkCmdBuildAccelerationStructureNV :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkWriteAccelerationStructuresPropertiesKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkWriteAccelerationStructuresPropertiesKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_acceleration_structure
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 PFN_vkWriteAccelerationStructuresPropertiesKHR :: #type (device : VkDevice,
                                                          accelerationStructureCount : u32,
@@ -34086,8 +36269,9 @@ PFN_vkGetFaultData :: #type (device : VkDevice,
 
 // Command vkCreateAccelerationStructureKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateAccelerationStructureKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCreateAccelerationStructureKHR :: #type (device : VkDevice,
                                                pCreateInfo : *VkAccelerationStructureCreateInfoKHR,
                                                pAllocator : *VkAllocationCallbacks,
@@ -34124,7 +36308,8 @@ PFN_vkCmdBuildAccelerationStructuresIndirectKHR :: #type (commandBuffer : VkComm
 
 // Command vkBuildAccelerationStructuresKHR (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkBuildAccelerationStructuresKHR.html)
-// Referenced by VK_KHR_acceleration_structure
+// Referenced by VK_KHR_acceleration_structure, VK_KHR_acceleration_structure
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_acceleration_structure.html)
 PFN_vkBuildAccelerationStructuresKHR :: #type (device : VkDevice,
                                                deferredOperation : VkDeferredOperationKHR,
@@ -34300,6 +36485,8 @@ PFN_vkCmdSetScissorWithCountEXT :: PFN_vkCmdSetScissorWithCount;
 // Can be submitted to a Graphics queue
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdBindIndexBuffer2 :: #type (commandBuffer : VkCommandBuffer,
                                     buffer : VkBuffer,
                                     offset : VkDeviceSize,
@@ -34330,8 +36517,9 @@ PFN_vkCmdBindVertexBuffers2 :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkCmdBindVertexBuffers2EXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBindVertexBuffers2EXT.html)
-// Referenced by VK_EXT_extended_dynamic_state, VK_EXT_shader_object
+// Referenced by VK_EXT_extended_dynamic_state, VK_KHR_device_address_commands, VK_EXT_shader_object
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_extended_dynamic_state.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_object.html)
 PFN_vkCmdBindVertexBuffers2EXT :: PFN_vkCmdBindVertexBuffers2;
 
@@ -34967,6 +37155,8 @@ PFN_vkGetPrivateDataEXT :: PFN_vkGetPrivateData;
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdCopyBuffer2 :: #type (commandBuffer : VkCommandBuffer,
                                pCopyBufferInfo : *VkCopyBufferInfo2) #foreign;
 
@@ -35015,6 +37205,8 @@ PFN_vkCmdBlitImage2KHR :: PFN_vkCmdBlitImage2;
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdCopyBufferToImage2 :: #type (commandBuffer : VkCommandBuffer,
                                       pCopyBufferToImageInfo : *VkCopyBufferToImageInfo2) #foreign;
 
@@ -35031,6 +37223,8 @@ PFN_vkCmdCopyBufferToImage2KHR :: PFN_vkCmdCopyBufferToImage2;
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Has to be used outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdCopyImageToBuffer2 :: #type (commandBuffer : VkCommandBuffer,
                                       pCopyImageToBufferInfo : *VkCopyImageToBufferInfo2) #foreign;
 
@@ -35237,8 +37431,9 @@ PFN_vkCmdWriteTimestamp2KHR :: PFN_vkCmdWriteTimestamp2;
 // Can be submitted to a Transfer, Graphics and Compute queues
 // Can be used both inside and outside a renderpass
 // Can be recorded to both a primary and secondary command buffer
-// Referenced by VK_AMD_buffer_marker
+// Referenced by VK_AMD_buffer_marker, VK_KHR_device_address_commands
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_buffer_marker.html)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
 PFN_vkCmdWriteBufferMarker2AMD :: #type (commandBuffer : VkCommandBuffer,
                                          stage : VkPipelineStageFlags2,
                                          dstBuffer : VkBuffer,
@@ -35814,7 +38009,8 @@ PFN_vkCmdBuildMicromapsEXT :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkBuildMicromapsEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkBuildMicromapsEXT.html)
-// Referenced by VK_EXT_opacity_micromap
+// Referenced by VK_EXT_opacity_micromap, VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 PFN_vkBuildMicromapsEXT :: #type (device : VkDevice,
                                   deferredOperation : VkDeferredOperationKHR,
@@ -35844,7 +38040,8 @@ PFN_vkCmdCopyMicromapEXT :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkCopyMicromapEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyMicromapEXT.html)
-// Referenced by VK_EXT_opacity_micromap
+// Referenced by VK_EXT_opacity_micromap, VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 PFN_vkCopyMicromapEXT :: #type (device : VkDevice,
                                 deferredOperation : VkDeferredOperationKHR,
@@ -35864,7 +38061,8 @@ PFN_vkCmdCopyMicromapToMemoryEXT :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkCopyMicromapToMemoryEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyMicromapToMemoryEXT.html)
-// Referenced by VK_EXT_opacity_micromap
+// Referenced by VK_EXT_opacity_micromap, VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 PFN_vkCopyMicromapToMemoryEXT :: #type (device : VkDevice,
                                         deferredOperation : VkDeferredOperationKHR,
@@ -35884,7 +38082,8 @@ PFN_vkCmdCopyMemoryToMicromapEXT :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkCopyMemoryToMicromapEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCopyMemoryToMicromapEXT.html)
-// Referenced by VK_EXT_opacity_micromap
+// Referenced by VK_EXT_opacity_micromap, VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 PFN_vkCopyMemoryToMicromapEXT :: #type (device : VkDevice,
                                         deferredOperation : VkDeferredOperationKHR,
@@ -35908,7 +38107,8 @@ PFN_vkCmdWriteMicromapsPropertiesEXT :: #type (commandBuffer : VkCommandBuffer,
 
 // Command vkWriteMicromapsPropertiesEXT (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkWriteMicromapsPropertiesEXT.html)
-// Referenced by VK_EXT_opacity_micromap
+// Referenced by VK_EXT_opacity_micromap, VK_EXT_opacity_micromap
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_opacity_micromap.html)
 PFN_vkWriteMicromapsPropertiesEXT :: #type (device : VkDevice,
                                             micromapCount : u32,
@@ -35984,7 +38184,7 @@ PFN_vkGetImageSubresourceLayout2EXT :: PFN_vkGetImageSubresourceLayout2;
 // Referenced by VK_EXT_pipeline_properties
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_pipeline_properties.html)
 PFN_vkGetPipelinePropertiesEXT :: #type (device : VkDevice,
-                                         pPipelineInfo : *VkPipelineInfoEXT,
+                                         pPipelineInfo : *VkPipelineInfoKHR,
                                          pPipelineProperties : *VkBaseOutStructure) -> VkResult #foreign;
 
 
@@ -36067,6 +38267,24 @@ PFN_vkCmdOpticalFlowExecuteNV :: #type (commandBuffer : VkCommandBuffer,
 PFN_vkGetDeviceFaultInfoEXT :: #type (device : VkDevice,
                                       pFaultCounts : *VkDeviceFaultCountsEXT,
                                       pFaultInfo : *VkDeviceFaultInfoEXT) -> VkResult #foreign;
+
+
+// Command vkGetDeviceFaultReportsKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetDeviceFaultReportsKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+PFN_vkGetDeviceFaultReportsKHR :: #type (device : VkDevice,
+                                         timeout : u64,
+                                         pFaultCounts : *u32,
+                                         pFaultInfo : *VkDeviceFaultInfoKHR) -> VkResult #foreign;
+
+
+// Command vkGetDeviceFaultDebugInfoKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetDeviceFaultDebugInfoKHR.html)
+// Referenced by VK_KHR_device_fault
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+PFN_vkGetDeviceFaultDebugInfoKHR :: #type (device : VkDevice,
+                                           pDebugInfo : *VkDeviceFaultDebugInfoKHR) -> VkResult #foreign;
 
 
 // Command vkCmdSetDepthBias2EXT (Device Command)
@@ -36215,6 +38433,126 @@ PFN_vkGetSwapchainTimeDomainPropertiesEXT :: #type (device : VkDevice,
 PFN_vkGetPastPresentationTimingEXT :: #type (device : VkDevice,
                                              pPastPresentationTimingInfo : *VkPastPresentationTimingInfoEXT,
                                              pPastPresentationTimingProperties : *VkPastPresentationTimingPropertiesEXT) -> VkResult #foreign;
+
+
+// Command vkCreateGpaSessionAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateGpaSessionAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCreateGpaSessionAMD :: #type (device : VkDevice,
+                                    pCreateInfo : *VkGpaSessionCreateInfoAMD,
+                                    pAllocator : *VkAllocationCallbacks,
+                                    pGpaSession : *VkGpaSessionAMD) -> VkResult #foreign;
+
+
+// Command vkDestroyGpaSessionAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkDestroyGpaSessionAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkDestroyGpaSessionAMD :: #type (device : VkDevice,
+                                     gpaSession : VkGpaSessionAMD,
+                                     pAllocator : *VkAllocationCallbacks) #foreign;
+
+
+// Command vkSetGpaDeviceClockModeAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkSetGpaDeviceClockModeAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkSetGpaDeviceClockModeAMD :: #type (device : VkDevice,
+                                         pInfo : *VkGpaDeviceClockModeInfoAMD) -> VkResult #foreign;
+
+
+// Command vkGetGpaDeviceClockInfoAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetGpaDeviceClockInfoAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkGetGpaDeviceClockInfoAMD :: #type (device : VkDevice,
+                                         pInfo : *VkGpaDeviceGetClockInfoAMD) -> VkResult #foreign;
+
+
+// Command vkCmdBeginGpaSessionAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBeginGpaSessionAMD.html)
+// Can be submitted to a Graphics and Compute queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCmdBeginGpaSessionAMD :: #type (commandBuffer : VkCommandBuffer,
+                                      gpaSession : VkGpaSessionAMD) -> VkResult #foreign;
+
+
+// Command vkCmdEndGpaSessionAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdEndGpaSessionAMD.html)
+// Can be submitted to a Graphics and Compute queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCmdEndGpaSessionAMD :: #type (commandBuffer : VkCommandBuffer,
+                                    gpaSession : VkGpaSessionAMD) -> VkResult #foreign;
+
+
+// Command vkCmdBeginGpaSampleAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBeginGpaSampleAMD.html)
+// Can be submitted to a Graphics and Compute queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCmdBeginGpaSampleAMD :: #type (commandBuffer : VkCommandBuffer,
+                                     gpaSession : VkGpaSessionAMD,
+                                     pGpaSampleBeginInfo : *VkGpaSampleBeginInfoAMD,
+                                     pSampleID : *u32) -> VkResult #foreign;
+
+
+// Command vkCmdEndGpaSampleAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdEndGpaSampleAMD.html)
+// Can be submitted to a Graphics and Compute queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCmdEndGpaSampleAMD :: #type (commandBuffer : VkCommandBuffer,
+                                   gpaSession : VkGpaSessionAMD,
+                                   sampleID : u32) #foreign;
+
+
+// Command vkGetGpaSessionStatusAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetGpaSessionStatusAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkGetGpaSessionStatusAMD :: #type (device : VkDevice,
+                                       gpaSession : VkGpaSessionAMD) -> VkResult #foreign;
+
+
+// Command vkGetGpaSessionResultsAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetGpaSessionResultsAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkGetGpaSessionResultsAMD :: #type (device : VkDevice,
+                                        gpaSession : VkGpaSessionAMD,
+                                        sampleID : u32,
+                                        pSizeInBytes : *u64,
+                                        pData : *void) -> VkResult #foreign;
+
+
+// Command vkResetGpaSessionAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkResetGpaSessionAMD.html)
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkResetGpaSessionAMD :: #type (device : VkDevice,
+                                   gpaSession : VkGpaSessionAMD) -> VkResult #foreign;
+
+
+// Command vkCmdCopyGpaSessionResultsAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyGpaSessionResultsAMD.html)
+// Can be submitted to a Graphics, Compute and Transfer queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_AMD_gpa_interface
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+PFN_vkCmdCopyGpaSessionResultsAMD :: #type (commandBuffer : VkCommandBuffer,
+                                            gpaSession : VkGpaSessionAMD) #foreign;
 
 
 // Command vkCmdBindDescriptorSets2 (Device Command)
@@ -36479,6 +38817,65 @@ PFN_vkGetExternalComputeQueueDataNV :: #type (externalQueue : VkExternalComputeQ
                                               pData : *void) #foreign;
 
 
+// Command vkCreateShaderInstrumentationARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateShaderInstrumentationARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkCreateShaderInstrumentationARM :: #type (device : VkDevice,
+                                               pCreateInfo : *VkShaderInstrumentationCreateInfoARM,
+                                               pAllocator : *VkAllocationCallbacks,
+                                               pInstrumentation : *VkShaderInstrumentationARM) -> VkResult #foreign;
+
+
+// Command vkDestroyShaderInstrumentationARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkDestroyShaderInstrumentationARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkDestroyShaderInstrumentationARM :: #type (device : VkDevice,
+                                                instrumentation : VkShaderInstrumentationARM,
+                                                pAllocator : *VkAllocationCallbacks) #foreign;
+
+
+// Command vkCmdBeginShaderInstrumentationARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBeginShaderInstrumentationARM.html)
+// Can be submitted to a Graphics, Compute and Data Graph ARM queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkCmdBeginShaderInstrumentationARM :: #type (commandBuffer : VkCommandBuffer,
+                                                 instrumentation : VkShaderInstrumentationARM) #foreign;
+
+
+// Command vkCmdEndShaderInstrumentationARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdEndShaderInstrumentationARM.html)
+// Can be submitted to a Graphics, Compute and Data Graph ARM queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkCmdEndShaderInstrumentationARM :: #type (commandBuffer : VkCommandBuffer) #foreign;
+
+
+// Command vkGetShaderInstrumentationValuesARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkGetShaderInstrumentationValuesARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkGetShaderInstrumentationValuesARM :: #type (device : VkDevice,
+                                                  instrumentation : VkShaderInstrumentationARM,
+                                                  pMetricBlockCount : *u32,
+                                                  pMetricValues : *void,
+                                                  flags : VkShaderInstrumentationValuesFlagsARM) -> VkResult #foreign;
+
+
+// Command vkClearShaderInstrumentationMetricsARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkClearShaderInstrumentationMetricsARM.html)
+// Referenced by VK_ARM_shader_instrumentation
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+PFN_vkClearShaderInstrumentationMetricsARM :: #type (device : VkDevice,
+                                                     instrumentation : VkShaderInstrumentationARM) #foreign;
+
+
 // Command vkCreateTensorARM (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateTensorARM.html)
 // Referenced by VK_ARM_tensors
@@ -36665,6 +39062,14 @@ PFN_vkGetDataGraphPipelinePropertiesARM :: #type (device : VkDevice,
                                                   pProperties : *VkDataGraphPipelinePropertyQueryResultARM) -> VkResult #foreign;
 
 
+// Command vkQueueSetPerfHintQCOM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkQueueSetPerfHintQCOM.html)
+// Referenced by VK_QCOM_queue_perf_hint
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+PFN_vkQueueSetPerfHintQCOM :: #type (queue : VkQueue,
+                                     pPerfHintInfo : *VkPerfHintInfoQCOM) -> VkResult #foreign;
+
+
 // Command vkCmdSetComputeOccupancyPriorityNV (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdSetComputeOccupancyPriorityNV.html)
 // Can be submitted to a Compute queue
@@ -36765,6 +39170,280 @@ PFN_vkGetTensorOpaqueCaptureDataARM :: #type (device : VkDevice,
                                               tensorCount : u32,
                                               pTensors : *VkTensorARM,
                                               pDatas : *VkHostAddressRangeEXT) -> VkResult #foreign;
+
+
+// Command vkCmdCopyMemoryKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyMemoryKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdCopyMemoryKHR :: #type (commandBuffer : VkCommandBuffer,
+                                 pCopyMemoryInfo : *VkCopyDeviceMemoryInfoKHR) #foreign;
+
+
+// Command vkCmdCopyMemoryToImageKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyMemoryToImageKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdCopyMemoryToImageKHR :: #type (commandBuffer : VkCommandBuffer,
+                                        pCopyMemoryInfo : *VkCopyDeviceMemoryImageInfoKHR) #foreign;
+
+
+// Command vkCmdCopyImageToMemoryKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyImageToMemoryKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdCopyImageToMemoryKHR :: #type (commandBuffer : VkCommandBuffer,
+                                        pCopyMemoryInfo : *VkCopyDeviceMemoryImageInfoKHR) #foreign;
+
+
+// Command vkCmdUpdateMemoryKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdUpdateMemoryKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdUpdateMemoryKHR :: #type (commandBuffer : VkCommandBuffer,
+                                   pDstRange : *VkDeviceAddressRangeKHR,
+                                   dstFlags : VkAddressCommandFlagsKHR,
+                                   dataSize : VkDeviceSize,
+                                   pData : *void) #foreign;
+
+
+// Command vkCmdFillMemoryKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdFillMemoryKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdFillMemoryKHR :: #type (commandBuffer : VkCommandBuffer,
+                                 pDstRange : *VkDeviceAddressRangeKHR,
+                                 dstFlags : VkAddressCommandFlagsKHR,
+                                 data : u32) #foreign;
+
+
+// Command vkCmdCopyQueryPoolResultsToMemoryKHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdCopyQueryPoolResultsToMemoryKHR.html)
+// Can be submitted to a Transfer queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdCopyQueryPoolResultsToMemoryKHR :: #type (commandBuffer : VkCommandBuffer,
+                                                   queryPool : VkQueryPool,
+                                                   firstQuery : u32,
+                                                   queryCount : u32,
+                                                   pDstRange : *VkStridedDeviceAddressRangeKHR,
+                                                   dstFlags : VkAddressCommandFlagsKHR,
+                                                   queryResultFlags : VkQueryResultFlags) #foreign;
+
+
+// Command vkCmdBeginConditionalRendering2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBeginConditionalRendering2EXT.html)
+// Can be submitted to a Graphics and Compute queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdBeginConditionalRendering2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                                 pConditionalRenderingBegin : *VkConditionalRenderingBeginInfo2EXT) #foreign;
+
+
+// Command vkCmdBindTransformFeedbackBuffers2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBindTransformFeedbackBuffers2EXT.html)
+// Can be submitted to a Graphics queue
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdBindTransformFeedbackBuffers2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                                    firstBinding : u32,
+                                                    bindingCount : u32,
+                                                    pBindingInfos : *VkBindTransformFeedbackBuffer2InfoEXT) #foreign;
+
+
+// Command vkCmdBeginTransformFeedback2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBeginTransformFeedback2EXT.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdBeginTransformFeedback2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                              firstCounterRange : u32,
+                                              counterRangeCount : u32,
+                                              pCounterInfos : *VkBindTransformFeedbackBuffer2InfoEXT) #foreign;
+
+
+// Command vkCmdEndTransformFeedback2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdEndTransformFeedback2EXT.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdEndTransformFeedback2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                            firstCounterRange : u32,
+                                            counterRangeCount : u32,
+                                            pCounterInfos : *VkBindTransformFeedbackBuffer2InfoEXT) #foreign;
+
+
+// Command vkCmdDrawIndirectByteCount2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndirectByteCount2EXT.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawIndirectByteCount2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                             instanceCount : u32,
+                                             firstInstance : u32,
+                                             pCounterInfo : *VkBindTransformFeedbackBuffer2InfoEXT,
+                                             counterOffset : u32,
+                                             vertexStride : u32) #foreign;
+
+
+// Command vkCmdWriteMarkerToMemoryAMD (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdWriteMarkerToMemoryAMD.html)
+// Can be submitted to a Graphics, Compute and Transfer queues
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdWriteMarkerToMemoryAMD :: #type (commandBuffer : VkCommandBuffer,
+                                          pInfo : *VkMemoryMarkerInfoAMD) #foreign;
+
+
+// Command vkCmdBindIndexBuffer3KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBindIndexBuffer3KHR.html)
+// Can be submitted to a Graphics queue
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdBindIndexBuffer3KHR :: #type (commandBuffer : VkCommandBuffer,
+                                       pInfo : *VkBindIndexBuffer3InfoKHR) #foreign;
+
+
+// Command vkCmdBindVertexBuffers3KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdBindVertexBuffers3KHR.html)
+// Can be submitted to a Graphics queue
+// Can be used both inside and outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdBindVertexBuffers3KHR :: #type (commandBuffer : VkCommandBuffer,
+                                         firstBinding : u32,
+                                         bindingCount : u32,
+                                         pBindingInfos : *VkBindVertexBuffer3InfoKHR) #foreign;
+
+
+// Command vkCmdDrawIndirect2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndirect2KHR.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawIndirect2KHR :: #type (commandBuffer : VkCommandBuffer,
+                                    pInfo : *VkDrawIndirect2InfoKHR) #foreign;
+
+
+// Command vkCmdDrawIndexedIndirect2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndexedIndirect2KHR.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawIndexedIndirect2KHR :: #type (commandBuffer : VkCommandBuffer,
+                                           pInfo : *VkDrawIndirect2InfoKHR) #foreign;
+
+
+// Command vkCmdDrawIndirectCount2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndirectCount2KHR.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawIndirectCount2KHR :: #type (commandBuffer : VkCommandBuffer,
+                                         pInfo : *VkDrawIndirectCount2InfoKHR) #foreign;
+
+
+// Command vkCmdDrawIndexedIndirectCount2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawIndexedIndirectCount2KHR.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawIndexedIndirectCount2KHR :: #type (commandBuffer : VkCommandBuffer,
+                                                pInfo : *VkDrawIndirectCount2InfoKHR) #foreign;
+
+
+// Command vkCmdDrawMeshTasksIndirect2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawMeshTasksIndirect2EXT.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawMeshTasksIndirect2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                             pInfo : *VkDrawIndirect2InfoKHR) #foreign;
+
+
+// Command vkCmdDrawMeshTasksIndirectCount2EXT (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDrawMeshTasksIndirectCount2EXT.html)
+// Can be submitted to a Graphics queue
+// Has to be used inside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDrawMeshTasksIndirectCount2EXT :: #type (commandBuffer : VkCommandBuffer,
+                                                  pInfo : *VkDrawIndirectCount2InfoKHR) #foreign;
+
+
+// Command vkCmdDispatchIndirect2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdDispatchIndirect2KHR.html)
+// Can be submitted to a Compute queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCmdDispatchIndirect2KHR :: #type (commandBuffer : VkCommandBuffer,
+                                        pInfo : *VkDispatchIndirect2InfoKHR) #foreign;
+
+
+// Command vkCreateAccelerationStructure2KHR (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateAccelerationStructure2KHR.html)
+// Referenced by VK_KHR_device_address_commands
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+PFN_vkCreateAccelerationStructure2KHR :: #type (device : VkDevice,
+                                                pCreateInfo : *VkAccelerationStructureCreateInfo2KHR,
+                                                pAllocator : *VkAllocationCallbacks,
+                                                pAccelerationStructure : *VkAccelerationStructureKHR) -> VkResult #foreign;
+
+
+// Command vkCmdSetDispatchParametersARM (Device Command)
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCmdSetDispatchParametersARM.html)
+// Can be submitted to a Compute queue
+// Has to be used outside a renderpass
+// Can be recorded to both a primary and secondary command buffer
+// Referenced by VK_ARM_scheduling_controls
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_scheduling_controls.html)
+PFN_vkCmdSetDispatchParametersARM :: #type (commandBuffer : VkCommandBuffer,
+                                            pDispatchParameters : *VkDispatchParametersARM) #foreign;
 
 
 #if VULKAN_PLATFORM == .X11
@@ -38453,8 +41132,8 @@ VkUbmSurfaceCreateInfoSEC :: struct
     sType : VkStructureType = VK_STRUCTURE_TYPE_UBM_SURFACE_CREATE_INFO_SEC;
     pNext : *void;
     flags : VkUbmSurfaceCreateFlagsSEC;
-    ubm_device : *ubm_device;
-    ubm_surface : *ubm_surface;
+    device : *ubm_device;
+    surface : *ubm_surface;
 }
 
 
@@ -38474,7 +41153,7 @@ PFN_vkCreateUbmSurfaceSEC :: #type (instance : VkInstance,
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_ubm_surface.html)
 PFN_vkGetPhysicalDeviceUbmPresentationSupportSEC :: #type (physicalDevice : VkPhysicalDevice,
                                                            queueFamilyIndex : u32,
-                                                           ubm_device : *ubm_device) -> VkBool32 #foreign;
+                                                           device : *ubm_device) -> VkBool32 #foreign;
 
 
 }
@@ -39565,31 +42244,6 @@ VkAccelerationStructureDenseGeometryFormatTrianglesDataAMDX :: struct // Can be 
 }
 
 
-// Type VkSetPresentConfigNV
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkSetPresentConfigNV.html)
-// Referenced by VK_NV_present_metering
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_present_metering.html)
-VkSetPresentConfigNV :: struct // Can be in the pNext chain of "VkPresentInfoKHR"
-{
-    sType : VkStructureType = VK_STRUCTURE_TYPE_SET_PRESENT_CONFIG_NV;
-    pNext : *void;
-    numFramesPerBatch : u32;
-    presentConfigFeedback : u32;
-}
-
-
-// Type VkPhysicalDevicePresentMeteringFeaturesNV
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VkPhysicalDevicePresentMeteringFeaturesNV.html)
-// Referenced by VK_NV_present_metering
-//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_present_metering.html)
-VkPhysicalDevicePresentMeteringFeaturesNV :: struct // Can be in the pNext chain of "VkPhysicalDeviceFeatures2,VkDeviceCreateInfo"
-{
-    sType : VkStructureType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PRESENT_METERING_FEATURES_NV;
-    pNext : *void;
-    presentMetering : VkBool32;
-}
-
-
 // Command vkCreateCudaModuleNV (Device Command)
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/vkCreateCudaModuleNV.html)
 // Referenced by VK_NV_cuda_kernel_launch
@@ -40636,6 +43290,14 @@ VK_AMD_GPU_SHADER_INT16_SPEC_VERSION :: 2;
 VK_AMD_GPU_SHADER_INT16_EXTENSION_NAME :: "VK_AMD_gpu_shader_int16";
 
 
+// Device Extension VK_AMD_gpa_interface (134)
+// author AMD, contact Stu Smith @stu-s
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMD_gpa_interface.html)
+VK_AMD_gpa_interface :: true;
+VK_AMD_GPA_INTERFACE_SPEC_VERSION :: 1;
+VK_AMD_GPA_INTERFACE_EXTENSION_NAME :: "VK_AMD_gpa_interface";
+
+
 // Device Extension VK_AMDX_shader_enqueue (135)
 // author AMD, contact Tobias Hector @tobski
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_AMDX_shader_enqueue.html)
@@ -40917,6 +43579,14 @@ VK_QCOM_RENDER_PASS_SHADER_RESOLVE_EXTENSION_NAME :: "VK_QCOM_render_pass_shader
 VK_QCOM_cooperative_matrix_conversion :: true;
 VK_QCOM_COOPERATIVE_MATRIX_CONVERSION_SPEC_VERSION :: 1;
 VK_QCOM_COOPERATIVE_MATRIX_CONVERSION_EXTENSION_NAME :: "VK_QCOM_cooperative_matrix_conversion";
+
+
+// Device Extension VK_QCOM_elapsed_timer_query (174)
+// author QCOM, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_elapsed_timer_query.html)
+VK_QCOM_elapsed_timer_query :: true;
+VK_QCOM_ELAPSED_TIMER_QUERY_SPEC_VERSION :: 1;
+VK_QCOM_ELAPSED_TIMER_QUERY_EXTENSION_NAME :: "VK_QCOM_elapsed_timer_query";
 
 
 // Device Extension VK_EXT_global_priority (175)
@@ -41284,12 +43954,28 @@ VK_AMD_DEVICE_COHERENT_MEMORY_SPEC_VERSION :: 1;
 VK_AMD_DEVICE_COHERENT_MEMORY_EXTENSION_NAME :: "VK_AMD_device_coherent_memory";
 
 
+// Device Extension VK_KHR_shader_constant_data (232)
+// author KHR, contact Tobias Hector @tobski
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_constant_data.html)
+VK_KHR_shader_constant_data :: true;
+VK_KHR_SHADER_CONSTANT_DATA_SPEC_VERSION :: 1;
+VK_KHR_SHADER_CONSTANT_DATA_EXTENSION_NAME :: "VK_KHR_shader_constant_data";
+
+
 // Device Extension VK_KHR_dynamic_rendering_local_read (233)
 // author AMD, contact Tobias Hector @tobski
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_dynamic_rendering_local_read.html)
 VK_KHR_dynamic_rendering_local_read :: true;
 VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_SPEC_VERSION :: 1;
 VK_KHR_DYNAMIC_RENDERING_LOCAL_READ_EXTENSION_NAME :: "VK_KHR_dynamic_rendering_local_read";
+
+
+// Device Extension VK_KHR_shader_abort (234)
+// author KHR, contact Tobias Hector @tobski
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_abort.html)
+VK_KHR_shader_abort :: true;
+VK_KHR_SHADER_ABORT_SPEC_VERSION :: 1;
+VK_KHR_SHADER_ABORT_EXTENSION_NAME :: "VK_KHR_shader_abort";
 
 
 // Device Extension VK_EXT_shader_image_atomic_int64 (235)
@@ -41748,6 +44434,38 @@ VK_QCOM_RENDER_PASS_STORE_OPS_SPEC_VERSION :: 2;
 VK_QCOM_RENDER_PASS_STORE_OPS_EXTENSION_NAME :: "VK_QCOM_render_pass_store_ops";
 
 
+// Device Extension VK_QCOM_queue_perf_hint (303)
+// author QCOM, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_queue_perf_hint.html)
+VK_QCOM_queue_perf_hint :: true;
+VK_QCOM_QUEUE_PERF_HINT_SPEC_VERSION :: 1;
+VK_QCOM_QUEUE_PERF_HINT_EXTENSION_NAME :: "VK_QCOM_queue_perf_hint";
+
+
+// Device Extension VK_QCOM_image_processing3 (304)
+// author QCOM, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_image_processing3.html)
+VK_QCOM_image_processing3 :: true;
+VK_QCOM_IMAGE_PROCESSING_3_SPEC_VERSION :: 1;
+VK_QCOM_IMAGE_PROCESSING_3_EXTENSION_NAME :: "VK_QCOM_image_processing3";
+
+
+// Device Extension VK_QCOM_shader_multiple_wait_queues (305)
+// author QCOM, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_shader_multiple_wait_queues.html)
+VK_QCOM_shader_multiple_wait_queues :: true;
+VK_QCOM_SHADER_MULTIPLE_WAIT_QUEUES_SPEC_VERSION :: 1;
+VK_QCOM_SHADER_MULTIPLE_WAIT_QUEUES_EXTENSION_NAME :: "VK_QCOM_shader_multiple_wait_queues";
+
+
+// Device Extension VK_EXT_shader_split_barrier (306)
+// author EXT, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_split_barrier.html)
+VK_EXT_shader_split_barrier :: true;
+VK_EXT_SHADER_SPLIT_BARRIER_SPEC_VERSION :: 1;
+VK_EXT_SHADER_SPLIT_BARRIER_EXTENSION_NAME :: "VK_EXT_shader_split_barrier";
+
+
 // Device Extension VK_NV_cuda_kernel_launch (308)
 // author NV, contact Tristan Lorach @tlorach
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cuda_kernel_launch.html)
@@ -41802,6 +44520,14 @@ VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME :: "VK_KHR_synchronization2";
 VK_EXT_descriptor_buffer :: true;
 VK_EXT_DESCRIPTOR_BUFFER_SPEC_VERSION :: 1;
 VK_EXT_DESCRIPTOR_BUFFER_EXTENSION_NAME :: "VK_EXT_descriptor_buffer";
+
+
+// Device Extension VK_KHR_device_address_commands (319)
+// author KHR, contact Tobias Hector @tobski
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_address_commands.html)
+VK_KHR_device_address_commands :: true;
+VK_KHR_DEVICE_ADDRESS_COMMANDS_SPEC_VERSION :: 1;
+VK_KHR_DEVICE_ADDRESS_COMMANDS_EXTENSION_NAME :: "VK_KHR_device_address_commands";
 
 
 // Device Extension VK_EXT_graphics_pipeline_library (321)
@@ -42313,7 +45039,7 @@ VK_KHR_SHADER_SUBGROUP_ROTATE_EXTENSION_NAME :: "VK_KHR_shader_subgroup_rotate";
 // author ARM, contact Kevin Petit @kpet
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_scheduling_controls.html)
 VK_ARM_scheduling_controls :: true;
-VK_ARM_SCHEDULING_CONTROLS_SPEC_VERSION :: 1;
+VK_ARM_SCHEDULING_CONTROLS_SPEC_VERSION :: 2;
 VK_ARM_SCHEDULING_CONTROLS_EXTENSION_NAME :: "VK_ARM_scheduling_controls";
 
 
@@ -42765,6 +45491,14 @@ VK_ARM_DATA_GRAPH_SPEC_VERSION :: 1;
 VK_ARM_DATA_GRAPH_EXTENSION_NAME :: "VK_ARM_data_graph";
 
 
+// Device Extension VK_ARM_data_graph_instruction_set_tosa (509)
+// author ARM, contact Kevin Petit @kpet
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_instruction_set_tosa.html)
+VK_ARM_data_graph_instruction_set_tosa :: true;
+VK_ARM_DATA_GRAPH_INSTRUCTION_SET_TOSA_SPEC_VERSION :: 1;
+VK_ARM_DATA_GRAPH_INSTRUCTION_SET_TOSA_EXTENSION_NAME :: "VK_ARM_data_graph_instruction_set_tosa";
+
+
 // Device Extension VK_QCOM_multiview_per_view_render_areas (511)
 // author QCOM, contact Matthew Netsch @mnetsch
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_QCOM_multiview_per_view_render_areas.html)
@@ -43022,7 +45756,7 @@ VK_NV_EXTERNAL_COMPUTE_QUEUE_EXTENSION_NAME :: "VK_NV_external_compute_queue";
 
 
 // Device Extension VK_KHR_shader_relaxed_extended_instruction (559)
-// author KHR, contact Nathan Gauer @Keenuts
+// author KHR, contact Nathan Gauër @Keenuts
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_shader_relaxed_extended_instruction.html)
 VK_KHR_shader_relaxed_extended_instruction :: true;
 VK_KHR_SHADER_RELAXED_EXTENDED_INSTRUCTION_SPEC_VERSION :: 1;
@@ -43059,6 +45793,14 @@ VK_NV_SHADER_ATOMIC_FLOAT16_VECTOR_EXTENSION_NAME :: "VK_NV_shader_atomic_float1
 VK_EXT_shader_replicated_composites :: true;
 VK_EXT_SHADER_REPLICATED_COMPOSITES_SPEC_VERSION :: 1;
 VK_EXT_SHADER_REPLICATED_COMPOSITES_EXTENSION_NAME :: "VK_EXT_shader_replicated_composites";
+
+
+// Device Extension VK_ARM_tensor_controls (566)
+// author Arm, contact Kevin Petit @kevinpetit
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_tensor_controls.html)
+VK_ARM_tensor_controls :: true;
+VK_ARM_TENSOR_CONTROLS_SPEC_VERSION :: 1;
+VK_ARM_TENSOR_CONTROLS_EXTENSION_NAME :: "VK_ARM_tensor_controls";
 
 
 // Device Extension VK_EXT_shader_float8 (568)
@@ -43101,6 +45843,14 @@ VK_EXT_DEVICE_GENERATED_COMMANDS_SPEC_VERSION :: 1;
 VK_EXT_DEVICE_GENERATED_COMMANDS_EXTENSION_NAME :: "VK_EXT_device_generated_commands";
 
 
+// Device Extension VK_KHR_device_fault (574)
+// author KHR, contact Ralph Potter gitlab:@r_potter
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_device_fault.html)
+VK_KHR_device_fault :: true;
+VK_KHR_DEVICE_FAULT_SPEC_VERSION :: 1;
+VK_KHR_DEVICE_FAULT_EXTENSION_NAME :: "VK_KHR_device_fault";
+
+
 // Device Extension VK_KHR_maintenance8 (575)
 // author KHR, contact Mike Blumenkrantz @zmike
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance8.html)
@@ -43137,7 +45887,7 @@ VK_NV_PUSH_CONSTANT_BANK_EXTENSION_NAME :: "VK_NV_push_constant_bank";
 // author EXT, contact Eric Werness @ewerness-nv
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_ray_tracing_invocation_reorder.html)
 VK_EXT_ray_tracing_invocation_reorder :: true;
-VK_EXT_RAY_TRACING_INVOCATION_REORDER_SPEC_VERSION :: 1;
+VK_EXT_RAY_TRACING_INVOCATION_REORDER_SPEC_VERSION :: 2;
 VK_EXT_RAY_TRACING_INVOCATION_REORDER_EXTENSION_NAME :: "VK_EXT_ray_tracing_invocation_reorder";
 
 
@@ -43197,6 +45947,22 @@ VK_ARM_PIPELINE_OPACITY_MICROMAP_SPEC_VERSION :: 1;
 VK_ARM_PIPELINE_OPACITY_MICROMAP_EXTENSION_NAME :: "VK_ARM_pipeline_opacity_micromap";
 
 
+// Device Extension VK_KHR_video_encode_feedback2 (599)
+// author KHR, contact Ahmed Abdelkhalek @aabdelkh
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_video_encode_feedback2.html)
+VK_KHR_video_encode_feedback2 :: true;
+VK_KHR_VIDEO_ENCODE_FEEDBACK_2_SPEC_VERSION :: 1;
+VK_KHR_VIDEO_ENCODE_FEEDBACK_2_EXTENSION_NAME :: "VK_KHR_video_encode_feedback2";
+
+
+// Device Extension VK_IMG_filter_linear_2d (601)
+// author IMG, contact Jarred Davies
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_IMG_filter_linear_2d.html)
+VK_IMG_filter_linear_2d :: true;
+VK_IMG_FILTER_LINEAR_2D_SPEC_VERSION :: 1;
+VK_IMG_FILTER_LINEAR_2D_EXTENSION_NAME :: "VK_IMG_filter_linear_2d";
+
+
 // Device Extension VK_EXT_external_memory_metal (603)
 // author EXT, contact Aitor Camacho Larrondo @aitor-lunarg
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_external_memory_metal.html)
@@ -43219,6 +45985,14 @@ VK_KHR_DEPTH_CLAMP_ZERO_ONE_EXTENSION_NAME :: "VK_KHR_depth_clamp_zero_one";
 VK_ARM_performance_counters_by_region :: true;
 VK_ARM_PERFORMANCE_COUNTERS_BY_REGION_SPEC_VERSION :: 1;
 VK_ARM_PERFORMANCE_COUNTERS_BY_REGION_EXTENSION_NAME :: "VK_ARM_performance_counters_by_region";
+
+
+// Device Extension VK_ARM_shader_instrumentation (608)
+// author ARM, contact Jan-Harald Fredriksen @janharaldfredriksen-arm
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_shader_instrumentation.html)
+VK_ARM_shader_instrumentation :: true;
+VK_ARM_SHADER_INSTRUMENTATION_SPEC_VERSION :: 1;
+VK_ARM_SHADER_INSTRUMENTATION_EXTENSION_NAME :: "VK_ARM_shader_instrumentation";
 
 
 // Device Extension VK_EXT_vertex_attribute_robustness (609)
@@ -43261,6 +46035,14 @@ VK_NV_PRESENT_METERING_SPEC_VERSION :: 1;
 VK_NV_PRESENT_METERING_EXTENSION_NAME :: "VK_NV_present_metering";
 
 
+// Device Extension VK_EXT_multisampled_render_to_swapchain (617)
+// author EXT, contact Shahbaz Youssefi @syoussefi
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_multisampled_render_to_swapchain.html)
+VK_EXT_multisampled_render_to_swapchain :: true;
+VK_EXT_MULTISAMPLED_RENDER_TO_SWAPCHAIN_SPEC_VERSION :: 1;
+VK_EXT_MULTISAMPLED_RENDER_TO_SWAPCHAIN_EXTENSION_NAME :: "VK_EXT_multisampled_render_to_swapchain";
+
+
 // Device Extension VK_EXT_fragment_density_map_offset (620)
 // author EXT, contact Connor Abbott @cwabbott0
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_fragment_density_map_offset.html)
@@ -43283,6 +46065,14 @@ VK_EXT_ZERO_INITIALIZE_DEVICE_MEMORY_EXTENSION_NAME :: "VK_EXT_zero_initialize_d
 VK_KHR_present_mode_fifo_latest_ready :: true;
 VK_KHR_PRESENT_MODE_FIFO_LATEST_READY_SPEC_VERSION :: 1;
 VK_KHR_PRESENT_MODE_FIFO_LATEST_READY_EXTENSION_NAME :: "VK_KHR_present_mode_fifo_latest_ready";
+
+
+// Device Extension VK_KHR_opacity_micromap (624)
+// author KHR, contact Matthew Netsch @mnetsch
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_opacity_micromap.html)
+VK_KHR_opacity_micromap :: true;
+VK_KHR_OPACITY_MICROMAP_SPEC_VERSION :: 1;
+VK_KHR_OPACITY_MICROMAP_EXTENSION_NAME :: "VK_KHR_opacity_micromap";
 
 
 // Device Extension VK_EXT_shader_64bit_indexing (628)
@@ -43317,6 +46107,14 @@ VK_KHR_MAINTENANCE_10_SPEC_VERSION :: 1;
 VK_KHR_MAINTENANCE_10_EXTENSION_NAME :: "VK_KHR_maintenance10";
 
 
+// Device Extension VK_ARM_data_graph_optical_flow (632)
+// author ARM, contact Kevin Petit @kpet
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_optical_flow.html)
+VK_ARM_data_graph_optical_flow :: true;
+VK_ARM_DATA_GRAPH_OPTICAL_FLOW_SPEC_VERSION :: 1;
+VK_ARM_DATA_GRAPH_OPTICAL_FLOW_EXTENSION_NAME :: "VK_ARM_data_graph_optical_flow";
+
+
 // Device Extension VK_EXT_shader_long_vector (636)
 // author EXT, contact Jeff Bolz @jeffbolznv
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_long_vector.html)
@@ -43349,6 +46147,14 @@ VK_NV_COMPUTE_OCCUPANCY_PRIORITY_SPEC_VERSION :: 1;
 VK_NV_COMPUTE_OCCUPANCY_PRIORITY_EXTENSION_NAME :: "VK_NV_compute_occupancy_priority";
 
 
+// Device Extension VK_KHR_maintenance11 (658)
+// author KHR, contact Mike Blumenkrantz @zmike
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_maintenance11.html)
+VK_KHR_maintenance11 :: true;
+VK_KHR_MAINTENANCE_11_SPEC_VERSION :: 1;
+VK_KHR_MAINTENANCE_11_EXTENSION_NAME :: "VK_KHR_maintenance11";
+
+
 // Device Extension VK_EXT_shader_subgroup_partitioned (663)
 // author EXT, contact Jeff Bolz @jeffbolznv
 //  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_subgroup_partitioned.html)
@@ -43363,6 +46169,62 @@ VK_EXT_SHADER_SUBGROUP_PARTITIONED_EXTENSION_NAME :: "VK_EXT_shader_subgroup_par
 VK_SEC_ubm_surface :: true;
 VK_SEC_UBM_SURFACE_SPEC_VERSION :: 1;
 VK_SEC_UBM_SURFACE_EXTENSION_NAME :: "VK_SEC_ubm_surface";
+
+
+// Device Extension VK_KHR_extended_flags (669)
+// author KHR, contact Jon Leech @oddhack
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_KHR_extended_flags.html)
+VK_KHR_extended_flags :: true;
+VK_KHR_EXTENDED_FLAGS_SPEC_VERSION :: 1;
+VK_KHR_EXTENDED_FLAGS_EXTENSION_NAME :: "VK_KHR_extended_flags";
+
+
+// Device Extension VK_EXT_shader_ocp_microscaling_types (673)
+// author EXT, contact Kevin Petit @kpet
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_shader_ocp_microscaling_types.html)
+VK_EXT_shader_ocp_microscaling_types :: true;
+VK_EXT_SHADER_OCP_MICROSCALING_TYPES_SPEC_VERSION :: 1;
+VK_EXT_SHADER_OCP_MICROSCALING_TYPES_EXTENSION_NAME :: "VK_EXT_shader_ocp_microscaling_types";
+
+
+// Device Extension VK_VALVE_shader_mixed_float_dot_product (674)
+// author VALVE, contact Georg Lehmann @DadSchoorse
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_VALVE_shader_mixed_float_dot_product.html)
+VK_VALVE_shader_mixed_float_dot_product :: true;
+VK_VALVE_SHADER_MIXED_FLOAT_DOT_PRODUCT_SPEC_VERSION :: 1;
+VK_VALVE_SHADER_MIXED_FLOAT_DOT_PRODUCT_EXTENSION_NAME :: "VK_VALVE_shader_mixed_float_dot_product";
+
+
+// Device Extension VK_SEC_throttle_hint (675)
+// author SEC, contact Ralph Potter gitlab:@r_potter
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_SEC_throttle_hint.html)
+VK_SEC_throttle_hint :: true;
+VK_SEC_THROTTLE_HINT_SPEC_VERSION :: 1;
+VK_SEC_THROTTLE_HINT_EXTENSION_NAME :: "VK_SEC_throttle_hint";
+
+
+// Device Extension VK_ARM_data_graph_neural_accelerator_statistics (677)
+// author ARM, contact Kevin Petit @kpet
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_ARM_data_graph_neural_accelerator_statistics.html)
+VK_ARM_data_graph_neural_accelerator_statistics :: true;
+VK_ARM_DATA_GRAPH_NEURAL_ACCELERATOR_STATISTICS_SPEC_VERSION :: 1;
+VK_ARM_DATA_GRAPH_NEURAL_ACCELERATOR_STATISTICS_EXTENSION_NAME :: "VK_ARM_data_graph_neural_accelerator_statistics";
+
+
+// Device Extension VK_EXT_primitive_restart_index (679)
+// author EXT, contact Mike Blumenkrantz @zmike
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_EXT_primitive_restart_index.html)
+VK_EXT_primitive_restart_index :: true;
+VK_EXT_PRIMITIVE_RESTART_INDEX_SPEC_VERSION :: 1;
+VK_EXT_PRIMITIVE_RESTART_INDEX_EXTENSION_NAME :: "VK_EXT_primitive_restart_index";
+
+
+// Device Extension VK_NV_cooperative_matrix_decode_vector (690)
+// author NV, contact Jeff Bolz @jeffbolznv
+//  - (https://docs.vulkan.org/refpages/latest/refpages/source/VK_NV_cooperative_matrix_decode_vector.html)
+VK_NV_cooperative_matrix_decode_vector :: true;
+VK_NV_COOPERATIVE_MATRIX_DECODE_VECTOR_SPEC_VERSION :: 1;
+VK_NV_COOPERATIVE_MATRIX_DECODE_VECTOR_EXTENSION_NAME :: "VK_NV_cooperative_matrix_decode_vector";
 
 
 

@@ -26,11 +26,11 @@ vulkan_memory_allocator_cpp_location :: "source/vk_mem_alloc.cpp";
 			if !vulkan_sdk_path then sdk_error_and_quit();
 
 			vulkan_headers_include := tprint("-I%\\Include", vulkan_sdk_path);
-			
+
 			build_cpp_dynamic_lib(
 				"windows/VMA",
-				vulkan_memory_allocator_cpp_location, 
-				extra=.[vulkan_headers_include, "/std:c++20"],
+				vulkan_memory_allocator_cpp_location,
+				extra=.[vulkan_headers_include, "/std:c++20", "/DVMA_CALL_PRE=__declspec(dllexport)"],
 				library_files=.[tprint("%/Lib/vulkan-1.lib", vulkan_sdk_path)]
 			);
 		} else if OS == .LINUX {
@@ -48,9 +48,9 @@ vulkan_memory_allocator_cpp_location :: "source/vk_mem_alloc.cpp";
 
 			// TODO: maybe compile for x86 and arm separately
 			build_cpp_dynamic_lib(
-				"macos/VMA", 
-				vulkan_memory_allocator_cpp_location, 
-				extra=.[vulkan_headers_include, "-std=c++20", "-Wno-nullability-completeness"], 
+				"macos/VMA",
+				vulkan_memory_allocator_cpp_location,
+				extra=.[vulkan_headers_include, "-std=c++20", "-Wno-nullability-completeness"],
 				library_files=.[tprint("%/lib/libvulkan.1.dylib", vulkan_sdk_path)]
 			);
 		}
@@ -81,6 +81,7 @@ sdk_error_and_quit :: () {
 OMIT_LIST :: string.[];
 
 generate_bindings :: () -> bool {
+    log("Generating bindings...");
 	output_filename: string;
 	opts: Generate_Bindings_Options;
 
@@ -97,13 +98,6 @@ generate_bindings :: () -> bool {
 			array_add(*system_include_paths, vulkan_headers_path);
 			array_add(*extra_clang_arguments, "-x", "c", "-DWIN32_LEAN_AND_MEAN");
 
-			// Necessary for some missing include, feel free to update to fit your system
-            // Might use an env variable for this in the future
-            array_add(
-                *system_include_paths, 
-                "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.42.34433\\include"
-            );
-			
 			output_filename = "windows.jai";
 		} else #if OS == .LINUX {
 			POSIX :: #import "POSIX";

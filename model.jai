@@ -223,7 +223,7 @@ read_mtllib :: (path: string) -> bool, [] Material {
 			contents[4] == "l" &&
 			is_whitespace(contents[5]) {
 				array_add(*materials, Material.{});
-				current_material = materials[materials.count - 1];
+				current_material = *materials[materials.count - 1];
 				advance(*contents, 5);
 				skip_whitespace(*contents);
 
@@ -277,7 +277,7 @@ delete_mesh :: (mesh: Mesh) {
 	free(mesh.name);
 }
 
-delete_materials :: (materials: *[] Materials) {
+delete_materials :: (materials: *[] Material) {
 	for materials {
 		free(it.name);
 	}
@@ -306,10 +306,6 @@ generate_tangents :: (vertices: [] Vertex) {
 
 		bitangent := f * (-delta_uv_2.x * edge_1 + delta_uv_1.x * edge_2);
 
-		// vertex_a.tangent.w = ifx dot(cross(vertex_a.normal, vertex_a.tangent.xyz), bitangent) < 0.0 then -1.0 else 1.0;
-		// vertex_b.tangent.w = ifx dot(cross(vertex_b.normal, vertex_b.tangent.xyz), bitangent) < 0.0 then -1.0 else 1.0;
-		// vertex_c.tangent.w = ifx dot(cross(vertex_c.normal, vertex_c.tangent.xyz), bitangent) < 0.0 then -1.0 else 1.0;
-
 		vertex_a.tangent.w = 1.0;
 		vertex_b.tangent.w = 1.0;
 		vertex_c.tangent.w = 1.0;
@@ -335,13 +331,13 @@ skip_whitespace :: inline (str: *string) {
 
 peek_previous :: inline (str: string) -> u8 {
 	data := str.data;
-	return (data - 1).*
+	return (data - 1).*;
 }
 
 skip_name :: inline (str: *string) {
 	start := str.data;
-	while !is_newline(str[0]) advance(str);
-	while str.data > start && is_whitespace(peek_previous(str))) go_back(str);
+	while !is_newline(str.*[0]) advance(str);
+	while str.data > start && is_whitespace(peek_previous(str.*)) go_back(str);
 }
 
 is_whitespace :: inline (c: u8) -> bool {
@@ -350,10 +346,6 @@ is_whitespace :: inline (c: u8) -> bool {
 
 is_newline :: inline (c: u8) -> bool {
 	return c == "\n";
-}
-
-is_digit :: inline (c: u8) -> bool {
-	return c >= #char "0" && c <= #char "9";
 }
 
 is_exponent :: inline (c: u8) -> bool {
@@ -497,7 +489,6 @@ parse_float :: (str: *string) -> float {
 			1.0e0, 1.0e-1,  1.0e-2,  1.0e-3,  1.0e-4,  1.0e-5,  1.0e-6,  1.0e-7,  1.0e-8,  1.0e-9,
 			1.0e-10, 1.0e-11, 1.0e-12, 1.0e-13, 1.0e-14, 1.0e-15, 1.0e-16, 1.0e-17, 1.0e-18, 1.0e-19,
 		];
-		MAX_POWER :: 20;
 		powers := POWER_10_POS;
 		if str.*[0] == {
 		case "+";
@@ -513,7 +504,7 @@ parse_float :: (str: *string) -> float {
 			advance(str);
 		}
 
-		num *= ifx eval >= MAX_POWER 0.0 else powers[eval];
+		num *= ifx eval >= POWER_10_POS.count 0.0 else powers[eval];
 	}
 
 	val : float = (sign * num).(float);

@@ -192,7 +192,7 @@ vulkan_init :: (
 		enabled_1_3_features.synchronization2 = VK_TRUE;
 		enabled_1_3_features.dynamicRendering = VK_TRUE;
 		enabled_1_0_features: VkPhysicalDeviceFeatures;
-		enabled_1_0_features.samplerAnisotropy = VK_TRUE
+		enabled_1_0_features.samplerAnisotropy = VK_TRUE;
 		device_info: VkDeviceCreateInfo;
 		device_info.pNext = *enabled_1_3_features;
 		device_info.queueCreateInfoCount = 1;
@@ -232,7 +232,7 @@ vulkan_deinit :: (vk_context: *Vulkan_Context) {}
 vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height: int = -1) -> bool {
 	chk(vkDeviceWaitIdle(vk_context.device));
 	surface_capabilities: VkSurfaceCapabilitiesKHR;
-	chk(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_context.device, vk_context.surface, *surface_capabilities));
+	chk(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_context.physical_device, vk_context.surface, *surface_capabilities));
 
 	if surface_capabilities.maxImageExtent.width == 0 || surface_capabilities.maxImageExtent.height == 0 {
 		return false;
@@ -246,8 +246,6 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 		assert(ok);
 		vk_context.window_size = {win_width, win_height};
 	}
-
-
 
 	image_format :: VkFormat.VK_FORMAT_B8G8R8A8_SRGB;
 	swapchain_info: VkSwapchainCreateInfoKHR;
@@ -294,14 +292,14 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 }
 
 vulkan_create_depth :: (vk_context: *Vulkan_Context) {
-	depth_format_list :: .[
+	depth_format_list :: VkFormat.[
 		VK_FORMAT_D32_SFLOAT_S8_UINT,
 		VK_FORMAT_D24_UNORM_S8_UINT
 	];
 	depth_format: VkFormat;
 	for depth_format_list {
 		format_properties: VkFormatProperties2;
-		vkGetPhysicalDeviceFormatProperties2(vk_context.device, it, *format_properties);
+		vkGetPhysicalDeviceFormatProperties2(vk_context.physical_device, it, *format_properties);
 		if format_properties.formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT {
 			depth_format = it;
 			break;
@@ -322,8 +320,8 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 	depth_image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 	alloc_info := VmaAllocationCreateInfo.{
-		flags=VmaAllocationCreateFlagBits.DEDICATED_MEMORY_BIT,
-		usage=VmaMemoryUsage.AUTO,
+		flags = .DEDICATED_MEMORY_BIT,
+		usage = .AUTO,
 	};
 	chk(vmaCreateImage(
 		vk_context.allocator,
@@ -352,6 +350,8 @@ main :: () {
 	assert(ok, "Could not create the first swapchain");
 	vulkan_create_depth(*vk_context);
 
+	ok=, mesh, materials := load_model_obj("data/suzanne.obj");
+
 	quit := false;
 	while !quit {
 		update_window_events();
@@ -370,94 +370,59 @@ main :: () {
 	}
 }
 
-//
-// Generates
-//
-//      - vulkan_fill_array :: ($type : Type, procedure : $Procedure, WITH_ARGUMENTS_FOR_PROCEDURE_HERE) -> [] type {...}
-//        // Use this one when the procedure passed in returns a VkResult so we assert on it.
-//
-//      - vulkan_fill_array_no_result :: ($type : Type, procedure : $Procedure, WITH_ARGUMENTS_FOR_PROCEDURE_HERE) -> [] type {...}
-//        // Use this one when the procedure doesn't return a VkResult or you don't want to check anything.
-//
-// @@TODO: I would really like to use varargs here, but I found no way to "flatten" it to the be able to call "procedure"
-// so for now I'm just generating versions of this procedure with different number of arguments.
-//
-// Taken from https://codeberg.org/osor_io/osor_vulkan/src/commit/ed5a3d9a57b7aa7fdf0330e548b9f8abf450d558/example/src/main.jai#L2803
-#insert #run () -> string
+// From modules/osor_vulkan/examples/src/main.jai
+vulkan_fill_array :: ($type : Type, procedure : $Procedure, $arguments : ..Code) -> [] type #expand
 {
-    FILL_ARRAY_STRING :: #string DONE
+    //
+    // @@NOTE: I would like to be able to derive the return type from the procedure they pass in. This
+    // would mean that we can get the type of the last argument and use it in the declaration of the procedure
+    // which I can't find a way to do right now for it to work with polymorphism. Essentially I would like to do something
+    // like the following:
+    //
+    // test :: ($procedure : $Procedure) -> #insert #run get_array_type(procedure)
+    // {
+    //     // . . .
+    // }
+    //
+    // get_array_type :: ($procedure : Procedure) -> string
+    // {
+    //     info := type_info(procedure);
+    //     argument := info.return_types[info.return_types-1];
+    //     assert(argument.type == Type_Info_Tag.POINTER);
+    //     argument_pointer := cast(*Type_Info_Pointer) argument;
+    //     type_pointed_to := argument_pointer.pointer_to;
+    //     assert(type_pointed_to.type == Type_Info_Tag.STRUCT);
+    //     type_pointed_to_struct := cast(*Type_Info_Struct) type_pointed_to;
+    //     return type_pointer_to_struct.name;
+    // }
+    //
 
-    vulkan_fill_array :: ($type : Type, procedure : $Procedure%) -> [] type
+    #insert #run -> string
     {
-        array := make_temp_dyn_array(type, 0);
-        count : u32;
-        chk(procedure(%*count, null));
-        array_resize(*array, count);
-        chk(procedure(%*count, array.data));
-        array.count = xx count;
-        return array;
-    }
+        builder : String_Builder;
+        for arguments print(*builder, "argument_%1 := #insert arguments[%1];\n", it_index);
+        return builder_to_string(*builder);
+    };
 
-    vulkan_fill_array_no_result :: ($type : Type, procedure : $Procedure%) -> [] type
+    CALL_STRING :: #run -> string
     {
-        array := make_temp_dyn_array(type, 0);
-        count : u32;
-        procedure(%*count, null);
-        array_resize(*array, count);
-        procedure(%*count, array.data);
-        array.count = xx count;
-        return array;
-    }
-    DONE
+        builder : String_Builder;
+        print(*builder, "{");
+        if type_info(Procedure).return_types.count != 0 then print(*builder, "result := ");
+        print(*builder, "procedure(");
+        for arguments print(*builder, "argument_%, ", it_index);
+        print(*builder, "*count, pointer);\n");
+        if type_info(Procedure).return_types.count != 0 then print(*builder, "assert(result == VK_SUCCESS);");
+        print(*builder, "}");
+        return builder_to_string(*builder);
+    };
 
-    builder : String_Builder;
-    free_buffers(*builder);
-    for 0..17
-    {
-        arguments_builder : String_Builder;
-        free_buffers(*arguments_builder);
-        forwarding_args_builder : String_Builder;
-        free_buffers(*forwarding_args_builder);
-
-        for 0..it-1
-        {
-            print_to_builder(*arguments_builder, ", argument_% : $Type_%", it, it);
-            print_to_builder(*forwarding_args_builder, "argument_%, ", it);
-        }
-
-        arguments       := builder_to_string(*arguments_builder);
-        forwarding_args := builder_to_string(*forwarding_args_builder);
-        print_to_builder(*builder, FILL_ARRAY_STRING,
-                         arguments,
-                         forwarding_args, forwarding_args,
-                         arguments,
-                         forwarding_args, forwarding_args);
-    }
-
-    /*
-
-    @@NOTE: I would like to be able to derive the return type from the procedure they pass in. This
-    would mean that we can get the type of the last argument and use it in the declaration of the procedure
-    which I can't find a way to do right now for it to work with polymorphism. Essentially I would like to do something
-    like the following:
-
-    test :: ($procedure : $Procedure) -> #insert #run get_array_type(procedure)
-    {
-        // . . .
-    }
-
-    get_array_type :: ($procedure : Procedure) -> string
-    {
-        info := type_info(procedure);
-        argument := info.return_types[info.return_types-1];
-        assert(argument.type == Type_Info_Tag.POINTER);
-        argument_pointer := cast(*Type_Info_Pointer) argument;
-        type_pointed_to := argument_pointer.pointer_to;
-        assert(type_pointed_to.type == Type_Info_Tag.STRUCT);
-        type_pointed_to_struct := cast(*Type_Info_Struct) type_pointed_to;
-        return type_pointer_to_struct.name;
-    }
-
-    */
-    return builder_to_string(*builder);
-}();
+    count : u32 = 0;
+    pointer : *type = null;
+    #insert CALL_STRING;
+    array := make_temp_dyn_array(type, xx count);
+    array_resize(*array, count);
+    pointer = array.data;
+    #insert CALL_STRING;
+    return array;
+}

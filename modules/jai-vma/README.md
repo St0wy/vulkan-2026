@@ -1,12 +1,26 @@
 # Jai VMA
 
-Jai bindings of [Vulkan® Memory Allocator](https://gpuopen.com/vulkan-memory-allocator/) v3.3.0.
+Jai bindings of [Vulkan® Memory Allocator](https://gpuopen.com/vulkan-memory-allocator/) v3.4.0.
 
-Should work on both Windows and Linux. Feel free to submit a pull request if you manage to make it build on MacOS.
+Should work on Windows, Linux and MacOS.
 
 The generation on Linux requires clang to be installed.
 
-# Credit
+## Contributing
+
+To regenerate the bindings, run :
+
+```
+jai generate.jai
+```
+
+And to also recompile VMA :
+
+```
+jai generate.jai - -compile
+```
+
+## Credits
 
 Big thank you to :
 

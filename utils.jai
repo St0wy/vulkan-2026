@@ -12,10 +12,10 @@ chk :: (result: bool) {
 	}
 }
 
-make_temp_dyn_array :: ($T: Type, $start_capacity := 16) -> [..] T {
+make_temp_dyn_array :: ($T: Type, start_capacity := 16) -> [..] T {
 	array: [..] T;
 	array.allocator = temp;
-	#if start_capacity > 0 then array_reserve(*array, start_capacity);
+	array_reserve(*array, start_capacity);
 	return array;
 }
 

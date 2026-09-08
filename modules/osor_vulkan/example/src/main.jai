@@ -813,7 +813,7 @@ vulkan_init :: (using vulkan_context : *Vulkan_Context,
         physical_devices_queue_properties := new_temporary_array([] VkQueueFamilyProperties2);
         for physical_devices
         {
-            queues := vulkan_fill_array_no_result(VkQueueFamilyProperties2, vkGetPhysicalDeviceQueueFamilyProperties2, it);
+            queues := vulkan_fill_array(VkQueueFamilyProperties2, vkGetPhysicalDeviceQueueFamilyProperties2, it);
             array_add(*physical_devices_queue_properties, queues);
         }
         physical_devices_available_extensions := new_temporary_array([] VkExtensionProperties);
@@ -1222,7 +1222,7 @@ vulkan_create_swapchain :: (vulkan_context : *Vulkan_Context,
             if surface_capabilities.currentExtent.width == 0xFF_FF_FF_FF && surface_capabilities.currentExtent.height == 0xFF_FF_FF_FF 
             {
                 assert(user_gave_data);
-                // @@NOTE Expecial case in the API where the size of the surface will be
+                // @@NOTE Special case in the API where the size of the surface will be
                 // determined by the size we set the swapchain here.
                 extent.width  = xx width;
                 extent.height = xx height;
@@ -2799,99 +2799,62 @@ cleanup_extension_name :: (name : string) -> string
 }
 
 
-
-//
-// Generates 
-//
-//      - vulkan_fill_array :: ($type : Type, procedure : $Procedure, WITH_ARGUMENTS_FOR_PROCEDURE_HERE) -> [] type {...}
-//        // Use this one when the procedure passed in returns a VkResult so we assert on it.
-//
-//      - vulkan_fill_array_no_result :: ($type : Type, procedure : $Procedure, WITH_ARGUMENTS_FOR_PROCEDURE_HERE) -> [] type {...}
-//        // Use this one when the procedure doesn't return a VkResult or you don't want to check anything.
-//
-// @@TODO: I would really like to use varargs here, but I found no way to "flatten" it to the be able to call "procedure"
-// so for now I'm just generating versions of this procedure with different number of arguments.
-//
-#insert #run () -> string
+vulkan_fill_array :: ($type : Type, procedure : $Procedure, $arguments : ..Code) -> [] type #expand
 {
-    FILL_ARRAY_STRING :: #string DONE
+    //
+    // @@NOTE: I would like to be able to derive the return type from the procedure they pass in. This
+    // would mean that we can get the type of the last argument and use it in the declaration of the procedure
+    // which I can't find a way to do right now for it to work with polymorphism. Essentially I would like to do something
+    // like the following:
+    // 
+    // test :: ($procedure : $Procedure) -> #insert #run get_array_type(procedure)
+    // {
+    //     // . . .
+    // }
+    // 
+    // get_array_type :: ($procedure : Procedure) -> string
+    // {
+    //     info := type_info(procedure);
+    //     argument := info.return_types[info.return_types-1];
+    //     assert(argument.type == Type_Info_Tag.POINTER);
+    //     argument_pointer := cast(*Type_Info_Pointer) argument;
+    //     type_pointed_to := argument_pointer.pointer_to;
+    //     assert(type_pointed_to.type == Type_Info_Tag.STRUCT);
+    //     type_pointed_to_struct := cast(*Type_Info_Struct) type_pointed_to;
+    //     return type_pointer_to_struct.name;
+    // }
+    //
 
-    vulkan_fill_array :: ($type : Type, procedure : $Procedure%) -> [] type
+    #insert #run -> string
     {
-        array := new_temporary_array(type, 0);
-        count : u32;
-        result := procedure(%*count, null);
-        assert(result == VK_SUCCESS);
-        array_resize(*array, count);
-        result = procedure(%*count, array.data);
-        assert(result == VK_SUCCESS);
-        array.count = xx count;
-        return array;
-    }
+        builder : String_Builder;
+        for arguments print(*builder, "argument_%1 := #insert arguments[%1];\n", it_index);
+        return builder_to_string(*builder);
+    };
 
-    vulkan_fill_array_no_result :: ($type : Type, procedure : $Procedure%) -> [] type
+    CALL_STRING :: #run -> string
     {
-        array := new_temporary_array(type, 0);
-        count : u32;
-        procedure(%*count, null);
-        array_resize(*array, count);
-        procedure(%*count, array.data);
-        array.count = xx count;
-        return array;
-    }
-    DONE
+        builder : String_Builder;
+        print(*builder, "{");
+        if type_info(Procedure).return_types.count != 0 then print(*builder, "result := ");
+        print(*builder, "procedure(");
+        for arguments print(*builder, "argument_%, ", it_index);
+        print(*builder, "*count, pointer);\n");
+        if type_info(Procedure).return_types.count != 0 then print(*builder, "assert(result == VK_SUCCESS);");
+        print(*builder, "}");
+        return builder_to_string(*builder);
+    };
 
-    builder : String_Builder;
-    free_buffers(*builder);
-    for 0..17 
-    {
-        arguments_builder : String_Builder;
-        free_buffers(*arguments_builder);
-        forwarding_args_builder : String_Builder;
-        free_buffers(*forwarding_args_builder);
+    count : u32 = 0;
+    pointer : *type = null;
+    #insert CALL_STRING;
+    array := new_temporary_array(type, xx count);
+    array_resize(*array, count);
+    pointer = array.data;
+    #insert CALL_STRING;
+    return array;
+}
 
-        for 0..it-1
-        {
-            print_to_builder(*arguments_builder, ", argument_% : $Type_%", it, it);
-            print_to_builder(*forwarding_args_builder, "argument_%, ", it);
-        }
-
-        arguments       := builder_to_string(*arguments_builder);
-        forwarding_args := builder_to_string(*forwarding_args_builder);
-        print_to_builder(*builder, FILL_ARRAY_STRING, 
-                         arguments, 
-                         forwarding_args, forwarding_args, 
-                         arguments, 
-                         forwarding_args, forwarding_args);
-    }
-
-    /*
-    
-    @@NOTE: I would like to be able to derive the return type from the procedure they pass in. This
-    would mean that we can get the type of the last argument and use it in the declaration of the procedure
-    which I can't find a way to do right now for it to work with polymorphism. Essentially I would like to do something
-    like the following:
-
-    test :: ($procedure : $Procedure) -> #insert #run get_array_type(procedure)
-    {
-        // . . .
-    }
-
-    get_array_type :: ($procedure : Procedure) -> string
-    {
-        info := type_info(procedure);
-        argument := info.return_types[info.return_types-1];
-        assert(argument.type == Type_Info_Tag.POINTER);
-        argument_pointer := cast(*Type_Info_Pointer) argument;
-        type_pointed_to := argument_pointer.pointer_to;
-        assert(type_pointed_to.type == Type_Info_Tag.STRUCT);
-        type_pointed_to_struct := cast(*Type_Info_Struct) type_pointed_to;
-        return type_pointer_to_struct.name;
-    }
-
-    */
-    return builder_to_string(*builder);
-}();
 
 alloc_and_copy_array :: (array : [] $T, allocator := context.allocator) -> [] T
 {
