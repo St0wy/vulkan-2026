@@ -16,6 +16,23 @@ Debug :: #import "Debug";
 #load "image.jai";
 #load "utils.jai";
 
+MAX_FRAMES_IN_FLIGHT :: 2;
+
+ShaderData :: struct {
+	projection: Matrix4;
+	view: Matrix4;
+	model: [3] Matrix4;
+	light_pos: Vector4 = {0, -10, 10, 0};
+	selected: u32 = 1;
+}
+
+ShaderDataBuffer :: struct {
+	allocation: VmaAllocation = VK_NULL_HANDLE;
+	allocation_info: VmaAllocationInfo;
+	buffer: VkBuffer = VK_NULL_HANDLE;
+	device_address: VkDeviceAddress;
+}
+
 Vulkan_Context :: struct {
 	instance: VkInstance;
 	debug_utils_messenger: VkDebugUtilsMessengerEXT;
@@ -28,12 +45,20 @@ Vulkan_Context :: struct {
 	swapchain: VkSwapchainKHR;
 	swapchain_images: [] VkImage;
 	swapchain_image_views: [] VkImageView;
+	render_complete_semaphores: [] VkSemaphore;
 	window_size: VkExtent2D;
 	depth_image: VkImage;
 	depth_image_allocation: VmaAllocation;
 	depth_image_view: VkImageView;
 	vertex_buffer: VkBuffer;
 	vertex_buffer_allocation: VmaAllocation;
+	shader_data_buffers: [MAX_FRAMES_IN_FLIGHT] ShaderDataBuffer;
+	command_buffers: [MAX_FRAMES_IN_FLIGHT] VkCommandBuffer;
+	fences: [MAX_FRAMES_IN_FLIGHT] VkFence;
+	image_acquired_semaphores: [MAX_FRAMES_IN_FLIGHT] VkSemaphore;
+	shader_data: ShaderData;
+	command_pool: VkCommandPool;
+	queue_family: u32;
 }
 
 vulkan_init :: (
@@ -154,7 +179,6 @@ vulkan_init :: (
 		chk(vkCreateDebugUtilsMessengerEXT(instance, *debug_utils_create_info, null, *debug_utils_messenger));
 	}
 
-	queue_family: u32;
 	{
 		physical_devices := vulkan_fill_array(VkPhysicalDevice, vkEnumeratePhysicalDevices, instance);
 		device_index := 0;
@@ -292,6 +316,26 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 		assert(false, "Missmatch between old and new swapchain image views count");
 	}
 
+	fence_info: VkFenceCreateInfo;
+	fence_info.flags = .VK_FENCE_CREATE_SIGNALED_BIT;
+	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
+		chk(vkCreateFence(vk_context.device, *fence_info, null, *vk_context.fences[it]));
+		vk_context.image_acquired_semaphores[it] = vulkan_create_semaphore(vk_context.device);
+	}
+
+	new_render_complete_semaphores := make_temp_dyn_array(VkSemaphore);
+	for 0..vk_context.swapchain_images.count - 1 {
+		array_add(*new_render_complete_semaphores, vulkan_create_semaphore(vk_context.device));
+	}
+
+	if vk_context.render_complete_semaphores.count == 0 {
+		vk_context.render_complete_semaphores = alloc_and_copy_array(new_render_complete_semaphores);
+	} else if vk_context.render_complete_semaphores.count == vk_context.swapchain_images.count {
+		copy_array_dst_src(vk_context.render_complete_semaphores, new_render_complete_semaphores);
+	} else {
+		assert(false, "Missmatch between old and new render_complete_semaphores count");
+	}
+
 	return true;
 }
 
@@ -367,6 +411,23 @@ main :: () {
 	);
 	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
 	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
+	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
+		data_buff :=  *vk_context.shader_data_buffers[it];
+		data_buff.buffer, data_buff.allocation, data_buff.allocation_info = vulkan_create_buffer(
+			vk_context.allocator,
+			size_of(ShaderData),
+			.VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT,
+			.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT,
+		);
+		uniform_buffer_bda_info: VkBufferDeviceAddressInfo;
+		uniform_buffer_bda_info.buffer = data_buff.buffer;
+		data_buff.device_address = vkGetBufferDeviceAddress(vk_context.device, *uniform_buffer_bda_info);
+	}
+
+	command_pool_info: VkCommandPoolCreateInfo;
+	command_pool_info.flags = .VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	command_pool_info.queueFamilyIndex = vk_context.queue_family;
+	chk(vkCreateCommandPool(vk_context.device, *command_pool_info, null, *vk_context.command_pool));
 
 	quit := false;
 	while !quit {
@@ -384,6 +445,14 @@ main :: () {
 			}
 		}
 	}
+}
+
+vulkan_create_semaphore :: (device: VkDevice) -> VkSemaphore
+{
+	create_info : VkSemaphoreCreateInfo;
+	semaphore : VkSemaphore;
+	chk(vkCreateSemaphore(device, *create_info, null, *semaphore));
+	return semaphore;
 }
 
 vulkan_create_buffer :: (
