@@ -2,7 +2,7 @@ Vertex :: struct {
 	position: Vector3;
 	normal: Vector3;
 	tex_coords: Vector2;
-	tangent: Vector4;
+	// tangent: Vector4;
 }
 
 Mesh :: struct {
@@ -268,31 +268,31 @@ delete_materials :: (materials: *[] Material) {
 	materials.count = 0;
 }
 
-generate_tangents :: (mesh: Mesh) {
-	for face_index: 0..(mesh.indices.count / 3) - 1 {
-		vertex_a := *mesh.vertices[mesh.indices[face_index * 3]];
-		vertex_b := *mesh.vertices[mesh.indices[face_index * 3 + 1]];
-		vertex_c := *mesh.vertices[mesh.indices[face_index * 3 + 2]];
+// generate_tangents :: (mesh: Mesh) {
+// 	for face_index: 0..(mesh.indices.count / 3) - 1 {
+// 		vertex_a := *mesh.vertices[mesh.indices[face_index * 3]];
+// 		vertex_b := *mesh.vertices[mesh.indices[face_index * 3 + 1]];
+// 		vertex_c := *mesh.vertices[mesh.indices[face_index * 3 + 2]];
 
-		edge_1 := vertex_b.position - vertex_a.position;
-		edge_2 := vertex_c.position - vertex_a.position;
-		delta_uv_1 := vertex_b.tex_coords - vertex_a.tex_coords;
-		delta_uv_2 := vertex_c.tex_coords - vertex_a.tex_coords;
+// 		edge_1 := vertex_b.position - vertex_a.position;
+// 		edge_2 := vertex_c.position - vertex_a.position;
+// 		delta_uv_1 := vertex_b.tex_coords - vertex_a.tex_coords;
+// 		delta_uv_2 := vertex_c.tex_coords - vertex_a.tex_coords;
 
-		f := 1.0 / (delta_uv_1.x * delta_uv_2.y - delta_uv_2.x * delta_uv_1.y);
+// 		f := 1.0 / (delta_uv_1.x * delta_uv_2.y - delta_uv_2.x * delta_uv_1.y);
 
-		tangent := f * (delta_uv_2.y * edge_1 - delta_uv_1.y * edge_2);
-		vertex_a.tangent.xyz = normalize(tangent - dot(vertex_a.normal, tangent) * vertex_a.normal);
-		vertex_b.tangent.xyz = normalize(tangent - dot(vertex_b.normal, tangent) * vertex_b.normal);
-		vertex_c.tangent.xyz = normalize(tangent - dot(vertex_c.normal, tangent) * vertex_c.normal);
+// 		tangent := f * (delta_uv_2.y * edge_1 - delta_uv_1.y * edge_2);
+// 		vertex_a.tangent.xyz = normalize(tangent - dot(vertex_a.normal, tangent) * vertex_a.normal);
+// 		vertex_b.tangent.xyz = normalize(tangent - dot(vertex_b.normal, tangent) * vertex_b.normal);
+// 		vertex_c.tangent.xyz = normalize(tangent - dot(vertex_c.normal, tangent) * vertex_c.normal);
 
-		bitangent := f * (-delta_uv_2.x * edge_1 + delta_uv_1.x * edge_2);
+// 		bitangent := f * (-delta_uv_2.x * edge_1 + delta_uv_1.x * edge_2);
 
-		vertex_a.tangent.w = 1.0;
-		vertex_b.tangent.w = 1.0;
-		vertex_c.tangent.w = 1.0;
-	}
-}
+// 		vertex_a.tangent.w = 1.0;
+// 		vertex_b.tangent.w = 1.0;
+// 		vertex_c.tangent.w = 1.0;
+// 	}
+// }
 
 #scope_file
 

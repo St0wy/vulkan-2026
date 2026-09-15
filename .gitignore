@@ -1,5 +1,2 @@
 .build/
-*.exe
-*.pdb
-*.rdi
-VMA.dll
+run/
