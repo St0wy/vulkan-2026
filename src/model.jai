@@ -83,6 +83,7 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 							vertex.position = positions[index_info.vertex - 1];
 							// TODO Handle the case where there's no texture coordinates, normal etc
 							vertex.tex_coords = tex_coords[index_info.tex_coords - 1];
+							vertex.tex_coords.y = 1 - vertex.tex_coords.y;
 							vertex.normal = normals[index_info.normal - 1];
 
 							array_add(*vertices, vertex);

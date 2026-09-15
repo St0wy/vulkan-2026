@@ -119,7 +119,7 @@ setup_build_dir :: (path: string) {
 }
 
 build_shader :: (in_path: string, out_path: string) {
-	command := tprint("slangc % -target spirv -profile spirv_1_6 -emit-spirv-directly -matrix-layout-column-major -capability spirv_1_5+SPV_KHR_non_semantic_info+SPV_GOOGLE_user_type+spvDerivativeControl+spvImageQuery+spvImageGatherExtended+spvSparseResidency+spvMinLod+spvFragmentFullyCoveredEXT+spvShaderNonUniformEXT -o %", in_path, out_path);
+	command := tprint("slangc % -target spirv -profile spirv_1_6 -emit-spirv-directly -matrix-layout-row-major -capability spirv_1_5+SPV_KHR_non_semantic_info+SPV_GOOGLE_user_type+spvDerivativeControl+spvImageQuery+spvImageGatherExtended+spvSparseResidency+spvMinLod+spvFragmentFullyCoveredEXT+spvShaderNonUniformEXT -o %", in_path, out_path);
 	strings := break_command_into_strings(command);
 	run_command(..strings);
 }

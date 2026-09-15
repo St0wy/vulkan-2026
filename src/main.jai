@@ -751,6 +751,7 @@ main :: () {
 	pipeline_ci.layout = vk_context.pipeline_layout;
 	chk(vkCreateGraphicsPipelines(vk_context.device, VK_NULL_HANDLE, 1, *pipeline_ci, null, *vk_context.pipeline));
 
+	cam_pos := Vector3.{0, 0, 6};
 	last_time := current_time_monotonic();
 	quit := false;
 	while !quit {
@@ -764,9 +765,10 @@ main :: () {
 			chk(result);
 		}
 
-		cam_pos := Vector3.{0, 0, -6};
 		aspect_ratio := vk_context.window_size.width.(float) / vk_context.window_size.height.(float);
-		vk_context.shader_data.projection = make_projection_matrix(45, aspect_ratio, 0.1, 32, depth_range_01=true);
+		FOV_VERTICAL :: 45.0 * PI / 180.0;
+		vk_context.shader_data.projection = make_projection_matrix(FOV_VERTICAL, aspect_ratio, 0.1, 32, depth_range_01=true);
+		vk_context.shader_data.projection._22 *= -1;
 		vk_context.shader_data.view = make_look_at_matrix(cam_pos, {0,0,0}, {0, 1, 0}, x_is_forward=false);
 		for 0..2 {
 			instance_pos := Vector3.{(it - 1).(float) * 3, 0, 0};
@@ -845,7 +847,7 @@ main :: () {
 		v_offset: VkDeviceSize;
 		vkCmdBindDescriptorSets(cb, .VK_PIPELINE_BIND_POINT_GRAPHICS, vk_context.pipeline_layout, 0, 1, *vk_context.descriptor_set_tex, 0, null);
 		vkCmdBindVertexBuffers(cb, 0, 1, *vk_context.vertex_buffer, *v_offset);
-		vkCmdBindIndexBuffer(cb, vk_context.vertex_buffer, v_buf_size, .VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(cb, vk_context.vertex_buffer, v_buf_size, .VK_INDEX_TYPE_UINT32);
 
 		vkCmdPushConstants(
 			cb,
@@ -930,11 +932,11 @@ main :: () {
 					vk_context.shader_data.selected = ifx vk_context.shader_data.selected > 0 then vk_context.shader_data.selected - 1 else 2;
 				}
 			case .MOUSE_WHEEL;
-				cam_pos.z += it.wheel_delta.(float) * delta_time * 10;
+				cam_pos.z -= it.wheel_delta.(float) * delta_time * 10;
 			}
 		}
 
-		object_rotations[vk_context.shader_data.selected].x -= mouse_delta_y.(float) * delta_time;
+		object_rotations[vk_context.shader_data.selected].x += mouse_delta_y.(float) * delta_time;
 		object_rotations[vk_context.shader_data.selected].y += mouse_delta_x.(float) * delta_time;
 
 		resizes := get_window_resizes();
