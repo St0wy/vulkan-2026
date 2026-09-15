@@ -34,7 +34,9 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 	positions := make_temp_dyn_array(Vector3);
 	normals := make_temp_dyn_array(Vector3);
 	tex_coords := make_temp_dyn_array(Vector2);
-	added_indices := make_temp_dyn_array(ObjIndexInfo);
+
+	heads := make_temp_dyn_array(s32);
+	nodes := make_temp_dyn_array(ObjParsingNode);
 
 	vertices: [..] Vertex;
 	indices: [..] u32;
@@ -73,11 +75,26 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 				// wont work, so might have to move it out later
 				for index_infos: faces_index_infos {
 					for index_info: index_infos {
-						// Already got and index with the same infos
-						could_find, index_index := array_find(added_indices, index_info);
+						slot := index_info.vertex - 1;
+						vt := index_info.tex_coords.(s32);
+						vn := index_info.normal.(s32);
+
+						if slot >= heads.count {
+							old := heads.count;
+							array_resize(*heads, slot + 1);
+							for old..heads.count - 1 heads[it] = -1;
+						}
+
+						cursor := heads[slot];
+						while cursor >= 0 {
+							n := *nodes[cursor];
+							if n.tex_coords == vt && n.normal == vn then break;
+							cursor = n.next;
+						}
+
+						could_find := cursor >= 0;
 						if could_find {
-							assert(index_index < vertices.count);
-							array_add(*indices, xx index_index);
+							array_add(*indices, cursor.(u32));
 						} else {
 							vertex: Vertex;
 							vertex.position = positions[index_info.vertex - 1];
@@ -85,11 +102,11 @@ load_model_obj :: (obj_path: string) -> bool, Mesh, [] Material {
 							vertex.tex_coords = tex_coords[index_info.tex_coords - 1];
 							vertex.tex_coords.y = 1 - vertex.tex_coords.y;
 							vertex.normal = normals[index_info.normal - 1];
-
 							array_add(*vertices, vertex);
-							array_add(*added_indices, index_info);
-							array_add(*indices, cast(u32, added_indices.count - 1));
-							assert(vertices.count == added_indices.count);
+
+							array_add(*nodes, {tex_coords=vt, normal=vn, next=heads[slot]});
+							heads[slot] = (nodes.count - 1).(s32);
+							array_add(*indices, (nodes.count - 1).(u32));
 						}
 					}
 				}
@@ -303,9 +320,10 @@ ObjIndexInfo :: struct {
 	normal: int;
 }
 
-#poke_name Basic operator==;
-operator == :: inline (a: ObjIndexInfo, b: ObjIndexInfo) -> bool {
-	return a.vertex == b.vertex && a.tex_coords == b.tex_coords && a.normal == b.normal;
+ObjParsingNode :: struct {
+	tex_coords: s32;
+	normal: s32;
+	next: s32;
 }
 
 skip_whitespace :: inline (str: *string) {
@@ -453,6 +471,7 @@ parse_float :: (str: *string) -> float {
 	sign: float64 = 1.0;
 
 	skip_whitespace(str);
+	token_start := str.*;
 
 	if str.*[0] == {
 	case "+";
@@ -506,7 +525,14 @@ parse_float :: (str: *string) -> float {
 			advance(str);
 		}
 
-		num *= ifx eval >= POWER_10_POS.count 0.0 else powers[eval];
+		if eval >= POWER_10_POS.count {
+			token := token_start;
+			token.count = token_start.count - str.count;
+			log("OBJ: exponent % out of range in '%'", eval, token, flags = .WARNING);
+			num = 0;
+		} else {
+			num *= powers[eval];
+		}
 	}
 
 	val : float = (sign * num).(float);

@@ -462,7 +462,11 @@ main :: () {
 	assert(ok, "Could not create the first swapchain");
 	vulkan_create_depth(*vk_context);
 
+	start := current_time_monotonic();
 	ok=, mesh, materials := load_model_obj("data/suzanne.obj");
+	delta_ms := to_float64_seconds(current_time_monotonic() - start) * 1000;
+	log("Loaded model in %ms", delta_ms);
+
 	object_rotations: [3] Vector3;
 
 	v_buf_size := cast(VkDeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
@@ -567,7 +571,6 @@ main :: () {
 		vkCmdPipelineBarrier2(cb_one_time, *barrier_tex_info);
 
 		copy_regions := make_temp_dyn_array(VkBufferImageCopy);
-		total : u64 = 0;
 		for ktx_image.mipmap_offsets {
 			region_width := ktx_image.width >> it_index;
 			region_height := ktx_image.height >> it_index;
@@ -754,17 +757,20 @@ main :: () {
 
 	cam_pos := Vector3.{0, 0, 6};
 	last_time := current_time_monotonic();
+	left_click := false;
 	quit := false;
 	while !quit {
 		chk(vkWaitForFences(vk_context.device, 1, *vk_context.fences[vk_context.frame_index], VK_TRUE, U64_MAX));
 		chk(vkResetFences(vk_context.device, 1, *vk_context.fences[vk_context.frame_index]));
 
 		result := vkAcquireNextImageKHR(vk_context.device, vk_context.swapchain, U64_MAX, vk_context.image_acquired_semaphores[vk_context.frame_index], VK_NULL_HANDLE, *vk_context.image_index);
-		if result == .VK_ERROR_OUT_OF_DATE_KHR {
+		if result == .VK_ERROR_OUT_OF_DATE_KHR || result == .VK_SUBOPTIMAL_KHR {
 			vk_context.update_swapchain = true;
 		} else {
 			chk(result);
 		}
+
+		if vk_context.window_size.width == 0 && vk_context.window_size.height == 0 then continue;
 
 		aspect_ratio := vk_context.window_size.width.(float) / vk_context.window_size.height.(float);
 		FOV_VERTICAL :: 45.0 * PI / 180.0;
@@ -905,7 +911,7 @@ main :: () {
 		present_info.pSwapchains = *vk_context.swapchain;
 		present_info.pImageIndices = *vk_context.image_index;
 		result = vkQueuePresentKHR(vk_context.queue, *present_info);
-		if result == .VK_ERROR_OUT_OF_DATE_KHR {
+		if result == .VK_ERROR_OUT_OF_DATE_KHR || result == .VK_SUBOPTIMAL_KHR {
 			vk_context.update_swapchain = true;
 		} else {
 			chk(result);
@@ -915,12 +921,17 @@ main :: () {
 		delta_time := to_float64_seconds(now - last_time).(float32);
 		last_time = now;
 
+
 		update_window_events();
 		for events_this_frame {
 			if it.type == {
 			case .QUIT;
 				quit = true;
 			case .KEYBOARD;
+				if it.key_code == .MOUSE_BUTTON_LEFT {
+					left_click = it.key_pressed != 0;
+				}
+
 				if it.key_pressed == 0 continue;
 
 				if it.key_code == {
@@ -937,8 +948,10 @@ main :: () {
 			}
 		}
 
-		object_rotations[vk_context.shader_data.selected].x += mouse_delta_y.(float) * delta_time;
-		object_rotations[vk_context.shader_data.selected].y += mouse_delta_x.(float) * delta_time;
+		if left_click {
+			object_rotations[vk_context.shader_data.selected].x += mouse_delta_y.(float) * delta_time;
+			object_rotations[vk_context.shader_data.selected].y += mouse_delta_x.(float) * delta_time;
+		}
 
 		resizes := get_window_resizes();
 		for record: resizes {
@@ -950,8 +963,8 @@ main :: () {
 
 		if vk_context.update_swapchain {
 			vk_context.update_swapchain = false;
-			vulkan_create_swapchain(*vk_context, vk_context.window_size.width, vk_context.window_size.height);
-			vulkan_create_depth(*vk_context);
+			ok = vulkan_create_swapchain(*vk_context, vk_context.window_size.width, vk_context.window_size.height);
+			if ok vulkan_create_depth(*vk_context);
 		}
 
 	}

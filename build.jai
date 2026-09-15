@@ -65,7 +65,7 @@ build :: () {
 	}
 	else if build_optimized {
 		setup_build_dir(BUILD_OPTIMIZED_DIR);
-		target_options.backend = #ifx CPU == .X64 then .X64 else .LLVM;
+		target_options.backend = .LLVM;
 		target_options.output_path = BUILD_OPTIMIZED_DIR;
 		set_optimization(*target_options, Optimization_Type.OPTIMIZED, true);
 	} else {
@@ -119,7 +119,7 @@ message_loop :: (w: Workspace) {
 }
 
 setup_build_dir :: (path: string) {
-	make_directory_if_it_does_not_exist(BUILD_RELEASE_DIR, recursive=true);
+	make_directory_if_it_does_not_exist(path, recursive=true);
 	#if OS == .WINDOWS {
 		vma_dll_path := tprint("%/VMA.dll", path);
 		if !file_exists(vma_dll_path) then copy_file("modules/jai-vma/windows/VMA.dll", vma_dll_path);
