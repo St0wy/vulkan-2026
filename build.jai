@@ -85,6 +85,14 @@ build :: () {
 
 	for plugins if it.add_source it.add_source(it);
 
+	add_build_string("BuildType :: enum u8 { DEBUG; OPTIMIZED; RELEASE; }", w);
+	if build_release
+		add_build_string("BUILD_TYPE :: BuildType.RELEASE;", w);
+	else if build_optimized
+		add_build_string("BUILD_TYPE :: BuildType.OPTIMIZED;", w);
+	else
+		add_build_string("BUILD_TYPE :: BuildType.DEBUG;", w);
+
 	add_build_file("src/main.jai", w);
 
 	message_loop(w);

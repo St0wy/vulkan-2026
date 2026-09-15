@@ -454,7 +454,8 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 main :: () {
 	window_handle := create_window(1920, 1080, "Vulkan 2026");
 	vk_context: Vulkan_Context;
-	vulkan_init(*vk_context, window_handle);
+	is_release :: BUILD_TYPE == .RELEASE;
+	vulkan_init(*vk_context, window_handle, !is_release, !is_release);
 	defer vulkan_deinit(*vk_context);
 
 	ok := vulkan_create_swapchain(*vk_context);
