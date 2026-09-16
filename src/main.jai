@@ -6,8 +6,6 @@ using Basic :: #import "Basic";
 #import "File_Utilities";
 Debug :: #import "Debug";
 
-#import "stb_image";
-
 Vma :: #import "jai-vma";
 Vk :: #import "Jolk";
 
