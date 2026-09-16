@@ -5,7 +5,7 @@ Ktx_Offsets :: struct {
 }
 
 Ktx_Image :: struct {
-	vulkan_format: VkFormat;
+	vulkan_format: Vk.Format;
 	width, height: u32;
 	level_count: u32;
 	mipmap_offsets: [] Ktx_Offsets;
@@ -28,7 +28,7 @@ ktx_load :: (data: string) -> bool, Ktx_Image {
 	}
 	advance(*cursor, size_of(Ktx_Header));
 
-	if header.vk_format == VkFormat.VK_FORMAT_UNDEFINED {
+	if header.vk_format == .UNDEFINED {
 		log_error("Unsuported vk_format: %", header.vk_format);
 		return false, image;
 	}
@@ -110,7 +110,7 @@ Ktx_Supercompression_Scheme :: enum u32 #specified {
 
 Ktx_Header :: struct {
 	identifier: [12] u8;
-	vk_format: VkFormat;
+	vk_format: Vk.Format;
 	type_size: u32;
 	pixel_width: u32;
 	pixel_height: u32;

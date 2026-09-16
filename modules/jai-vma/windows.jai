@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai - -compile
+// jai generate.jai
 //
 
 
@@ -1974,7 +1974,8 @@ vmaFreeStatsString :: (allocator: VmaAllocator, pStatsString: *u8) -> void #fore
 
 #scope_file
 
-#import "osor_vulkan";
+C_Names :: #import "Jolk/C_Names";
+using,map(C_Names.to_c_names) Vk :: #import "Jolk";
 
 #if OS == .WINDOWS {
 	libvma :: #library "windows/VMA";

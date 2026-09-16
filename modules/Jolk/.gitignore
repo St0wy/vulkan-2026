@@ -1,0 +1,16 @@
+# Jai build output
+.build/
+*.exe
+*.pdb
+*.lib
+*.exp
+*.obj
+
+# Built binaries (no extension on Linux/macOS)
+generator/generate
+tests/loader
+tests/platforms
+tests/c_names
+examples/device_info/main
+
+.zed

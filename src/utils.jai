@@ -1,5 +1,5 @@
-chk :: (result: VkResult) {
-	if result != VK_SUCCESS {
+chk :: (result: Vk.Result) {
+	if result != .SUCCESS {
 		log_error("Vulkan call returned an error (%).", result);
 		log_stack_trace(context.stack_trace);
 		exit(3);

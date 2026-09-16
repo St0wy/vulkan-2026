@@ -206,7 +206,8 @@ vulkan_memory_allocator_visitor :: (decl: *Declaration, parent_decl: *Declaratio
 #import "BuildCpp";
 
 VMA_FOOTER :: #string DONE
-#import "osor_vulkan";
+C_Names :: #import "Jolk/C_Names";
+using,map(C_Names.to_c_names) Vk :: #import "Jolk";
 
 #if OS == .WINDOWS {
 	libvma :: #library "windows/VMA";

@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<foo>
+   <bar value="embiggen">
+      <baz>Bloop</baz>
+   </bar>
+   <bloop>
+     <aargh>
+       <fail/>
+     </aargh>
+     <aargh>
+       <succeed/>
+     </aargh>
+   </bloop>
+   <more>
+     <stuff quotient="16"/>
+     <ono bleep="strong"/>
+   </more>
+</foo>
