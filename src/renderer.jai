@@ -10,14 +10,14 @@ Vulkan_Shader_Data :: struct {
 }
 
 Shader_Data_Buffer :: struct {
-	allocation: VmaAllocation;
-	allocation_info: VmaAllocationInfo;
+	allocation: Vma.Allocation;
+	allocation_info: Vma.AllocationInfo;
 	buffer: Vk.Buffer;
 	device_address: Vk.DeviceAddress;
 }
 
 Vulkan_Texture :: struct {
-	allocation: VmaAllocation;
+	allocation: Vma.Allocation;
 	image: Vk.Image;
 	view: Vk.ImageView;
 	sampler: Vk.Sampler;
@@ -26,7 +26,7 @@ Vulkan_Texture :: struct {
 // Verticies and indicies are stored in the same buffer
 Vulkan_Mesh :: struct {
 	mesh_buffer: Vk.Buffer;
-	mesh_buffer_allocation: VmaAllocation;
+	mesh_buffer_allocation: Vma.Allocation;
 }
 
 Vulkan_Context :: struct {
@@ -35,7 +35,7 @@ Vulkan_Context :: struct {
 	physical_device: Vk.PhysicalDevice;
 	device: Vk.Device;
 	queue: Vk.Queue;
-	allocator: VmaAllocator;
+	allocator: Vma.Allocator;
 	surface: Vk.SurfaceKHR;
 	window: Window_Type;
 	swapchain_image_format: Vk.Format;
@@ -46,7 +46,7 @@ Vulkan_Context :: struct {
 	window_size: Vk.Extent2D;
 	depth_image_format: Vk.Format;
 	depth_image: Vk.Image;
-	depth_image_allocation: VmaAllocation;
+	depth_image_allocation: Vma.Allocation;
 	depth_image_view: Vk.ImageView;
 	shader_data_buffers: [MAX_FRAMES_IN_FLIGHT] Shader_Data_Buffer;
 	command_buffers: [MAX_FRAMES_IN_FLIGHT] Vk.CommandBuffer;
@@ -241,19 +241,19 @@ vulkan_init :: (
 	Vk.GetDeviceQueue(device, queue_family, 0, *queue);
 
 	{
-		vk_functions := VmaVulkanFunctions.{
+		vk_functions := Vma.VulkanFunctions.{
 			vkGetInstanceProcAddr = Vk.GetInstanceProcAddr,
 			vkGetDeviceProcAddr = Vk.GetDeviceProcAddr,
 			vkCreateImage = Vk.CreateImage,
 		};
-		allocator_info := VmaAllocatorCreateInfo.{
+		allocator_info := Vma.AllocatorCreateInfo.{
 			flags = .BUFFER_DEVICE_ADDRESS_BIT,
 			physicalDevice = physical_device,
 			device = device,
 			pVulkanFunctions = *vk_functions,
 			instance = instance,
 		};
-		chk(vmaCreateAllocator(*allocator_info, *allocator));
+		chk(Vma.CreateAllocator(*allocator_info, *allocator));
 	}
 
 	surface = create_surface(instance, vk_context.window);
@@ -265,13 +265,13 @@ vulkan_deinit :: (using vk_context: *Vulkan_Context) {
 		Vk.DestroySemaphore(device, image_acquired_semaphores[it], null);
 	}
 	for render_complete_semaphores Vk.DestroySemaphore(device, it, null);
-	vmaDestroyImage(allocator, depth_image, depth_image_allocation);
+	Vma.DestroyImage(allocator, depth_image, depth_image_allocation);
 	Vk.DestroyImageView(device, depth_image_view, null);
 	for swapchain_image_views Vk.DestroyImageView(device, it, null);
 	for textures {
 		Vk.DestroyImageView(device, it.view, null);
 		Vk.DestroySampler(device, it.sampler, null);
-		vmaDestroyImage(allocator, it.image, it.allocation);
+		Vma.DestroyImage(allocator, it.image, it.allocation);
 	}
 	Vk.DestroyDescriptorSetLayout(device, descriptor_set_layout_tex, null);
 	Vk.DestroyDescriptorPool(device, descriptor_pool, null);
@@ -281,7 +281,7 @@ vulkan_deinit :: (using vk_context: *Vulkan_Context) {
 	Vk.DestroySurfaceKHR(instance, surface, null);
 	Vk.DestroyCommandPool(device, command_pool, null);
 	Vk.DestroyShaderModule(device, shader_module, null);
-	vmaDestroyAllocator(allocator);
+	Vma.DestroyAllocator(allocator);
 	Vk.DestroyDevice(device, null);
 	if debug_utils_messenger then Vk.DestroyDebugUtilsMessengerEXT(instance, debug_utils_messenger, null);
 	Vk.DestroyInstance(instance, null);
@@ -383,7 +383,7 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 
 vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 	if vk_context.depth_image && vk_context.depth_image_allocation {
-		vmaDestroyImage(vk_context.allocator, vk_context.depth_image, vk_context.depth_image_allocation);
+		Vma.DestroyImage(vk_context.allocator, vk_context.depth_image, vk_context.depth_image_allocation);
 		Vk.DestroyImageView(vk_context.device, vk_context.depth_image_view, null);
 	}
 
@@ -414,11 +414,11 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 	depth_image_info.usage = .DEPTH_STENCIL_ATTACHMENT_BIT;
 	depth_image_info.initialLayout = .UNDEFINED;
 
-	alloc_info := VmaAllocationCreateInfo.{
+	alloc_info := Vma.AllocationCreateInfo.{
 		flags = .DEDICATED_MEMORY_BIT,
 		usage = .AUTO,
 	};
-	chk(vmaCreateImage(
+	chk(Vma.CreateImage(
 		vk_context.allocator,
 		*depth_image_info,
 		*alloc_info,
@@ -435,11 +435,11 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 	chk(Vk.CreateImageView(vk_context.device, *depth_view_info, null, *vk_context.depth_image_view));
 }
 
-vulkan_upload_mesh :: (allocator: VmaAllocator, mesh: Mesh) -> Vulkan_Mesh {
+vulkan_upload_mesh :: (allocator: Vma.Allocator, mesh: Mesh) -> Vulkan_Mesh {
 	vulkan_mesh: Vulkan_Mesh;
 	v_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
 	i_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
-	alloc_info: VmaAllocationInfo;
+	alloc_info: Vma.AllocationInfo;
 	vulkan_mesh.mesh_buffer, vulkan_mesh.mesh_buffer_allocation, alloc_info = vulkan_create_buffer(
 		allocator,
 		v_buf_size + i_buf_size,
@@ -452,8 +452,8 @@ vulkan_upload_mesh :: (allocator: VmaAllocator, mesh: Mesh) -> Vulkan_Mesh {
 	return vulkan_mesh;
 }
 
-vulkan_destroy_mesh :: (allocator: VmaAllocator, vulkan_mesh: *Vulkan_Mesh) {
-	vmaDestroyBuffer(allocator, vulkan_mesh.mesh_buffer, vulkan_mesh.mesh_buffer_allocation);
+vulkan_destroy_mesh :: (allocator: Vma.Allocator, vulkan_mesh: *Vulkan_Mesh) {
+	Vma.DestroyBuffer(allocator, vulkan_mesh.mesh_buffer, vulkan_mesh.mesh_buffer_allocation);
 	vulkan_mesh.* = {};
 }
 
@@ -474,7 +474,7 @@ vulkan_allocate_shader_data_buffer :: (vk_context: *Vulkan_Context) {
 
 vulkan_free_shader_data_buffers :: (using vk_context: *Vulkan_Context) {
 	for * shader_data_buffers {
-		vmaDestroyBuffer(allocator, it.buffer, it.allocation);
+		Vma.DestroyBuffer(allocator, it.buffer, it.allocation);
 	}
 }
 
@@ -520,22 +520,22 @@ vulkan_destroy_fence :: (device: Vk.Device, fence : *Vk.Fence)
 }
 
 vulkan_create_buffer :: (
-	allocator: VmaAllocator,
+	allocator: Vma.Allocator,
 	size: Vk.DeviceSize,
 	usage: Vk.BufferUsageFlags,
-	alloc_flags: VmaAllocationCreateFlags
-) -> Vk.Buffer, VmaAllocation, VmaAllocationInfo {
+	alloc_flags: Vma.AllocationCreateFlags
+) -> Vk.Buffer, Vma.Allocation, Vma.AllocationInfo {
 	buffer_info: Vk.BufferCreateInfo;
 	buffer_info.size = size;
 	buffer_info.usage = usage;
-	buffer_alloc_create_info: VmaAllocationCreateInfo;
+	buffer_alloc_create_info: Vma.AllocationCreateInfo;
 	buffer_alloc_create_info.flags = alloc_flags;
 	buffer_alloc_create_info.usage = .AUTO;
-	buffer_alloc_info: VmaAllocationInfo;
+	buffer_alloc_info: Vma.AllocationInfo;
 
 	buffer: Vk.Buffer;
-	alloc: VmaAllocation;
-	chk(vmaCreateBuffer(
+	alloc: Vma.Allocation;
+	chk(Vma.CreateBuffer(
 		allocator,
 		*buffer_info,
 		*buffer_alloc_create_info,

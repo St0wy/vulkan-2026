@@ -1,7 +1,7 @@
 //
 // This file was auto-generated using the following command:
 //
-// jai generate.jai
+// jai generate.jai - -compile
 //
 
 
@@ -31,7 +31,7 @@ VMA_EXTERNAL_MEMORY_WIN32 :: 0;
 VMA_STATS_STRING_ENABLED :: 1;
 
 /// Flags for created #VmaAllocator.
-VmaAllocatorCreateFlagBits :: enum_flags u32 {
+AllocatorCreateFlagBits :: enum_flags u32 {
     EXTERNALLY_SYNCHRONIZED_BIT    :: 0x1;
 
     KHR_DEDICATED_ALLOCATION_BIT   :: 0x2;
@@ -78,10 +78,10 @@ VmaAllocatorCreateFlagBits :: enum_flags u32 {
 }
 
 /// See #VmaAllocatorCreateFlagBits.
-VmaAllocatorCreateFlags :: VmaAllocatorCreateFlagBits;
+AllocatorCreateFlags :: AllocatorCreateFlagBits;
 
 /// \brief Intended usage of the allocated memory.
-VmaMemoryUsage :: enum u32 {
+MemoryUsage :: enum u32 {
     UNKNOWN              :: 0;
 
     GPU_ONLY             :: 1;
@@ -128,7 +128,7 @@ VmaMemoryUsage :: enum u32 {
 }
 
 /// Flags to be passed as VmaAllocationCreateInfo::flags.
-VmaAllocationCreateFlagBits :: enum_flags u32 {
+AllocationCreateFlagBits :: enum_flags u32 {
     DEDICATED_MEMORY_BIT                   :: 0x1;
 
     NEVER_ALLOCATE_BIT                     :: 0x2;
@@ -203,10 +203,10 @@ VmaAllocationCreateFlagBits :: enum_flags u32 {
 }
 
 /// See #VmaAllocationCreateFlagBits.
-VmaAllocationCreateFlags :: VmaAllocationCreateFlagBits;
+AllocationCreateFlags :: AllocationCreateFlagBits;
 
 /// Flags to be passed as VmaPoolCreateInfo::flags.
-VmaPoolCreateFlagBits :: enum_flags u32 {
+PoolCreateFlagBits :: enum_flags u32 {
     IGNORE_BUFFER_IMAGE_GRANULARITY_BIT :: 0x2;
 
     LINEAR_ALGORITHM_BIT                :: 0x4;
@@ -225,10 +225,10 @@ VmaPoolCreateFlagBits :: enum_flags u32 {
 }
 
 /// Flags to be passed as VmaPoolCreateInfo::flags. See #VmaPoolCreateFlagBits.
-VmaPoolCreateFlags :: VmaPoolCreateFlagBits;
+PoolCreateFlags :: PoolCreateFlagBits;
 
 /// Flags to be passed as VmaDefragmentationInfo::flags.
-VmaDefragmentationFlagBits :: enum_flags u32 {
+DefragmentationFlagBits :: enum_flags u32 {
     ALGORITHM_FAST_BIT      :: 0x1;
 
     ALGORITHM_BALANCED_BIT  :: 0x2;
@@ -255,10 +255,10 @@ VmaDefragmentationFlagBits :: enum_flags u32 {
 }
 
 /// See #VmaDefragmentationFlagBits.
-VmaDefragmentationFlags :: VmaDefragmentationFlagBits;
+DefragmentationFlags :: DefragmentationFlagBits;
 
 /// Operation performed on single defragmentation move. See structure #VmaDefragmentationMove.
-VmaDefragmentationMoveOperation :: enum u32 {
+DefragmentationMoveOperation :: enum u32 {
     COPY    :: 0;
 
     IGNORE  :: 1;
@@ -273,7 +273,7 @@ VmaDefragmentationMoveOperation :: enum u32 {
 }
 
 /// Flags to be passed as VmaVirtualBlockCreateInfo::flags.
-VmaVirtualBlockCreateFlagBits :: enum_flags u32 {
+VirtualBlockCreateFlagBits :: enum_flags u32 {
     LINEAR_ALGORITHM_BIT :: 0x1;
 
     ALGORITHM_MASK       :: 0x1;
@@ -288,10 +288,10 @@ VmaVirtualBlockCreateFlagBits :: enum_flags u32 {
 }
 
 /// Flags to be passed as VmaVirtualBlockCreateInfo::flags. See #VmaVirtualBlockCreateFlagBits.
-VmaVirtualBlockCreateFlags :: VmaVirtualBlockCreateFlagBits;
+VirtualBlockCreateFlags :: VirtualBlockCreateFlagBits;
 
 /// Flags to be passed as VmaVirtualAllocationCreateInfo::flags.
-VmaVirtualAllocationCreateFlagBits :: enum_flags u32 {
+VirtualAllocationCreateFlagBits :: enum_flags u32 {
     UPPER_ADDRESS_BIT       :: 0x40;
 
     STRATEGY_MIN_MEMORY_BIT :: 0x10000;
@@ -318,9 +318,9 @@ VmaVirtualAllocationCreateFlagBits :: enum_flags u32 {
 }
 
 /// Flags to be passed as VmaVirtualAllocationCreateInfo::flags. See #VmaVirtualAllocationCreateFlagBits.
-VmaVirtualAllocationCreateFlags :: VmaVirtualAllocationCreateFlagBits;
+VirtualAllocationCreateFlags :: VirtualAllocationCreateFlagBits;
 
-VmaAllocator_T :: struct {}
+Allocator_T :: struct {}
 /** \struct VmaAllocator
 \brief Represents main object of this library initialized.
 
@@ -330,9 +330,9 @@ Call function vmaDestroyAllocator() to destroy it.
 It is recommended to create just one object of this type per `VkDevice` object,
 right after Vulkan is initialized and keep it alive until before Vulkan device is destroyed.
 */
-VmaAllocator :: *VmaAllocator_T;
+Allocator :: *Allocator_T;
 
-VmaPool_T :: struct {}
+Pool_T :: struct {}
 /** \struct VmaPool
 \brief Represents custom memory pool
 
@@ -341,9 +341,9 @@ Call function vmaDestroyPool() to destroy it.
 
 For more information see [Custom memory pools](@ref choosing_memory_type_custom_memory_pools).
 */
-VmaPool :: *VmaPool_T;
+Pool :: *Pool_T;
 
-VmaAllocation_T :: struct {}
+Allocation_T :: struct {}
 /** \struct VmaAllocation
 \brief Represents single memory allocation.
 
@@ -365,18 +365,18 @@ The object also remembers its size and some other information.
 To retrieve this information, use function vmaGetAllocationInfo() and inspect
 returned structure VmaAllocationInfo.
 */
-VmaAllocation :: *VmaAllocation_T;
+Allocation :: *Allocation_T;
 
-VmaDefragmentationContext_T :: struct {}
+DefragmentationContext_T :: struct {}
 /** \struct VmaDefragmentationContext
 \brief An opaque object that represents started defragmentation process.
 
 Fill structure #VmaDefragmentationInfo and call function vmaBeginDefragmentation() to create it.
 Call function vmaEndDefragmentation() to destroy it.
 */
-VmaDefragmentationContext :: *VmaDefragmentationContext_T;
+DefragmentationContext :: *DefragmentationContext_T;
 
-VmaVirtualAllocation_T :: struct {}
+VirtualAllocation_T :: struct {}
 /** \struct VmaVirtualAllocation
 \brief Represents single memory allocation done inside VmaVirtualBlock.
 
@@ -384,9 +384,9 @@ Use it as a unique identifier to virtual allocation within the single block.
 
 Use value `VK_NULL_HANDLE` to represent a null/invalid allocation.
 */
-VmaVirtualAllocation :: *VmaVirtualAllocation_T;
+VirtualAllocation :: *VirtualAllocation_T;
 
-VmaVirtualBlock_T :: struct {}
+VirtualBlock_T :: struct {}
 /** \struct VmaVirtualBlock
 \brief Handle to a virtual block object that allows to use core allocation algorithm without allocating any real GPU memory.
 
@@ -395,13 +395,13 @@ For more information, see documentation chapter \ref virtual_allocator.
 
 This object is not thread-safe - should not be used from multiple threads simultaneously, must be synchronized externally.
 */
-VmaVirtualBlock :: *VmaVirtualBlock_T;
+VirtualBlock :: *VirtualBlock_T;
 
 /// Callback function called after successful vkAllocateMemory.
-PFN_vmaAllocateDeviceMemoryFunction :: #type (allocator: VmaAllocator, memoryType: u32, memory: VkDeviceMemory, size: VkDeviceSize, pUserData: *void) -> void #c_call;
+PFN_vmaAllocateDeviceMemoryFunction :: #type (allocator: Allocator, memoryType: u32, memory: VkDeviceMemory, size: VkDeviceSize, pUserData: *void) -> void #c_call;
 
 /// Callback function called before vkFreeMemory.
-PFN_vmaFreeDeviceMemoryFunction :: #type (allocator: VmaAllocator, memoryType: u32, memory: VkDeviceMemory, size: VkDeviceSize, pUserData: *void) -> void #c_call;
+PFN_vmaFreeDeviceMemoryFunction :: #type (allocator: Allocator, memoryType: u32, memory: VkDeviceMemory, size: VkDeviceSize, pUserData: *void) -> void #c_call;
 
 /** \brief Set of callbacks that the library will call for `vkAllocateMemory` and `vkFreeMemory`.
 
@@ -410,7 +410,7 @@ allocations or total amount of memory allocated in Vulkan.
 
 Used in VmaAllocatorCreateInfo::pDeviceMemoryCallbacks.
 */
-VmaDeviceMemoryCallbacks :: struct {
+DeviceMemoryCallbacks :: struct {
     /// Optional, can be null.
     pfnAllocate: PFN_vmaAllocateDeviceMemoryFunction;
 
@@ -425,7 +425,7 @@ VmaDeviceMemoryCallbacks :: struct {
 
 Used in VmaAllocatorCreateInfo::pVulkanFunctions.
 */
-VmaVulkanFunctions :: struct {
+VulkanFunctions :: struct {
     /// Required when using VMA_DYNAMIC_VULKAN_FUNCTIONS.
     vkGetInstanceProcAddr:                   PFN_vkGetInstanceProcAddr;
 
@@ -477,9 +477,9 @@ VmaVulkanFunctions :: struct {
 }
 
 /// Description of a Allocator to be created.
-VmaAllocatorCreateInfo :: struct {
+AllocatorCreateInfo :: struct {
     /// Flags for created allocator. Use #VmaAllocatorCreateFlagBits enum.
-    flags:                          VmaAllocatorCreateFlags;
+    flags:                          AllocatorCreateFlags;
 
     /// Vulkan physical device.
     /** It must be valid throughout whole lifetime of created allocator. */
@@ -499,7 +499,7 @@ VmaAllocatorCreateInfo :: struct {
 
     /// Informative callbacks for `vkAllocateMemory`, `vkFreeMemory`. Optional.
     /** Optional, can be null. */
-    pDeviceMemoryCallbacks:         *VmaDeviceMemoryCallbacks;
+    pDeviceMemoryCallbacks:         *DeviceMemoryCallbacks;
 
     /** \brief Either null or a pointer to an array of limits on maximum number of bytes that can be allocated out of particular Vulkan memory heap.
     
@@ -531,7 +531,7 @@ VmaAllocatorCreateInfo :: struct {
     
     For details see [Pointers to Vulkan functions](@ref config_Vulkan_functions).
     */
-    pVulkanFunctions:               *VmaVulkanFunctions;
+    pVulkanFunctions:               *VulkanFunctions;
 
     /** \brief Handle to Vulkan instance object.
     
@@ -564,7 +564,7 @@ VmaAllocatorCreateInfo :: struct {
 }
 
 /// Information about existing #VmaAllocator object.
-VmaAllocatorInfo :: struct {
+AllocatorInfo :: struct {
     /** \brief Handle to Vulkan instance object.
     
     This is the same value as has been passed through VmaAllocatorCreateInfo::instance.
@@ -589,7 +589,7 @@ VmaAllocatorInfo :: struct {
 These are fast to calculate.
 See functions: vmaGetHeapBudgets(), vmaGetPoolStatistics().
 */
-VmaStatistics :: struct {
+Statistics :: struct {
     /** \brief Number of `VkDeviceMemory` objects - Vulkan memory blocks allocated.
     */
     blockCount:      u32;
@@ -631,9 +631,9 @@ VkDeviceSize unusedBytes = detailedStats.statistics.blockBytes - detailedStats.s
 VkDeviceSize unusedRangeSizeAvg = unusedBytes / detailedStats.unusedRangeCount;
 \endcode
 */
-VmaDetailedStatistics :: struct {
+DetailedStatistics :: struct {
     /// Basic statistics.
-    statistics:         VmaStatistics;
+    statistics:         Statistics;
 
     /// Number of free ranges of memory between allocations.
     unusedRangeCount:   u32;
@@ -657,10 +657,10 @@ total memory usage across all memory heaps and types.
 These are slower to calculate. Use for debugging purposes.
 See function vmaCalculateStatistics().
 */
-VmaTotalStatistics :: struct {
-    memoryType: [32] VmaDetailedStatistics;
-    memoryHeap: [16] VmaDetailedStatistics;
-    total:      VmaDetailedStatistics;
+TotalStatistics :: struct {
+    memoryType: [32] DetailedStatistics;
+    memoryHeap: [16] DetailedStatistics;
+    total:      DetailedStatistics;
 }
 
 /** \brief Statistics of current memory usage and available budget for a specific memory heap.
@@ -668,10 +668,10 @@ VmaTotalStatistics :: struct {
 These are fast to calculate.
 See function vmaGetHeapBudgets().
 */
-VmaBudget :: struct {
+Budget :: struct {
     /** \brief Statistics fetched from the library.
     */
-    statistics: VmaStatistics;
+    statistics: Statistics;
 
     /** \brief Estimated current memory usage of the program, in bytes.
     
@@ -699,16 +699,16 @@ VmaBudget :: struct {
 
 To be used with functions like vmaCreateBuffer(), vmaCreateImage(), and many others.
 */
-VmaAllocationCreateInfo :: struct {
+AllocationCreateInfo :: struct {
     /// Use #VmaAllocationCreateFlagBits enum.
-    flags:          VmaAllocationCreateFlags;
+    flags:          AllocationCreateFlags;
 
     /** \brief Intended usage of memory.
     
     You can leave #VMA_MEMORY_USAGE_UNKNOWN if you specify memory requirements in other way. \n
     If `pool` is not null, this member is ignored.
     */
-    usage:          VmaMemoryUsage;
+    usage:          MemoryUsage;
 
     /** \brief Flags that must be set in a Memory Type chosen for an allocation.
     
@@ -736,7 +736,7 @@ VmaAllocationCreateInfo :: struct {
     Leave `VK_NULL_HANDLE` to allocate from default pool. If not null, members:
     `usage`, `requiredFlags`, `preferredFlags`, `memoryTypeBits` are ignored.
     */
-    pool:           VmaPool;
+    pool:           Pool;
 
     /** \brief Custom general-purpose pointer that will be stored in #VmaAllocation, can be read as VmaAllocationInfo::pUserData and changed using vmaSetAllocationUserData().
     
@@ -770,14 +770,14 @@ VmaAllocationCreateInfo :: struct {
 }
 
 /// Describes parameter of created #VmaPool.
-VmaPoolCreateInfo :: struct {
+PoolCreateInfo :: struct {
     /** \brief Vulkan memory type index to allocate this pool from.
     */
     memoryTypeIndex:        u32;
 
     /** \brief Use combination of #VmaPoolCreateFlagBits.
     */
-    flags:                  VmaPoolCreateFlags;
+    flags:                  PoolCreateFlags;
 
     /** \brief Size of a single `VkDeviceMemory` block to be allocated as part of this pool, in bytes. Optional.
     
@@ -843,7 +843,7 @@ Parameters of #VmaAllocation objects, that can be retrieved using function vmaGe
 
 There is also an extended version of this structure that carries additional parameters: #VmaAllocationInfo2.
 */
-VmaAllocationInfo :: struct {
+AllocationInfo :: struct {
     /** \brief Memory type index that this allocation was allocated from.
     
     It never changes.
@@ -908,12 +908,12 @@ VmaAllocationInfo :: struct {
 }
 
 /// Extended parameters of a #VmaAllocation object that can be retrieved using function vmaGetAllocationInfo2().
-VmaAllocationInfo2 :: struct {
+AllocationInfo2 :: struct {
     /** \brief Basic parameters of the allocation.
     
     If you need only these, you can use function vmaGetAllocationInfo() and structure #VmaAllocationInfo instead.
     */
-    allocationInfo:  VmaAllocationInfo;
+    allocationInfo:  AllocationInfo;
 
     /** \brief Size of the `VkDeviceMemory` block that the allocation belongs to.
     
@@ -939,15 +939,15 @@ PFN_vmaCheckDefragmentationBreakFunction :: #type (pUserData: *void) -> VkBool32
 
 To be used with function vmaBeginDefragmentation().
 */
-VmaDefragmentationInfo :: struct {
+DefragmentationInfo :: struct {
     /// \brief Use combination of #VmaDefragmentationFlagBits.
-    flags:                  VmaDefragmentationFlags;
+    flags:                  DefragmentationFlags;
 
     /** \brief Custom pool to be defragmented.
     
     If null then default pools will undergo defragmentation process.
     */
-    pool:                   VmaPool;
+    pool:                   Pool;
 
     /** \brief Maximum numbers of bytes that can be copied during single pass, while moving allocations to different places.
     
@@ -972,12 +972,12 @@ VmaDefragmentationInfo :: struct {
 }
 
 /// Single move of an allocation to be done for defragmentation.
-VmaDefragmentationMove :: struct {
+DefragmentationMove :: struct {
     /// Operation to be performed on the allocation by vmaEndDefragmentationPass(). Default value is #VMA_DEFRAGMENTATION_MOVE_OPERATION_COPY. You can modify it.
-    operation:        VmaDefragmentationMoveOperation;
+    operation:        DefragmentationMoveOperation;
 
     /// Allocation that should be moved.
-    srcAllocation:    VmaAllocation;
+    srcAllocation:    Allocation;
 
     /** \brief Temporary allocation pointing to destination memory that will replace `srcAllocation`.
     
@@ -985,14 +985,14 @@ VmaDefragmentationMove :: struct {
     to be used for binding new buffer/image to the destination memory using e.g. vmaBindBufferMemory().
     vmaEndDefragmentationPass() will destroy it and make `srcAllocation` point to this memory.
     */
-    dstTmpAllocation: VmaAllocation;
+    dstTmpAllocation: Allocation;
 }
 
 /** \brief Parameters for incremental defragmentation steps.
 
 To be used with function vmaBeginDefragmentationPass().
 */
-VmaDefragmentationPassMoveInfo :: struct {
+DefragmentationPassMoveInfo :: struct {
     /// Number of elements in the `pMoves` array.
     moveCount: u32;
 
@@ -1019,11 +1019,11 @@ VmaDefragmentationPassMoveInfo :: struct {
     
     Then, after vmaEndDefragmentationPass() the allocation will be freed.
     */
-    pMoves:    *VmaDefragmentationMove;
+    pMoves:    *DefragmentationMove;
 }
 
 /// Statistics returned for defragmentation process in function vmaEndDefragmentation().
-VmaDefragmentationStats :: struct {
+DefragmentationStats :: struct {
     /// Total number of bytes that have been copied while moving allocations to different places.
     bytesMoved:              VkDeviceSize;
 
@@ -1038,7 +1038,7 @@ VmaDefragmentationStats :: struct {
 }
 
 /// Parameters of created #VmaVirtualBlock object to be passed to vmaCreateVirtualBlock().
-VmaVirtualBlockCreateInfo :: struct {
+VirtualBlockCreateInfo :: struct {
     /** \brief Total size of the virtual block.
     
     Sizes can be expressed in bytes or any units you want as long as you are consistent in using them.
@@ -1048,7 +1048,7 @@ VmaVirtualBlockCreateInfo :: struct {
 
     /** \brief Use combination of #VmaVirtualBlockCreateFlagBits.
     */
-    flags:                VmaVirtualBlockCreateFlags;
+    flags:                VirtualBlockCreateFlags;
 
     /** \brief Custom CPU memory allocation callbacks. Optional.
     
@@ -1058,7 +1058,7 @@ VmaVirtualBlockCreateInfo :: struct {
 }
 
 /// Parameters of created virtual allocation to be passed to vmaVirtualAllocate().
-VmaVirtualAllocationCreateInfo :: struct {
+VirtualAllocationCreateInfo :: struct {
     /** \brief Size of the allocation.
     
     Cannot be zero.
@@ -1073,7 +1073,7 @@ VmaVirtualAllocationCreateInfo :: struct {
 
     /** \brief Use combination of #VmaVirtualAllocationCreateFlagBits.
     */
-    flags:     VmaVirtualAllocationCreateFlags;
+    flags:     VirtualAllocationCreateFlags;
 
     /** \brief Custom pointer to be associated with the allocation. Optional.
     
@@ -1083,7 +1083,7 @@ VmaVirtualAllocationCreateInfo :: struct {
 }
 
 /// Parameters of an existing virtual allocation, returned by vmaGetVirtualAllocationInfo().
-VmaVirtualAllocationInfo :: struct {
+VirtualAllocationInfo :: struct {
     /** \brief Offset of the allocation.
     
     Offset at which the allocation was made.
@@ -1104,29 +1104,29 @@ VmaVirtualAllocationInfo :: struct {
 }
 
 /// Creates #VmaAllocator object.
-vmaCreateAllocator :: (pCreateInfo: *VmaAllocatorCreateInfo, pAllocator: *VmaAllocator) -> VkResult #foreign libvma;
+CreateAllocator :: (pCreateInfo: *AllocatorCreateInfo, pAllocator: *Allocator) -> VkResult #foreign libvma "vmaCreateAllocator";
 
 /// Destroys allocator object.
-vmaDestroyAllocator :: (allocator: VmaAllocator) -> void #foreign libvma;
+DestroyAllocator :: (allocator: Allocator) -> void #foreign libvma "vmaDestroyAllocator";
 
 /** \brief Returns information about existing #VmaAllocator object - handle to Vulkan device etc.
 
 It might be useful if you want to keep just the #VmaAllocator handle and fetch other required handles to
 `VkPhysicalDevice`, `VkDevice` etc. every time using this function.
 */
-vmaGetAllocatorInfo :: (allocator: VmaAllocator, pAllocatorInfo: *VmaAllocatorInfo) -> void #foreign libvma;
+GetAllocatorInfo :: (allocator: Allocator, pAllocatorInfo: *AllocatorInfo) -> void #foreign libvma "vmaGetAllocatorInfo";
 
 /**
 PhysicalDeviceProperties are fetched from physicalDevice by the allocator.
 You can access it here, without fetching it again on your own.
 */
-vmaGetPhysicalDeviceProperties :: (allocator: VmaAllocator, ppPhysicalDeviceProperties: **VkPhysicalDeviceProperties) -> void #foreign libvma;
+GetPhysicalDeviceProperties :: (allocator: Allocator, ppPhysicalDeviceProperties: **VkPhysicalDeviceProperties) -> void #foreign libvma "vmaGetPhysicalDeviceProperties";
 
 /**
 PhysicalDeviceMemoryProperties are fetched from physicalDevice by the allocator.
 You can access it here, without fetching it again on your own.
 */
-vmaGetMemoryProperties :: (allocator: VmaAllocator, ppPhysicalDeviceMemoryProperties: **VkPhysicalDeviceMemoryProperties) -> void #foreign libvma;
+GetMemoryProperties :: (allocator: Allocator, ppPhysicalDeviceMemoryProperties: **VkPhysicalDeviceMemoryProperties) -> void #foreign libvma "vmaGetMemoryProperties";
 
 /**
 \brief Given Memory Type Index, returns Property Flags of this memory type.
@@ -1134,11 +1134,11 @@ vmaGetMemoryProperties :: (allocator: VmaAllocator, ppPhysicalDeviceMemoryProper
 This is just a convenience function. Same information can be obtained using
 vmaGetMemoryProperties().
 */
-vmaGetMemoryTypeProperties :: (allocator: VmaAllocator, memoryTypeIndex: u32, pFlags: *VkMemoryPropertyFlags) -> void #foreign libvma;
+GetMemoryTypeProperties :: (allocator: Allocator, memoryTypeIndex: u32, pFlags: *VkMemoryPropertyFlags) -> void #foreign libvma "vmaGetMemoryTypeProperties";
 
 /** \brief Sets index of the current frame.
 */
-vmaSetCurrentFrameIndex :: (allocator: VmaAllocator, frameIndex: u32) -> void #foreign libvma;
+SetCurrentFrameIndex :: (allocator: Allocator, frameIndex: u32) -> void #foreign libvma "vmaSetCurrentFrameIndex";
 
 /** \brief Retrieves statistics from current state of the Allocator.
 
@@ -1150,7 +1150,7 @@ use vmaGetHeapBudgets().
 Note that when using allocator from multiple threads, returned information may immediately
 become outdated.
 */
-vmaCalculateStatistics :: (allocator: VmaAllocator, pStats: *VmaTotalStatistics) -> void #foreign libvma;
+CalculateStatistics :: (allocator: Allocator, pStats: *TotalStatistics) -> void #foreign libvma "vmaCalculateStatistics";
 
 /** \brief Retrieves information about current memory usage and budget for all memory heaps.
 
@@ -1163,7 +1163,7 @@ every frame or every allocation. For more detailed statistics use vmaCalculateSt
 Note that when using allocator from multiple threads, returned information may immediately
 become outdated.
 */
-vmaGetHeapBudgets :: (allocator: VmaAllocator, pBudgets: *VmaBudget) -> void #foreign libvma;
+GetHeapBudgets :: (allocator: Allocator, pBudgets: *Budget) -> void #foreign libvma "vmaGetHeapBudgets";
 
 /**
 \brief Helps to find `memoryTypeIndex`, given `memoryTypeBits` and #VmaAllocationCreateInfo.
@@ -1181,7 +1181,7 @@ device doesn't support any memory type with requested features for the specific
 type of resource you want to use it for. Please check parameters of your
 resource, like image layout (`OPTIMAL` versus `LINEAR`) or mip level count.
 */
-vmaFindMemoryTypeIndex :: (allocator: VmaAllocator, memoryTypeBits: u32, pAllocationCreateInfo: *VmaAllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma;
+FindMemoryTypeIndex :: (allocator: Allocator, memoryTypeBits: u32, pAllocationCreateInfo: *AllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma "vmaFindMemoryTypeIndex";
 
 /**
 \brief Helps to find `memoryTypeIndex`, given `VkBufferCreateInfo` and #VmaAllocationCreateInfo.
@@ -1189,7 +1189,7 @@ vmaFindMemoryTypeIndex :: (allocator: VmaAllocator, memoryTypeBits: u32, pAlloca
 It can be useful e.g. to determine value to be used as VmaPoolCreateInfo::memoryTypeIndex.
 It may need to internally create a temporary, dummy buffer that never has memory bound.
 */
-vmaFindMemoryTypeIndexForBufferInfo :: (allocator: VmaAllocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma;
+FindMemoryTypeIndexForBufferInfo :: (allocator: Allocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma "vmaFindMemoryTypeIndexForBufferInfo";
 
 /**
 \brief Helps to find `memoryTypeIndex`, given `VkImageCreateInfo` and #VmaAllocationCreateInfo.
@@ -1197,7 +1197,7 @@ vmaFindMemoryTypeIndexForBufferInfo :: (allocator: VmaAllocator, pBufferCreateIn
 It can be useful e.g. to determine value to be used as VmaPoolCreateInfo::memoryTypeIndex.
 It may need to internally create a temporary, dummy image that never has memory bound.
 */
-vmaFindMemoryTypeIndexForImageInfo :: (allocator: VmaAllocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma;
+FindMemoryTypeIndexForImageInfo :: (allocator: Allocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pMemoryTypeIndex: *u32) -> VkResult #foreign libvma "vmaFindMemoryTypeIndexForImageInfo";
 
 /** \brief Allocates Vulkan device memory and creates #VmaPool object.
 
@@ -1205,11 +1205,11 @@ vmaFindMemoryTypeIndexForImageInfo :: (allocator: VmaAllocator, pImageCreateInfo
 \param pCreateInfo Parameters of pool to create.
 \param[out] pPool Handle to created pool.
 */
-vmaCreatePool :: (allocator: VmaAllocator, pCreateInfo: *VmaPoolCreateInfo, pPool: *VmaPool) -> VkResult #foreign libvma;
+CreatePool :: (allocator: Allocator, pCreateInfo: *PoolCreateInfo, pPool: *Pool) -> VkResult #foreign libvma "vmaCreatePool";
 
 /** \brief Destroys #VmaPool object and frees Vulkan device memory.
 */
-vmaDestroyPool :: (allocator: VmaAllocator, pool: VmaPool) -> void #foreign libvma;
+DestroyPool :: (allocator: Allocator, pool: Pool) -> void #foreign libvma "vmaDestroyPool";
 
 /** \brief Retrieves statistics of existing #VmaPool object.
 
@@ -1220,7 +1220,7 @@ vmaDestroyPool :: (allocator: VmaAllocator, pool: VmaPool) -> void #foreign libv
 Note that when using the pool from multiple threads, returned information may immediately
 become outdated.
 */
-vmaGetPoolStatistics :: (allocator: VmaAllocator, pool: VmaPool, pPoolStats: *VmaStatistics) -> void #foreign libvma;
+GetPoolStatistics :: (allocator: Allocator, pool: Pool, pPoolStats: *Statistics) -> void #foreign libvma "vmaGetPoolStatistics";
 
 /** \brief Retrieves detailed statistics of existing #VmaPool object.
 
@@ -1228,7 +1228,7 @@ vmaGetPoolStatistics :: (allocator: VmaAllocator, pool: VmaPool, pPoolStats: *Vm
 \param pool Pool object.
 \param[out] pPoolStats Statistics of specified pool.
 */
-vmaCalculatePoolStatistics :: (allocator: VmaAllocator, pool: VmaPool, pPoolStats: *VmaDetailedStatistics) -> void #foreign libvma;
+CalculatePoolStatistics :: (allocator: Allocator, pool: Pool, pPoolStats: *DetailedStatistics) -> void #foreign libvma "vmaCalculatePoolStatistics";
 
 /** \brief Checks magic number in margins around all allocations in given memory pool in search for corruptions.
 
@@ -1244,7 +1244,7 @@ Possible return values:
 `VMA_ASSERT` is also fired in that case.
 - Other value: Error returned by Vulkan, e.g. memory mapping failure.
 */
-vmaCheckPoolCorruption :: (allocator: VmaAllocator, pool: VmaPool) -> VkResult #foreign libvma;
+CheckPoolCorruption :: (allocator: Allocator, pool: Pool) -> VkResult #foreign libvma "vmaCheckPoolCorruption";
 
 /** \brief Retrieves name of a custom pool.
 
@@ -1252,14 +1252,14 @@ After the call `ppName` is either null or points to an internally-owned null-ter
 containing name of the pool that was previously set. The pointer becomes invalid when the pool is
 destroyed or its name is changed using vmaSetPoolName().
 */
-vmaGetPoolName :: (allocator: VmaAllocator, pool: VmaPool, ppName: **u8) -> void #foreign libvma;
+GetPoolName :: (allocator: Allocator, pool: Pool, ppName: **u8) -> void #foreign libvma "vmaGetPoolName";
 
 /** \brief Sets name of a custom pool.
 
 `pName` can be either null or pointer to a null-terminated string with new name for the pool.
 Function makes internal copy of the string, so it can be changed or freed immediately after this call.
 */
-vmaSetPoolName :: (allocator: VmaAllocator, pool: VmaPool, pName: *u8) -> void #foreign libvma;
+SetPoolName :: (allocator: Allocator, pool: Pool, pName: *u8) -> void #foreign libvma "vmaSetPoolName";
 
 /** \brief General purpose memory allocation.
 
@@ -1283,7 +1283,7 @@ You must free the returned allocation object using vmaFreeMemory() or vmaFreeMem
 There is also extended version of this function: vmaAllocateDedicatedMemory()
 that offers additional parameter `pMemoryAllocateNext`.
 */
-vmaAllocateMemory :: (allocator: VmaAllocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *VmaAllocationCreateInfo, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+AllocateMemory :: (allocator: Allocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *AllocationCreateInfo, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaAllocateMemory";
 
 /** \brief General purpose allocation of a dedicated memory.
 
@@ -1293,7 +1293,7 @@ It offers additional parameter `pMemoryAllocateNext`,
 which can be used to attach `pNext` chain to the `VkMemoryAllocateInfo` structure.
 It can be useful for importing external memory. For more information, see \ref other_api_interop.
 */
-vmaAllocateDedicatedMemory :: (allocator: VmaAllocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *VmaAllocationCreateInfo, pMemoryAllocateNext: *void, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+AllocateDedicatedMemory :: (allocator: Allocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *AllocationCreateInfo, pMemoryAllocateNext: *void, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaAllocateDedicatedMemory";
 
 /** \brief General purpose memory allocation for multiple allocation objects at once.
 
@@ -1314,7 +1314,7 @@ All allocations are made using same parameters. All of them are created out of t
 If any allocation fails, all allocations already made within this function call are also freed, so that when
 returned result is not `VK_SUCCESS`, `pAllocation` array is always entirely filled with `VK_NULL_HANDLE`.
 */
-vmaAllocateMemoryPages :: (allocator: VmaAllocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *VmaAllocationCreateInfo, allocationCount: u64, pAllocations: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+AllocateMemoryPages :: (allocator: Allocator, pVkMemoryRequirements: *VkMemoryRequirements, pCreateInfo: *AllocationCreateInfo, allocationCount: u64, pAllocations: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaAllocateMemoryPages";
 
 /** \brief Allocates memory suitable for given `VkBuffer`.
 
@@ -1330,7 +1330,7 @@ This is a special-purpose function. In most cases you should use vmaCreateBuffer
 
 You must free the allocation using vmaFreeMemory() when no longer needed.
 */
-vmaAllocateMemoryForBuffer :: (allocator: VmaAllocator, buffer: VkBuffer, pCreateInfo: *VmaAllocationCreateInfo, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+AllocateMemoryForBuffer :: (allocator: Allocator, buffer: VkBuffer, pCreateInfo: *AllocationCreateInfo, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaAllocateMemoryForBuffer";
 
 /** \brief Allocates memory suitable for given `VkImage`.
 
@@ -1346,13 +1346,13 @@ This is a special-purpose function. In most cases you should use vmaCreateImage(
 
 You must free the allocation using vmaFreeMemory() when no longer needed.
 */
-vmaAllocateMemoryForImage :: (allocator: VmaAllocator, image: VkImage, pCreateInfo: *VmaAllocationCreateInfo, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+AllocateMemoryForImage :: (allocator: Allocator, image: VkImage, pCreateInfo: *AllocationCreateInfo, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaAllocateMemoryForImage";
 
 /** \brief Frees memory previously allocated using vmaAllocateMemory(), vmaAllocateMemoryForBuffer(), or vmaAllocateMemoryForImage().
 
 Passing `VK_NULL_HANDLE` as `allocation` is valid. Such function call is just skipped.
 */
-vmaFreeMemory :: (allocator: VmaAllocator, allocation: VmaAllocation) -> void #foreign libvma;
+FreeMemory :: (allocator: Allocator, allocation: Allocation) -> void #foreign libvma "vmaFreeMemory";
 
 /** \brief Frees memory and destroys multiple allocations.
 
@@ -1364,7 +1364,7 @@ It may be internally optimized to be more efficient than calling vmaFreeMemory()
 Allocations in `pAllocations` array can come from any memory pools and types.
 Passing `VK_NULL_HANDLE` as elements of `pAllocations` array is valid. Such entries are just skipped.
 */
-vmaFreeMemoryPages :: (allocator: VmaAllocator, allocationCount: u64, pAllocations: *VmaAllocation) -> void #foreign libvma;
+FreeMemoryPages :: (allocator: Allocator, allocationCount: u64, pAllocations: *Allocation) -> void #foreign libvma "vmaFreeMemoryPages";
 
 /** \brief Returns current information about specified allocation.
 
@@ -1379,7 +1379,7 @@ vmaCreateBuffer(), vmaCreateImage(). You can remember it if you are sure paramet
 There is also a new function vmaGetAllocationInfo2() that offers extended information
 about the allocation, returned using new structure #VmaAllocationInfo2.
 */
-vmaGetAllocationInfo :: (allocator: VmaAllocator, allocation: VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> void #foreign libvma;
+GetAllocationInfo :: (allocator: Allocator, allocation: Allocation, pAllocationInfo: *AllocationInfo) -> void #foreign libvma "vmaGetAllocationInfo";
 
 /** \brief Returns extended information about specified allocation.
 
@@ -1388,7 +1388,7 @@ Extended parameters in structure #VmaAllocationInfo2 include memory block size
 and a flag telling whether the allocation has dedicated memory.
 It can be useful e.g. for interop with OpenGL.
 */
-vmaGetAllocationInfo2 :: (allocator: VmaAllocator, allocation: VmaAllocation, pAllocationInfo: *VmaAllocationInfo2) -> void #foreign libvma;
+GetAllocationInfo2 :: (allocator: Allocator, allocation: Allocation, pAllocationInfo: *AllocationInfo2) -> void #foreign libvma "vmaGetAllocationInfo2";
 
 /** \brief Sets pUserData in given allocation to new value.
 
@@ -1396,7 +1396,7 @@ The value of pointer `pUserData` is copied to allocation's `pUserData`.
 It is opaque, so you can use it however you want - e.g.
 as a pointer, ordinal number or some handle to you own data.
 */
-vmaSetAllocationUserData :: (allocator: VmaAllocator, allocation: VmaAllocation, pUserData: *void) -> void #foreign libvma;
+SetAllocationUserData :: (allocator: Allocator, allocation: Allocation, pUserData: *void) -> void #foreign libvma "vmaSetAllocationUserData";
 
 /** \brief Sets pName in given allocation to new value.
 
@@ -1406,7 +1406,7 @@ passed as pName doesn't need to be valid for whole lifetime of the allocation -
 you can free it after this call. String previously pointed by allocation's
 `pName` is freed from memory.
 */
-vmaSetAllocationName :: (allocator: VmaAllocator, allocation: VmaAllocation, pName: *u8) -> void #foreign libvma;
+SetAllocationName :: (allocator: Allocator, allocation: Allocation, pName: *u8) -> void #foreign libvma "vmaSetAllocationName";
 
 /**
 \brief Given an allocation, returns Property Flags of its memory type.
@@ -1414,7 +1414,7 @@ vmaSetAllocationName :: (allocator: VmaAllocator, allocation: VmaAllocation, pNa
 This is just a convenience function. Same information can be obtained using
 vmaGetAllocationInfo() + vmaGetMemoryProperties().
 */
-vmaGetAllocationMemoryProperties :: (allocator: VmaAllocator, allocation: VmaAllocation, pFlags: *VkMemoryPropertyFlags) -> void #foreign libvma;
+GetAllocationMemoryProperties :: (allocator: Allocator, allocation: Allocation, pFlags: *VkMemoryPropertyFlags) -> void #foreign libvma "vmaGetAllocationMemoryProperties";
 
 /** \brief Maps memory represented by given allocation and returns pointer to it.
 
@@ -1453,7 +1453,7 @@ This function doesn't automatically flush or invalidate caches.
 If the allocation is made from a memory types that is not `HOST_COHERENT`,
 you also need to use vmaInvalidateAllocation() / vmaFlushAllocation(), as required by Vulkan specification.
 */
-vmaMapMemory :: (allocator: VmaAllocator, allocation: VmaAllocation, ppData: **void) -> VkResult #foreign libvma;
+MapMemory :: (allocator: Allocator, allocation: Allocation, ppData: **void) -> VkResult #foreign libvma "vmaMapMemory";
 
 /** \brief Unmaps memory represented by given allocation, mapped previously using vmaMapMemory().
 
@@ -1463,7 +1463,7 @@ This function doesn't automatically flush or invalidate caches.
 If the allocation is made from a memory types that is not `HOST_COHERENT`,
 you also need to use vmaInvalidateAllocation() / vmaFlushAllocation(), as required by Vulkan specification.
 */
-vmaUnmapMemory :: (allocator: VmaAllocator, allocation: VmaAllocation) -> void #foreign libvma;
+UnmapMemory :: (allocator: Allocator, allocation: Allocation) -> void #foreign libvma "vmaUnmapMemory";
 
 /** \brief Flushes memory of given allocation.
 
@@ -1486,7 +1486,7 @@ Do not pass allocation's offset as `offset`!!!
 This function returns the `VkResult` from `vkFlushMappedMemoryRanges` if it is
 called, otherwise `VK_SUCCESS`.
 */
-vmaFlushAllocation :: (allocator: VmaAllocator, allocation: VmaAllocation, offset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma;
+FlushAllocation :: (allocator: Allocator, allocation: Allocation, offset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma "vmaFlushAllocation";
 
 /** \brief Invalidates memory of given allocation.
 
@@ -1509,7 +1509,7 @@ Do not pass allocation's offset as `offset`!!!
 This function returns the `VkResult` from `vkInvalidateMappedMemoryRanges` if
 it is called, otherwise `VK_SUCCESS`.
 */
-vmaInvalidateAllocation :: (allocator: VmaAllocator, allocation: VmaAllocation, offset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma;
+InvalidateAllocation :: (allocator: Allocator, allocation: Allocation, offset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma "vmaInvalidateAllocation";
 
 /** \brief Flushes memory of given set of allocations.
 
@@ -1525,7 +1525,7 @@ For more information, see documentation of vmaFlushAllocation().
 This function returns the `VkResult` from `vkFlushMappedMemoryRanges` if it is
 called, otherwise `VK_SUCCESS`.
 */
-vmaFlushAllocations :: (allocator: VmaAllocator, allocationCount: u32, allocations: *VmaAllocation, offsets: *VkDeviceSize, sizes: *VkDeviceSize) -> VkResult #foreign libvma;
+FlushAllocations :: (allocator: Allocator, allocationCount: u32, allocations: *Allocation, offsets: *VkDeviceSize, sizes: *VkDeviceSize) -> VkResult #foreign libvma "vmaFlushAllocations";
 
 /** \brief Invalidates memory of given set of allocations.
 
@@ -1541,7 +1541,7 @@ For more information, see documentation of vmaInvalidateAllocation().
 This function returns the `VkResult` from `vkInvalidateMappedMemoryRanges` if it is
 called, otherwise `VK_SUCCESS`.
 */
-vmaInvalidateAllocations :: (allocator: VmaAllocator, allocationCount: u32, allocations: *VmaAllocation, offsets: *VkDeviceSize, sizes: *VkDeviceSize) -> VkResult #foreign libvma;
+InvalidateAllocations :: (allocator: Allocator, allocationCount: u32, allocations: *Allocation, offsets: *VkDeviceSize, sizes: *VkDeviceSize) -> VkResult #foreign libvma "vmaInvalidateAllocations";
 
 /** \brief Maps the allocation temporarily if needed, copies data from specified host pointer to it, and flushes the memory from the host caches if needed.
 
@@ -1563,7 +1563,7 @@ Otherwise, the function will fail and generate a Validation Layers error.
 If you mean whole allocation, you should pass 0.
 Do not pass allocation's offset within device memory block this parameter!
 */
-vmaCopyMemoryToAllocation :: (allocator: VmaAllocator, pSrcHostPointer: *void, dstAllocation: VmaAllocation, dstAllocationLocalOffset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma;
+CopyMemoryToAllocation :: (allocator: Allocator, pSrcHostPointer: *void, dstAllocation: Allocation, dstAllocationLocalOffset: VkDeviceSize, size: VkDeviceSize) -> VkResult #foreign libvma "vmaCopyMemoryToAllocation";
 
 /** \brief Invalidates memory in the host caches if needed, maps the allocation temporarily if needed, and copies data from it to a specified host pointer.
 
@@ -1586,7 +1586,7 @@ It may also work very slowly when reading from an uncached memory.
 If you mean whole allocation, you should pass 0.
 Do not pass allocation's offset within device memory block as this parameter!
 */
-vmaCopyAllocationToMemory :: (allocator: VmaAllocator, srcAllocation: VmaAllocation, srcAllocationLocalOffset: VkDeviceSize, pDstHostPointer: *void, size: VkDeviceSize) -> VkResult #foreign libvma;
+CopyAllocationToMemory :: (allocator: Allocator, srcAllocation: Allocation, srcAllocationLocalOffset: VkDeviceSize, pDstHostPointer: *void, size: VkDeviceSize) -> VkResult #foreign libvma "vmaCopyAllocationToMemory";
 
 /** \brief Checks magic number in margins around all allocations in given memory types (in both default and custom pools) in search for corruptions.
 
@@ -1605,7 +1605,7 @@ Possible return values:
 `VMA_ASSERT` is also fired in that case.
 - Other value: Error returned by Vulkan, e.g. memory mapping failure.
 */
-vmaCheckCorruption :: (allocator: VmaAllocator, memoryTypeBits: u32) -> VkResult #foreign libvma;
+CheckCorruption :: (allocator: Allocator, memoryTypeBits: u32) -> VkResult #foreign libvma "vmaCheckCorruption";
 
 /** \brief Begins defragmentation process.
 
@@ -1619,7 +1619,7 @@ vmaCheckCorruption :: (allocator: VmaAllocator, memoryTypeBits: u32) -> VkResult
 For more information about defragmentation, see documentation chapter:
 [Defragmentation](@ref defragmentation).
 */
-vmaBeginDefragmentation :: (allocator: VmaAllocator, pInfo: *VmaDefragmentationInfo, pContext: *VmaDefragmentationContext) -> VkResult #foreign libvma;
+BeginDefragmentation :: (allocator: Allocator, pInfo: *DefragmentationInfo, pContext: *DefragmentationContext) -> VkResult #foreign libvma "vmaBeginDefragmentation";
 
 /** \brief Ends defragmentation process.
 
@@ -1629,7 +1629,7 @@ vmaBeginDefragmentation :: (allocator: VmaAllocator, pInfo: *VmaDefragmentationI
 
 Use this function to finish defragmentation started by vmaBeginDefragmentation().
 */
-vmaEndDefragmentation :: (allocator: VmaAllocator, _context: VmaDefragmentationContext, pStats: *VmaDefragmentationStats) -> void #foreign libvma;
+EndDefragmentation :: (allocator: Allocator, _context: DefragmentationContext, pStats: *DefragmentationStats) -> void #foreign libvma "vmaEndDefragmentation";
 
 /** \brief Starts single defragmentation pass.
 
@@ -1641,7 +1641,7 @@ vmaEndDefragmentation :: (allocator: VmaAllocator, _context: VmaDefragmentationC
 - `VK_INCOMPLETE` if there are pending moves returned in `pPassInfo`. You need to perform them, call vmaEndDefragmentationPass(),
 and then preferably try another pass with vmaBeginDefragmentationPass().
 */
-vmaBeginDefragmentationPass :: (allocator: VmaAllocator, _context: VmaDefragmentationContext, pPassInfo: *VmaDefragmentationPassMoveInfo) -> VkResult #foreign libvma;
+BeginDefragmentationPass :: (allocator: Allocator, _context: DefragmentationContext, pPassInfo: *DefragmentationPassMoveInfo) -> VkResult #foreign libvma "vmaBeginDefragmentationPass";
 
 /** \brief Ends single defragmentation pass.
 
@@ -1661,7 +1661,7 @@ will be freed.
 
 If no more moves are possible you can end whole defragmentation.
 */
-vmaEndDefragmentationPass :: (allocator: VmaAllocator, _context: VmaDefragmentationContext, pPassInfo: *VmaDefragmentationPassMoveInfo) -> VkResult #foreign libvma;
+EndDefragmentationPass :: (allocator: Allocator, _context: DefragmentationContext, pPassInfo: *DefragmentationPassMoveInfo) -> VkResult #foreign libvma "vmaEndDefragmentationPass";
 
 /** \brief Binds buffer to allocation.
 
@@ -1675,7 +1675,7 @@ allocations, calls to `vkBind*Memory()` or `vkMapMemory()` won't happen from mul
 
 It is recommended to use function vmaCreateBuffer() instead of this one.
 */
-vmaBindBufferMemory :: (allocator: VmaAllocator, allocation: VmaAllocation, buffer: VkBuffer) -> VkResult #foreign libvma;
+BindBufferMemory :: (allocator: Allocator, allocation: Allocation, buffer: VkBuffer) -> VkResult #foreign libvma "vmaBindBufferMemory";
 
 /** \brief Binds buffer to allocation with additional parameters.
 
@@ -1690,7 +1690,7 @@ This function is similar to vmaBindBufferMemory(), but it provides additional pa
 If `pNext` is not null, #VmaAllocator object must have been created with #VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT flag
 or with VmaAllocatorCreateInfo::vulkanApiVersion `>= VK_API_VERSION_1_1`. Otherwise the call fails.
 */
-vmaBindBufferMemory2 :: (allocator: VmaAllocator, allocation: VmaAllocation, allocationLocalOffset: VkDeviceSize, buffer: VkBuffer, pNext: *void) -> VkResult #foreign libvma;
+BindBufferMemory2 :: (allocator: Allocator, allocation: Allocation, allocationLocalOffset: VkDeviceSize, buffer: VkBuffer, pNext: *void) -> VkResult #foreign libvma "vmaBindBufferMemory2";
 
 /** \brief Binds image to allocation.
 
@@ -1704,7 +1704,7 @@ allocations, calls to `vkBind*Memory()` or `vkMapMemory()` won't happen from mul
 
 It is recommended to use function vmaCreateImage() instead of this one.
 */
-vmaBindImageMemory :: (allocator: VmaAllocator, allocation: VmaAllocation, image: VkImage) -> VkResult #foreign libvma;
+BindImageMemory :: (allocator: Allocator, allocation: Allocation, image: VkImage) -> VkResult #foreign libvma "vmaBindImageMemory";
 
 /** \brief Binds image to allocation with additional parameters.
 
@@ -1719,7 +1719,7 @@ This function is similar to vmaBindImageMemory(), but it provides additional par
 If `pNext` is not null, #VmaAllocator object must have been created with #VMA_ALLOCATOR_CREATE_KHR_BIND_MEMORY2_BIT flag
 or with VmaAllocatorCreateInfo::vulkanApiVersion `>= VK_API_VERSION_1_1`. Otherwise the call fails.
 */
-vmaBindImageMemory2 :: (allocator: VmaAllocator, allocation: VmaAllocation, allocationLocalOffset: VkDeviceSize, image: VkImage, pNext: *void) -> VkResult #foreign libvma;
+BindImageMemory2 :: (allocator: Allocator, allocation: Allocation, allocationLocalOffset: VkDeviceSize, image: VkImage, pNext: *void) -> VkResult #foreign libvma "vmaBindImageMemory2";
 
 /** \brief Creates a new `VkBuffer`, allocates and binds memory for it.
 
@@ -1759,7 +1759,7 @@ by the user as a higher-level logic on top of VMA.
 There is also an extended versions of this function available with additional parameter `pMemoryAllocateNext` -
 see vmaCreateDedicatedBuffer().
 */
-vmaCreateBuffer :: (allocator: VmaAllocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pBuffer: *VkBuffer, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+CreateBuffer :: (allocator: Allocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pBuffer: *VkBuffer, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaCreateBuffer";
 
 /** \brief Creates a buffer with additional minimum alignment.
 
@@ -1771,7 +1771,7 @@ for interop with OpenGL.
 This function in obsolete since new VmaAllocationCreateInfo::minAlignment member allows specifying custom
 alignment while using any allocation function, like the standard vmaCreateBuffer().
 */
-vmaCreateBufferWithAlignment :: (allocator: VmaAllocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, minAlignment: VkDeviceSize, pBuffer: *VkBuffer, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+CreateBufferWithAlignment :: (allocator: Allocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, minAlignment: VkDeviceSize, pBuffer: *VkBuffer, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaCreateBufferWithAlignment";
 
 /** \brief Creates a dedicated buffer while offering extra parameter `pMemoryAllocateNext`.
 
@@ -1781,7 +1781,7 @@ It offers additional parameter `pMemoryAllocateNext`,
 which can be used to attach `pNext` chain to the `VkMemoryAllocateInfo` structure.
 It can be useful for importing external memory. For more information, see \ref other_api_interop.
 */
-vmaCreateDedicatedBuffer :: (allocator: VmaAllocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pMemoryAllocateNext: *void, pBuffer: *VkBuffer, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+CreateDedicatedBuffer :: (allocator: Allocator, pBufferCreateInfo: *VkBufferCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pMemoryAllocateNext: *void, pBuffer: *VkBuffer, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaCreateDedicatedBuffer";
 
 /** \brief Creates a new `VkBuffer`, binds already created memory for it.
 
@@ -1804,7 +1804,7 @@ allocation you can use convenience function vmaDestroyBuffer().
 
 \note There is a new version of this function augmented with parameter `allocationLocalOffset` - see vmaCreateAliasingBuffer2().
 */
-vmaCreateAliasingBuffer :: (allocator: VmaAllocator, allocation: VmaAllocation, pBufferCreateInfo: *VkBufferCreateInfo, pBuffer: *VkBuffer) -> VkResult #foreign libvma;
+CreateAliasingBuffer :: (allocator: Allocator, allocation: Allocation, pBufferCreateInfo: *VkBufferCreateInfo, pBuffer: *VkBuffer) -> VkResult #foreign libvma "vmaCreateAliasingBuffer";
 
 /** \brief Creates a new `VkBuffer`, binds already created memory for it.
 
@@ -1828,7 +1828,7 @@ allocation you can use convenience function vmaDestroyBuffer().
 
 \note This is a new version of the function augmented with parameter `allocationLocalOffset`.
 */
-vmaCreateAliasingBuffer2 :: (allocator: VmaAllocator, allocation: VmaAllocation, allocationLocalOffset: VkDeviceSize, pBufferCreateInfo: *VkBufferCreateInfo, pBuffer: *VkBuffer) -> VkResult #foreign libvma;
+CreateAliasingBuffer2 :: (allocator: Allocator, allocation: Allocation, allocationLocalOffset: VkDeviceSize, pBufferCreateInfo: *VkBufferCreateInfo, pBuffer: *VkBuffer) -> VkResult #foreign libvma "vmaCreateAliasingBuffer2";
 
 /** \brief Destroys Vulkan buffer and frees allocated memory.
 
@@ -1841,14 +1841,14 @@ vmaFreeMemory(allocator, allocation);
 
 It is safe to pass null as buffer and/or allocation.
 */
-vmaDestroyBuffer :: (allocator: VmaAllocator, buffer: VkBuffer, allocation: VmaAllocation) -> void #foreign libvma;
+DestroyBuffer :: (allocator: Allocator, buffer: VkBuffer, allocation: Allocation) -> void #foreign libvma "vmaDestroyBuffer";
 
 /** \brief Function similar to vmaCreateBuffer() but for images.
 
 There is also an extended version of this function available: vmaCreateDedicatedImage()
 which offers additional parameter `pMemoryAllocateNext`.
 */
-vmaCreateImage :: (allocator: VmaAllocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pImage: *VkImage, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+CreateImage :: (allocator: Allocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pImage: *VkImage, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaCreateImage";
 
 /** \brief Function similar to vmaCreateDedicatedBuffer() but for images.
 
@@ -1858,13 +1858,13 @@ It offers additional parameter `pMemoryAllocateNext`,
 which can be used to attach `pNext` chain to the `VkMemoryAllocateInfo` structure.
 It can be useful for importing external memory. For more information, see \ref other_api_interop.
 */
-vmaCreateDedicatedImage :: (allocator: VmaAllocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *VmaAllocationCreateInfo, pMemoryAllocateNext: *void, pImage: *VkImage, pAllocation: *VmaAllocation, pAllocationInfo: *VmaAllocationInfo) -> VkResult #foreign libvma;
+CreateDedicatedImage :: (allocator: Allocator, pImageCreateInfo: *VkImageCreateInfo, pAllocationCreateInfo: *AllocationCreateInfo, pMemoryAllocateNext: *void, pImage: *VkImage, pAllocation: *Allocation, pAllocationInfo: *AllocationInfo) -> VkResult #foreign libvma "vmaCreateDedicatedImage";
 
 /// Function similar to vmaCreateAliasingBuffer() but for images.
-vmaCreateAliasingImage :: (allocator: VmaAllocator, allocation: VmaAllocation, pImageCreateInfo: *VkImageCreateInfo, pImage: *VkImage) -> VkResult #foreign libvma;
+CreateAliasingImage :: (allocator: Allocator, allocation: Allocation, pImageCreateInfo: *VkImageCreateInfo, pImage: *VkImage) -> VkResult #foreign libvma "vmaCreateAliasingImage";
 
 /// Function similar to vmaCreateAliasingBuffer2() but for images.
-vmaCreateAliasingImage2 :: (allocator: VmaAllocator, allocation: VmaAllocation, allocationLocalOffset: VkDeviceSize, pImageCreateInfo: *VkImageCreateInfo, pImage: *VkImage) -> VkResult #foreign libvma;
+CreateAliasingImage2 :: (allocator: Allocator, allocation: Allocation, allocationLocalOffset: VkDeviceSize, pImageCreateInfo: *VkImageCreateInfo, pImage: *VkImage) -> VkResult #foreign libvma "vmaCreateAliasingImage2";
 
 /** \brief Destroys Vulkan image and frees allocated memory.
 
@@ -1877,14 +1877,14 @@ vmaFreeMemory(allocator, allocation);
 
 It is safe to pass null as image and/or allocation.
 */
-vmaDestroyImage :: (allocator: VmaAllocator, image: VkImage, allocation: VmaAllocation) -> void #foreign libvma;
+DestroyImage :: (allocator: Allocator, image: VkImage, allocation: Allocation) -> void #foreign libvma "vmaDestroyImage";
 
 /** \brief Creates new #VmaVirtualBlock object.
 
 \param pCreateInfo Parameters for creation.
 \param[out] pVirtualBlock Returned virtual block object or `VMA_NULL` if creation failed.
 */
-vmaCreateVirtualBlock :: (pCreateInfo: *VmaVirtualBlockCreateInfo, pVirtualBlock: *VmaVirtualBlock) -> VkResult #foreign libvma;
+CreateVirtualBlock :: (pCreateInfo: *VirtualBlockCreateInfo, pVirtualBlock: *VirtualBlock) -> VkResult #foreign libvma "vmaCreateVirtualBlock";
 
 /** \brief Destroys #VmaVirtualBlock object.
 
@@ -1895,15 +1895,15 @@ if you are sure this is what you want. If you do neither, an assert is called.
 If you keep pointers to some additional metadata associated with your virtual allocations in their `pUserData`,
 don't forget to free them.
 */
-vmaDestroyVirtualBlock :: (virtualBlock: VmaVirtualBlock) -> void #foreign libvma;
+DestroyVirtualBlock :: (virtualBlock: VirtualBlock) -> void #foreign libvma "vmaDestroyVirtualBlock";
 
 /** \brief Returns true of the #VmaVirtualBlock is empty - contains 0 virtual allocations and has all its space available for new allocations.
 */
-vmaIsVirtualBlockEmpty :: (virtualBlock: VmaVirtualBlock) -> VkBool32 #foreign libvma;
+IsVirtualBlockEmpty :: (virtualBlock: VirtualBlock) -> VkBool32 #foreign libvma "vmaIsVirtualBlockEmpty";
 
 /** \brief Returns information about a specific virtual allocation within a virtual block, like its size and `pUserData` pointer.
 */
-vmaGetVirtualAllocationInfo :: (virtualBlock: VmaVirtualBlock, allocation: VmaVirtualAllocation, pVirtualAllocInfo: *VmaVirtualAllocationInfo) -> void #foreign libvma;
+GetVirtualAllocationInfo :: (virtualBlock: VirtualBlock, allocation: VirtualAllocation, pVirtualAllocInfo: *VirtualAllocationInfo) -> void #foreign libvma "vmaGetVirtualAllocationInfo";
 
 /** \brief Allocates new virtual allocation inside given #VmaVirtualBlock.
 
@@ -1916,13 +1916,13 @@ If the allocation fails due to not enough free space available, `VK_ERROR_OUT_OF
 \param[out] pAllocation Returned handle of the new allocation
 \param[out] pOffset Returned offset of the new allocation. Optional, can be null.
 */
-vmaVirtualAllocate :: (virtualBlock: VmaVirtualBlock, pCreateInfo: *VmaVirtualAllocationCreateInfo, pAllocation: *VmaVirtualAllocation, pOffset: *VkDeviceSize) -> VkResult #foreign libvma;
+VirtualAllocate :: (virtualBlock: VirtualBlock, pCreateInfo: *VirtualAllocationCreateInfo, pAllocation: *VirtualAllocation, pOffset: *VkDeviceSize) -> VkResult #foreign libvma "vmaVirtualAllocate";
 
 /** \brief Frees virtual allocation inside given #VmaVirtualBlock.
 
 It is correct to call this function with `allocation == VK_NULL_HANDLE` - it does nothing.
 */
-vmaVirtualFree :: (virtualBlock: VmaVirtualBlock, allocation: VmaVirtualAllocation) -> void #foreign libvma;
+VirtualFree :: (virtualBlock: VirtualBlock, allocation: VirtualAllocation) -> void #foreign libvma "vmaVirtualFree";
 
 /** \brief Frees all virtual allocations inside given #VmaVirtualBlock.
 
@@ -1932,24 +1932,24 @@ before destroying a virtual block. Otherwise, an assert is called.
 If you keep pointer to some additional metadata associated with your virtual allocation in its `pUserData`,
 don't forget to free it as well.
 */
-vmaClearVirtualBlock :: (virtualBlock: VmaVirtualBlock) -> void #foreign libvma;
+ClearVirtualBlock :: (virtualBlock: VirtualBlock) -> void #foreign libvma "vmaClearVirtualBlock";
 
 /** \brief Changes custom pointer associated with given virtual allocation.
 */
-vmaSetVirtualAllocationUserData :: (virtualBlock: VmaVirtualBlock, allocation: VmaVirtualAllocation, pUserData: *void) -> void #foreign libvma;
+SetVirtualAllocationUserData :: (virtualBlock: VirtualBlock, allocation: VirtualAllocation, pUserData: *void) -> void #foreign libvma "vmaSetVirtualAllocationUserData";
 
 /** \brief Calculates and returns statistics about virtual allocations and memory usage in given #VmaVirtualBlock.
 
 This function is fast to call. For more detailed statistics, see vmaCalculateVirtualBlockStatistics().
 */
-vmaGetVirtualBlockStatistics :: (virtualBlock: VmaVirtualBlock, pStats: *VmaStatistics) -> void #foreign libvma;
+GetVirtualBlockStatistics :: (virtualBlock: VirtualBlock, pStats: *Statistics) -> void #foreign libvma "vmaGetVirtualBlockStatistics";
 
 /** \brief Calculates and returns detailed statistics about virtual allocations and memory usage in given #VmaVirtualBlock.
 
 This function is slow to call. Use for debugging purposes.
 For less detailed statistics, see vmaGetVirtualBlockStatistics().
 */
-vmaCalculateVirtualBlockStatistics :: (virtualBlock: VmaVirtualBlock, pStats: *VmaDetailedStatistics) -> void #foreign libvma;
+CalculateVirtualBlockStatistics :: (virtualBlock: VirtualBlock, pStats: *DetailedStatistics) -> void #foreign libvma "vmaCalculateVirtualBlockStatistics";
 
 /** \brief Builds and returns a null-terminated string in JSON format with information about given #VmaVirtualBlock.
 \param virtualBlock Virtual block.
@@ -1958,19 +1958,19 @@ vmaCalculateVirtualBlockStatistics :: (virtualBlock: VmaVirtualBlock, pStats: *V
 
 Returned string must be freed using vmaFreeVirtualBlockStatsString().
 */
-vmaBuildVirtualBlockStatsString :: (virtualBlock: VmaVirtualBlock, ppStatsString: **u8, detailedMap: VkBool32) -> void #foreign libvma;
+BuildVirtualBlockStatsString :: (virtualBlock: VirtualBlock, ppStatsString: **u8, detailedMap: VkBool32) -> void #foreign libvma "vmaBuildVirtualBlockStatsString";
 
 /// Frees a string returned by vmaBuildVirtualBlockStatsString().
-vmaFreeVirtualBlockStatsString :: (virtualBlock: VmaVirtualBlock, pStatsString: *u8) -> void #foreign libvma;
+FreeVirtualBlockStatsString :: (virtualBlock: VirtualBlock, pStatsString: *u8) -> void #foreign libvma "vmaFreeVirtualBlockStatsString";
 
 /** \brief Builds and returns statistics as a null-terminated string in JSON format.
 \param allocator
 \param[out] ppStatsString Must be freed using vmaFreeStatsString() function.
 \param detailedMap
 */
-vmaBuildStatsString :: (allocator: VmaAllocator, ppStatsString: **u8, detailedMap: VkBool32) -> void #foreign libvma;
+BuildStatsString :: (allocator: Allocator, ppStatsString: **u8, detailedMap: VkBool32) -> void #foreign libvma "vmaBuildStatsString";
 
-vmaFreeStatsString :: (allocator: VmaAllocator, pStatsString: *u8) -> void #foreign libvma;
+FreeStatsString :: (allocator: Allocator, pStatsString: *u8) -> void #foreign libvma "vmaFreeStatsString";
 
 #scope_file
 

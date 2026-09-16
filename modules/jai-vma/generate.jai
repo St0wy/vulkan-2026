@@ -120,6 +120,8 @@ generate_bindings :: () -> bool {
 
 		array_add(*source_files, vulkan_memory_allocator_h_location);
 		array_add(*system_include_paths, ".");
+		array_add(*strip_prefixes, "vma");
+		array_add(*strip_prefixes, "Vma");
 
 		generate_library_declarations = false;
 

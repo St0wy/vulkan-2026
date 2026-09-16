@@ -8,7 +8,7 @@ Debug :: #import "Debug";
 
 #import "stb_image";
 
-#import "jai-vma";
+Vma :: #import "jai-vma";
 Vk :: #import "Jolk";
 
 #load "platform.jai";
@@ -64,8 +64,8 @@ main :: () {
 		texture_info.usage = .TRANSFER_DST_BIT | .SAMPLED_BIT;
 		texture_info.initialLayout = .UNDEFINED;
 
-		texture_alloc_info := VmaAllocationCreateInfo.{usage=.AUTO};
-		chk(vmaCreateImage(vk_context.allocator, *texture_info, *texture_alloc_info, *it.image, *it.allocation, null));
+		texture_alloc_info := Vma.AllocationCreateInfo.{usage=.AUTO};
+		chk(Vma.CreateImage(vk_context.allocator, *texture_info, *texture_alloc_info, *it.image, *it.allocation, null));
 
 		texture_view_info: Vk.ImageViewCreateInfo;
 		texture_view_info.image = it.image;
@@ -155,7 +155,7 @@ main :: () {
 		chk(Vk.QueueSubmit2(vk_context.queue, 1, *one_time_si, fence_one_time));
 		chk(Vk.WaitForFences(vk_context.device, 1, *fence_one_time, Vk.TRUE, U64_MAX));
 		Vk.DestroyFence(vk_context.device, fence_one_time, null);
-		vmaDestroyBuffer(vk_context.allocator, image_source_buffer, image_source_allocation);
+		Vma.DestroyBuffer(vk_context.allocator, image_source_buffer, image_source_allocation);
 
 		sampler_info: Vk.SamplerCreateInfo;
 		sampler_info.magFilter = .LINEAR;
