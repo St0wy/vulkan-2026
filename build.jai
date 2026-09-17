@@ -27,6 +27,7 @@ build :: () {
 
 	for arg: args {
 		if arg == {
+			case "-o"; #through;
 			case "-optimized";
 				build_optimized = true;
 			case "-release";

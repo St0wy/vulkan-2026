@@ -1,14 +1,6 @@
 
 MAX_FRAMES_IN_FLIGHT :: 2;
 
-Vulkan_Shader_Data :: struct {
-	projection: Matrix4;
-	view: Matrix4;
-	model: [3] Matrix4;
-	light_pos: Vector4 = {0, -10, 10, 0};
-	selected: u32 = 1;
-}
-
 Shader_Data_Buffer :: struct {
 	allocation: Vma.Allocation;
 	allocation_info: Vma.AllocationInfo;
@@ -16,7 +8,7 @@ Shader_Data_Buffer :: struct {
 	device_address: Vk.DeviceAddress;
 }
 
-Vulkan_Texture :: struct {
+Gpu_Texture :: struct {
 	allocation: Vma.Allocation;
 	image: Vk.Image;
 	view: Vk.ImageView;
@@ -24,12 +16,14 @@ Vulkan_Texture :: struct {
 }
 
 // Verticies and indicies are stored in the same buffer
-Vulkan_Mesh :: struct {
-	mesh_buffer: Vk.Buffer;
-	mesh_buffer_allocation: Vma.Allocation;
+Gpu_Mesh :: struct {
+	buffer: Vk.Buffer;
+	allocation: Vma.Allocation;
+	index_offset: Vk.DeviceSize;
+	index_count: u32;
 }
 
-Vulkan_Context :: struct {
+Renderer :: struct {
 	instance: Vk.Instance;
 	debug_utils_messenger: Vk.DebugUtilsMessengerEXT;
 	physical_device: Vk.PhysicalDevice;
@@ -52,11 +46,9 @@ Vulkan_Context :: struct {
 	command_buffers: [MAX_FRAMES_IN_FLIGHT] Vk.CommandBuffer;
 	fences: [MAX_FRAMES_IN_FLIGHT] Vk.Fence;
 	image_acquired_semaphores: [MAX_FRAMES_IN_FLIGHT] Vk.Semaphore;
-	shader_data: Vulkan_Shader_Data;
 	shader_module: Vk.ShaderModule;
-	command_pool: Vk.CommandPool;
 	queue_family: u32;
-	textures: [3] Vulkan_Texture;
+	textures: [3] Gpu_Texture;
 	descriptor_set_layout_tex: Vk.DescriptorSetLayout;
 	descriptor_pool: Vk.DescriptorPool;
 	descriptor_set_tex: Vk.DescriptorSet;
@@ -65,15 +57,19 @@ Vulkan_Context :: struct {
 	frame_index: u32;
 	image_index: u32;
 	update_swapchain: bool;
+	current_cb: Vk.CommandBuffer;
+
+	command_pool: Vk.CommandPool;
+	immediate_fence: Vk.Fence;
+	immediate_command_buffer: Vk.CommandBuffer;
 }
 
-vulkan_init :: (
-	using vk_context: *Vulkan_Context,
+rederer_init :: (
+	using r: *Renderer,
 	handle: Window_Type,
 	$want_validation_layers := true,
-	$want_debug_extensions := true,
 ) {
-	vk_context.window = handle;
+	r.window = handle;
 
 	if Vk.initialize() != .SUCCESS  return;
 
@@ -99,7 +95,7 @@ vulkan_init :: (
 	debug_extensions_enabled := false;
 	{
 		desired_instance_extensions := get_desired_surface_extensions();
-		#if want_debug_extensions then array_add(*desired_instance_extensions, Vk.EXT_DEBUG_UTILS_EXTENSION_NAME);
+		#if want_validation_layers then array_add(*desired_instance_extensions, Vk.EXT_DEBUG_UTILS_EXTENSION_NAME);
 
 		instance_properties := vulkan_fill_array(Vk.ExtensionProperties, Vk.EnumerateInstanceExtensionProperties, null);
 		for desired: desired_instance_extensions {
@@ -256,13 +252,49 @@ vulkan_init :: (
 		chk(Vma.CreateAllocator(*allocator_info, *allocator));
 	}
 
-	surface = create_surface(instance, vk_context.window);
+	surface = create_surface(instance, r.window);
+
+	ok := vulkan_create_swapchain(r);
+	assert(ok, "Could not create the first swapchain");
+	vulkan_create_depth(r);
+
+	command_pool_info: Vk.CommandPoolCreateInfo;
+	command_pool_info.flags = .RESET_COMMAND_BUFFER_BIT;
+	command_pool_info.queueFamilyIndex = r.queue_family;
+	chk(Vk.CreateCommandPool(r.device, *command_pool_info, null, *r.command_pool));
+	cb_alloc_info: Vk.CommandBufferAllocateInfo;
+	cb_alloc_info.commandPool = r.command_pool;
+	cb_alloc_info.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
+	chk(Vk.AllocateCommandBuffers(r.device, *cb_alloc_info, r.command_buffers.data));
+
+	r.immediate_fence = vulkan_create_fence(r.device, signaled=false);
+
+	cb_one_time_info: Vk.CommandBufferAllocateInfo;
+	cb_one_time_info.commandPool = r.command_pool;
+	cb_one_time_info.commandBufferCount = 1;
+	chk(Vk.AllocateCommandBuffers(r.device, *cb_one_time_info, *r.immediate_command_buffer));
+
+	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
+		data_buff := *shader_data_buffers[it];
+		data_buff.buffer, data_buff.allocation, data_buff.allocation_info = vulkan_create_buffer(
+			allocator,
+			size_of(Shader_Data),
+			.SHADER_DEVICE_ADDRESS_BIT,
+			.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT,
+		);
+		uniform_buffer_bda_info: Vk.BufferDeviceAddressInfo;
+		uniform_buffer_bda_info.buffer = data_buff.buffer;
+		data_buff.device_address = Vk.GetBufferDeviceAddress(device, *uniform_buffer_bda_info);
+	}
 }
 
-vulkan_deinit :: (using vk_context: *Vulkan_Context) {
+renderer_deinit :: (using r: *Renderer) {
+	chk(Vk.DeviceWaitIdle(device));
+
 	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
 		Vk.DestroyFence(device, fences[it], null);
 		Vk.DestroySemaphore(device, image_acquired_semaphores[it], null);
+		Vma.DestroyBuffer(allocator, shader_data_buffers[it].buffer, shader_data_buffers[it].allocation);
 	}
 	for render_complete_semaphores Vk.DestroySemaphore(device, it, null);
 	Vma.DestroyImage(allocator, depth_image, depth_image_allocation);
@@ -280,6 +312,7 @@ vulkan_deinit :: (using vk_context: *Vulkan_Context) {
 	Vk.DestroySwapchainKHR(device, swapchain, null);
 	Vk.DestroySurfaceKHR(instance, surface, null);
 	Vk.DestroyCommandPool(device, command_pool, null);
+	Vk.DestroyFence(device, immediate_fence, null);
 	Vk.DestroyShaderModule(device, shader_module, null);
 	Vma.DestroyAllocator(allocator);
 	Vk.DestroyDevice(device, null);
@@ -288,92 +321,302 @@ vulkan_deinit :: (using vk_context: *Vulkan_Context) {
 	Vk.finalize();
 }
 
-vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height: int = -1) -> bool {
-	chk(Vk.DeviceWaitIdle(vk_context.device));
+begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool {
+	if update_swapchain {
+		update_swapchain = false;
+		ok := vulkan_create_swapchain(r, window_size.width, window_size.height);
+		if ok vulkan_create_depth(r);
+	}
+
+	if window_size.width == 0 || window_size.height == 0 then return false;
+
+	chk(Vk.WaitForFences(device, 1, *fences[frame_index], Vk.TRUE, U64_MAX));
+	chk(Vk.ResetFences(device, 1, *fences[frame_index]));
+
+	result := Vk.AcquireNextImageKHR(device, swapchain, U64_MAX, image_acquired_semaphores[frame_index], Vk.NULL_HANDLE, *image_index);
+	if result == .ERROR_OUT_OF_DATE_KHR {
+		update_swapchain = true;
+		return false;
+	} else if result == .SUBOPTIMAL_KHR {
+		update_swapchain = true;
+	} else {
+		chk(result);
+	}
+
+	current_cb = command_buffers[frame_index];
+	chk(Vk.ResetCommandBuffer(current_cb, 0));
+
+	cb_bi: Vk.CommandBufferBeginInfo;
+	cb_bi.flags = .ONE_TIME_SUBMIT_BIT;
+	chk(Vk.BeginCommandBuffer(current_cb, *cb_bi));
+
+	output_barriers := Vk.ImageMemoryBarrier2.[
+		{
+			srcStageMask = .COLOR_ATTACHMENT_OUTPUT_BIT,
+			dstStageMask = .COLOR_ATTACHMENT_OUTPUT_BIT,
+			dstAccessMask = .COLOR_ATTACHMENT_READ_BIT | .COLOR_ATTACHMENT_WRITE_BIT,
+			oldLayout = .UNDEFINED,
+			newLayout = .ATTACHMENT_OPTIMAL,
+			image = swapchain_images[image_index],
+			subresourceRange = {aspectMask=.COLOR_BIT, levelCount=1, layerCount=1},
+		},
+		{
+			srcStageMask = .LATE_FRAGMENT_TESTS_BIT,
+			srcAccessMask = .DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			dstStageMask = .EARLY_FRAGMENT_TESTS_BIT,
+			dstAccessMask = .DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			oldLayout = .UNDEFINED,
+			newLayout = .ATTACHMENT_OPTIMAL,
+			image = depth_image,
+			subresourceRange = {aspectMask=.DEPTH_BIT | .STENCIL_BIT, levelCount=1, layerCount=1},
+		}
+	];
+
+	barrier_dependency_info: Vk.DependencyInfo;
+	barrier_dependency_info.imageMemoryBarrierCount = output_barriers.count;
+	barrier_dependency_info.pImageMemoryBarriers = output_barriers.data;
+	Vk.CmdPipelineBarrier2(current_cb, *barrier_dependency_info);
+
+	color_attachment_info: Vk.RenderingAttachmentInfo;
+	color_attachment_info.imageView = swapchain_image_views[image_index];
+	color_attachment_info.imageLayout = .COLOR_ATTACHMENT_OPTIMAL;
+	color_attachment_info.loadOp = .CLEAR;
+	color_attachment_info.storeOp = .STORE;
+	color_attachment_info.clearValue.color.float32_ = .[0, 0, 0.2, 1.0];
+	depth_attachment_info: Vk.RenderingAttachmentInfo;
+	depth_attachment_info.imageView = depth_image_view;
+	depth_attachment_info.imageLayout = .DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+	depth_attachment_info.loadOp = .CLEAR;
+	depth_attachment_info.storeOp = .DONT_CARE;
+	depth_attachment_info.clearValue.depthStencil = {1.0, 0};
+
+	rendering_info: Vk.RenderingInfo;
+	rendering_info.renderArea = {extent=window_size};
+	rendering_info.layerCount = 1;
+	rendering_info.colorAttachmentCount = 1;
+	rendering_info.pColorAttachments = *color_attachment_info;
+	rendering_info.pDepthAttachment = *depth_attachment_info;
+	Vk.CmdBeginRendering(current_cb, *rendering_info);
+
+	vp := Vk.Viewport.{
+		width = window_size.width.(float),
+		height = window_size.height.(float),
+		minDepth = 0,
+		maxDepth = 1,
+	};
+	Vk.CmdSetViewport(current_cb, 0, 1, *vp);
+	scissor := Vk.Rect2D.{extent=window_size};
+	Vk.CmdSetScissor(current_cb, 0, 1, *scissor);
+
+	Vk.CmdBindPipeline(current_cb, .GRAPHICS, pipeline);
+	Vk.CmdBindDescriptorSets(current_cb, .GRAPHICS, pipeline_layout, 0, 1, *descriptor_set_tex, 0, null);
+
+	Vk.CmdPushConstants(
+		current_cb,
+		pipeline_layout,
+		.VERTEX_BIT,
+		0,
+		size_of(Vk.DeviceAddress),
+		*shader_data_buffers[frame_index].device_address
+	);
+	return true;
+}
+
+draw_mesh :: (r: *Renderer, mesh: Gpu_Mesh, instance_count: u32 = 1) {
+	v_offset: Vk.DeviceSize;
+	Vk.CmdBindVertexBuffers(r.current_cb, 0, 1, *mesh.buffer, *v_offset);
+	Vk.CmdBindIndexBuffer(r.current_cb, mesh.buffer, mesh.index_offset, .UINT32);
+	Vk.CmdDrawIndexed(r.current_cb, mesh.index_count, instance_count, 0, 0, 0);
+}
+
+end_frame :: (using r: *Renderer) {
+	Vk.CmdEndRendering(current_cb);
+
+	barrier_present: Vk.ImageMemoryBarrier2;
+	barrier_present.srcStageMask = .COLOR_ATTACHMENT_OUTPUT_BIT;
+	barrier_present.srcAccessMask = .COLOR_ATTACHMENT_WRITE_BIT;
+	barrier_present.dstStageMask = .COLOR_ATTACHMENT_OUTPUT_BIT;
+	barrier_present.oldLayout = .ATTACHMENT_OPTIMAL;
+	barrier_present.newLayout = .PRESENT_SRC_KHR;
+	barrier_present.image = swapchain_images[image_index];
+	barrier_present.subresourceRange = {aspectMask=.COLOR_BIT, levelCount=1, layerCount = 1};
+	barrier_present_dependency_info: Vk.DependencyInfo;
+	barrier_present_dependency_info.imageMemoryBarrierCount = 1;
+	barrier_present_dependency_info.pImageMemoryBarriers = *barrier_present;
+	Vk.CmdPipelineBarrier2(current_cb, *barrier_present_dependency_info);
+
+	Vk.EndCommandBuffer(current_cb);
+
+	wait_semaphore_info: Vk.SemaphoreSubmitInfo;
+	wait_semaphore_info.semaphore = image_acquired_semaphores[frame_index];
+	wait_semaphore_info.stageMask = .COLOR_ATTACHMENT_OUTPUT_BIT;
+	command_buffer_submit_info: Vk.CommandBufferSubmitInfo;
+	command_buffer_submit_info.commandBuffer = current_cb;
+	signal_semaphore_info: Vk.SemaphoreSubmitInfo;
+	signal_semaphore_info.semaphore = render_complete_semaphores[image_index];
+	signal_semaphore_info.stageMask = .COLOR_ATTACHMENT_OUTPUT_BIT;
+	submit_info: Vk.SubmitInfo2;
+	submit_info.waitSemaphoreInfoCount = 1;
+	submit_info.pWaitSemaphoreInfos = *wait_semaphore_info;
+	submit_info.commandBufferInfoCount = 1;
+	submit_info.pCommandBufferInfos = *command_buffer_submit_info;
+	submit_info.signalSemaphoreInfoCount = 1;
+	submit_info.pSignalSemaphoreInfos = *signal_semaphore_info;
+	chk(Vk.QueueSubmit2(queue, 1, *submit_info, fences[frame_index]));
+
+	frame_index = (frame_index + 1) % MAX_FRAMES_IN_FLIGHT;
+
+	present_info: Vk.PresentInfoKHR;
+	present_info.waitSemaphoreCount = 1;
+	present_info.pWaitSemaphores = *render_complete_semaphores[image_index];
+	present_info.swapchainCount = 1;
+	present_info.pSwapchains = *swapchain;
+	present_info.pImageIndices = *image_index;
+	result := Vk.QueuePresentKHR(queue, *present_info);
+	if result == .ERROR_OUT_OF_DATE_KHR || result == .SUBOPTIMAL_KHR {
+		update_swapchain = true;
+	} else {
+		chk(result);
+	}
+}
+
+renderer_resize :: (r: *Renderer, width: u32, height: u32) {
+	r.window_size = {width, height};
+	r.update_swapchain = true;
+}
+
+renderer_upload_mesh :: (r: *Renderer, mesh: Mesh) -> Gpu_Mesh {
+	gpu_mesh: Gpu_Mesh;
+	v_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
+	i_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
+	alloc_info: Vma.AllocationInfo;
+	gpu_mesh.buffer, gpu_mesh.allocation, alloc_info = vulkan_create_buffer(
+		r.allocator,
+		v_buf_size + i_buf_size,
+		.VERTEX_BUFFER_BIT | .INDEX_BUFFER_BIT,
+		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT
+	);
+	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
+	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
+
+	gpu_mesh.index_offset = v_buf_size;
+	gpu_mesh.index_count = xx mesh.indices.count;
+
+	return gpu_mesh;
+}
+
+renderer_destroy_mesh :: (r: *Renderer, gpu_mesh: *Gpu_Mesh) {
+	Vma.DestroyBuffer(r.allocator, gpu_mesh.buffer, gpu_mesh.allocation);
+	gpu_mesh.* = {};
+}
+
+set_shader_data :: (r: *Renderer, data: *Shader_Data) {
+	memcpy(r.shader_data_buffers[r.frame_index].allocation_info.pMappedData, data, size_of(type_of(data.*)));
+}
+
+// #scope_file
+
+begin_one_time_commands :: (r: *Renderer) {
+	chk(Vk.ResetFences(r.device, 1, *r.immediate_fence));
+	chk(Vk.ResetCommandBuffer(r.immediate_command_buffer, 0));
+	begin_info := command_buffer_begin_info(.ONE_TIME_SUBMIT_BIT);
+	chk(Vk.BeginCommandBuffer(r.immediate_command_buffer, *begin_info));
+}
+
+end_one_time_commands :: (r: *Renderer) {
+	chk(Vk.EndCommandBuffer(r.immediate_command_buffer));
+	cmd_submit_info := command_buffer_submit_info(r.immediate_command_buffer);
+	submit_info := submit_info_2(*cmd_submit_info);
+	chk(Vk.QueueSubmit2(r.queue, 1, *submit_info, r.immediate_fence));
+	chk(Vk.WaitForFences(r.device, 1, *r.immediate_fence, Vk.TRUE, U64_MAX));
+}
+
+vulkan_create_swapchain :: (r: *Renderer, width: int = -1, height: int = -1) -> bool {
+	chk(Vk.DeviceWaitIdle(r.device));
 	surface_capabilities: Vk.SurfaceCapabilitiesKHR;
-	chk(Vk.GetPhysicalDeviceSurfaceCapabilitiesKHR(vk_context.physical_device, vk_context.surface, *surface_capabilities));
+	chk(Vk.GetPhysicalDeviceSurfaceCapabilitiesKHR(r.physical_device, r.surface, *surface_capabilities));
 
 	if surface_capabilities.maxImageExtent.width == 0 || surface_capabilities.maxImageExtent.height == 0 {
 		return false;
 	}
 
-	vk_context.window_size = surface_capabilities.currentExtent;
+	r.window_size = surface_capabilities.currentExtent;
 	if width != -1 || height != -1 {
-		vk_context.window_size = {xx width, xx height};
-	} else if vk_context.window_size.width == 0xFFFFFFFF {
-		x, y, win_width, win_height, ok := get_dimensions(vk_context.window, right_handed=false);
+		r.window_size = {xx width, xx height};
+	} else if r.window_size.width == 0xFFFFFFFF {
+		x, y, win_width, win_height, ok := get_dimensions(r.window, right_handed=false);
 		assert(ok);
-		vk_context.window_size = {xx win_width, xx win_height};
+		r.window_size = {xx win_width, xx win_height};
 	}
 
-	vk_context.swapchain_image_format = .B8G8R8A8_SRGB;
+	r.swapchain_image_format = .B8G8R8A8_SRGB;
 	swapchain_info: Vk.SwapchainCreateInfoKHR;
-	swapchain_info.surface = vk_context.surface;
+	swapchain_info.surface = r.surface;
 	swapchain_info.minImageCount = surface_capabilities.minImageCount;
-	swapchain_info.imageFormat = vk_context.swapchain_image_format;
+	swapchain_info.imageFormat = r.swapchain_image_format;
 	swapchain_info.imageColorSpace = .SRGB_NONLINEAR_KHR;
-	swapchain_info.imageExtent = vk_context.window_size;
+	swapchain_info.imageExtent = r.window_size;
 	swapchain_info.imageArrayLayers = 1;
 	swapchain_info.imageUsage = .COLOR_ATTACHMENT_BIT;
 	swapchain_info.preTransform = .IDENTITY_BIT_KHR;
 	swapchain_info.compositeAlpha = .OPAQUE_BIT_KHR;
 	swapchain_info.presentMode = .FIFO_KHR;
-	swapchain_info.oldSwapchain = vk_context.swapchain;
-	chk(Vk.CreateSwapchainKHR(vk_context.device, *swapchain_info, null, *vk_context.swapchain));
+	swapchain_info.oldSwapchain = r.swapchain;
+	chk(Vk.CreateSwapchainKHR(r.device, *swapchain_info, null, *r.swapchain));
 
-	if swapchain_info.oldSwapchain then Vk.DestroySwapchainKHR(vk_context.device, swapchain_info.oldSwapchain, null);
+	if swapchain_info.oldSwapchain then Vk.DestroySwapchainKHR(r.device, swapchain_info.oldSwapchain, null);
 
-	images := vulkan_fill_array(Vk.Image, Vk.GetSwapchainImagesKHR, vk_context.device, vk_context.swapchain);
-	if vk_context.swapchain_images.count == 0 {
-		vk_context.swapchain_images = alloc_and_copy_array(images);
-	} else if vk_context.swapchain_images.count == images.count {
-		copy_array_dst_src(vk_context.swapchain_images, images);
+	images := vulkan_fill_array(Vk.Image, Vk.GetSwapchainImagesKHR, r.device, r.swapchain);
+	if r.swapchain_images.count == 0 {
+		r.swapchain_images = alloc_and_copy_array(images);
+	} else if r.swapchain_images.count == images.count {
+		copy_array_dst_src(r.swapchain_images, images);
 	} else {
 		assert(false, "Missmatch between old and new swapchain image count");
 	}
 
-	for vk_context.swapchain_image_views Vk.DestroyImageView(vk_context.device, it, null);
+	for r.swapchain_image_views Vk.DestroyImageView(r.device, it, null);
 
 	new_image_views := make_temp_dyn_array(Vk.ImageView);
-	for vk_context.swapchain_images {
+	for r.swapchain_images {
 		view_info: Vk.ImageViewCreateInfo;
 		view_info.image = it;
 		view_info.viewType = ._2D;
-		view_info.format = vk_context.swapchain_image_format;
+		view_info.format = r.swapchain_image_format;
 		view_info.subresourceRange = {aspectMask=.COLOR_BIT, levelCount=1, layerCount=1};
 		image_view: Vk.ImageView;
-		chk(Vk.CreateImageView(vk_context.device, *view_info, null, *image_view));
+		chk(Vk.CreateImageView(r.device, *view_info, null, *image_view));
 		array_add(*new_image_views, image_view);
 	}
 
-	if vk_context.swapchain_image_views.count == 0 {
-		vk_context.swapchain_image_views = alloc_and_copy_array(new_image_views);
-	} else if vk_context.swapchain_image_views.count == images.count {
-		copy_array_dst_src(vk_context.swapchain_image_views, new_image_views);
+	if r.swapchain_image_views.count == 0 {
+		r.swapchain_image_views = alloc_and_copy_array(new_image_views);
+	} else if r.swapchain_image_views.count == images.count {
+		copy_array_dst_src(r.swapchain_image_views, new_image_views);
 	} else {
 		assert(false, "Missmatch between old and new swapchain image views count");
 	}
 
 	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
-		if !vk_context.fences[it]
-			vk_context.fences[it] = vulkan_create_fence(vk_context.device, signaled=true);
-		if !vk_context.image_acquired_semaphores[it]
-			vk_context.image_acquired_semaphores[it] = vulkan_create_semaphore(vk_context.device);
+		if !r.fences[it]
+			r.fences[it] = vulkan_create_fence(r.device, signaled=true);
+		if !r.image_acquired_semaphores[it]
+			r.image_acquired_semaphores[it] = vulkan_create_semaphore(r.device);
 	}
 
 	new_render_complete_semaphores := make_temp_dyn_array(Vk.Semaphore);
-	for 0..vk_context.swapchain_images.count - 1 {
-		array_add(*new_render_complete_semaphores, vulkan_create_semaphore(vk_context.device));
+	for 0..r.swapchain_images.count - 1 {
+		array_add(*new_render_complete_semaphores, vulkan_create_semaphore(r.device));
 	}
 
-	for * vk_context.render_complete_semaphores {
-		vulkan_destroy_semaphore(vk_context.device, it);
+	for * r.render_complete_semaphores {
+		vulkan_destroy_semaphore(r.device, it);
 	}
 
-	if vk_context.render_complete_semaphores.count == 0 {
-		vk_context.render_complete_semaphores = alloc_and_copy_array(new_render_complete_semaphores);
-	} else if vk_context.render_complete_semaphores.count == vk_context.swapchain_images.count {
-		copy_array_dst_src(vk_context.render_complete_semaphores, new_render_complete_semaphores);
+	if r.render_complete_semaphores.count == 0 {
+		r.render_complete_semaphores = alloc_and_copy_array(new_render_complete_semaphores);
+	} else if r.render_complete_semaphores.count == r.swapchain_images.count {
+		copy_array_dst_src(r.render_complete_semaphores, new_render_complete_semaphores);
 	} else {
 		assert(false, "Missmatch between old and new render_complete_semaphores count");
 	}
@@ -381,10 +624,10 @@ vulkan_create_swapchain :: (vk_context: *Vulkan_Context, width: int = -1, height
 	return true;
 }
 
-vulkan_create_depth :: (vk_context: *Vulkan_Context) {
-	if vk_context.depth_image && vk_context.depth_image_allocation {
-		Vma.DestroyImage(vk_context.allocator, vk_context.depth_image, vk_context.depth_image_allocation);
-		Vk.DestroyImageView(vk_context.device, vk_context.depth_image_view, null);
+vulkan_create_depth :: (r: *Renderer) {
+	if r.depth_image && r.depth_image_allocation {
+		Vma.DestroyImage(r.allocator, r.depth_image, r.depth_image_allocation);
+		Vk.DestroyImageView(r.device, r.depth_image_view, null);
 	}
 
 	depth_format_list :: Vk.Format.[
@@ -394,19 +637,19 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 
 	for depth_format_list {
 		format_properties: Vk.FormatProperties2;
-		Vk.GetPhysicalDeviceFormatProperties2(vk_context.physical_device, it, *format_properties);
+		Vk.GetPhysicalDeviceFormatProperties2(r.physical_device, it, *format_properties);
 		if format_properties.formatProperties.optimalTilingFeatures & .DEPTH_STENCIL_ATTACHMENT_BIT {
-			vk_context.depth_image_format = it;
+			r.depth_image_format = it;
 			break;
 		}
 	}
 
-	assert(vk_context.depth_image_format != .UNDEFINED);
+	assert(r.depth_image_format != .UNDEFINED);
 
 	depth_image_info: Vk.ImageCreateInfo;
 	depth_image_info.imageType = ._2D;
-	depth_image_info.format = vk_context.depth_image_format;
-	depth_image_info.extent = {vk_context.window_size.width, vk_context.window_size.height, 1};
+	depth_image_info.format = r.depth_image_format;
+	depth_image_info.extent = {r.window_size.width, r.window_size.height, 1};
 	depth_image_info.mipLevels = 1;
 	depth_image_info.arrayLayers = 1;
 	depth_image_info.samples = ._1_BIT;
@@ -419,102 +662,43 @@ vulkan_create_depth :: (vk_context: *Vulkan_Context) {
 		usage = .AUTO,
 	};
 	chk(Vma.CreateImage(
-		vk_context.allocator,
+		r.allocator,
 		*depth_image_info,
 		*alloc_info,
-		*vk_context.depth_image,
-		*vk_context.depth_image_allocation,
+		*r.depth_image,
+		*r.depth_image_allocation,
 		null
 	));
 
 	depth_view_info: Vk.ImageViewCreateInfo;
-	depth_view_info.image = vk_context.depth_image;
+	depth_view_info.image = r.depth_image;
 	depth_view_info.viewType = ._2D;
-	depth_view_info.format = vk_context.depth_image_format;
+	depth_view_info.format = r.depth_image_format;
 	depth_view_info.subresourceRange = {aspectMask=.DEPTH_BIT, levelCount=1, layerCount=1};
-	chk(Vk.CreateImageView(vk_context.device, *depth_view_info, null, *vk_context.depth_image_view));
+	chk(Vk.CreateImageView(r.device, *depth_view_info, null, *r.depth_image_view));
 }
 
-vulkan_upload_mesh :: (allocator: Vma.Allocator, mesh: Mesh) -> Vulkan_Mesh {
-	vulkan_mesh: Vulkan_Mesh;
-	v_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
-	i_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
-	alloc_info: Vma.AllocationInfo;
-	vulkan_mesh.mesh_buffer, vulkan_mesh.mesh_buffer_allocation, alloc_info = vulkan_create_buffer(
-		allocator,
-		v_buf_size + i_buf_size,
-		.VERTEX_BUFFER_BIT | .INDEX_BUFFER_BIT,
-		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT
-	);
-	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
-	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
-
-	return vulkan_mesh;
-}
-
-vulkan_destroy_mesh :: (allocator: Vma.Allocator, vulkan_mesh: *Vulkan_Mesh) {
-	Vma.DestroyBuffer(allocator, vulkan_mesh.mesh_buffer, vulkan_mesh.mesh_buffer_allocation);
-	vulkan_mesh.* = {};
-}
-
-vulkan_allocate_shader_data_buffer :: (vk_context: *Vulkan_Context) {
-	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
-		data_buff := *vk_context.shader_data_buffers[it];
-		data_buff.buffer, data_buff.allocation, data_buff.allocation_info = vulkan_create_buffer(
-			vk_context.allocator,
-			size_of(Vulkan_Shader_Data),
-			.SHADER_DEVICE_ADDRESS_BIT,
-			.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT,
-		);
-		uniform_buffer_bda_info: Vk.BufferDeviceAddressInfo;
-		uniform_buffer_bda_info.buffer = data_buff.buffer;
-		data_buff.device_address = Vk.GetBufferDeviceAddress(vk_context.device, *uniform_buffer_bda_info);
-	}
-}
-
-vulkan_free_shader_data_buffers :: (using vk_context: *Vulkan_Context) {
-	for * shader_data_buffers {
-		Vma.DestroyBuffer(allocator, it.buffer, it.allocation);
-	}
-}
-
-vulkan_allocate_command_buffers :: (vk_context: *Vulkan_Context) {
-	command_pool_info: Vk.CommandPoolCreateInfo;
-	command_pool_info.flags = .RESET_COMMAND_BUFFER_BIT;
-	command_pool_info.queueFamilyIndex = vk_context.queue_family;
-	chk(Vk.CreateCommandPool(vk_context.device, *command_pool_info, null, *vk_context.command_pool));
-	cb_alloc_info: Vk.CommandBufferAllocateInfo;
-	cb_alloc_info.commandPool = vk_context.command_pool;
-	cb_alloc_info.commandBufferCount = MAX_FRAMES_IN_FLIGHT;
-	chk(Vk.AllocateCommandBuffers(vk_context.device, *cb_alloc_info, vk_context.command_buffers.data));
-}
-
-vulkan_create_semaphore :: (device: Vk.Device) -> Vk.Semaphore
-{
+vulkan_create_semaphore :: (device: Vk.Device) -> Vk.Semaphore {
 	create_info : Vk.SemaphoreCreateInfo;
 	semaphore : Vk.Semaphore;
 	chk(Vk.CreateSemaphore(device, *create_info, null, *semaphore));
 	return semaphore;
 }
 
-vulkan_destroy_semaphore :: (device: Vk.Device, semaphore : *Vk.Semaphore)
-{
+vulkan_destroy_semaphore :: (device: Vk.Device, semaphore : *Vk.Semaphore) {
 	Vk.DestroySemaphore(device, semaphore.*, null);
 	semaphore.* = null;
 }
 
-vulkan_create_fence :: (device: Vk.Device, signaled : bool) -> Vk.Fence
-{
+vulkan_create_fence :: (device: Vk.Device, signaled : bool) -> Vk.Fence {
 	create_info : Vk.FenceCreateInfo;
 	if signaled create_info.flags = .SIGNALED_BIT;
 	fence : Vk.Fence;
-	result := Vk.CreateFence(device, *create_info, null, *fence);
+	chk(Vk.CreateFence(device, *create_info, null, *fence));
 	return fence;
 }
 
-
-vulkan_destroy_fence :: (device: Vk.Device, fence : *Vk.Fence)
-{
+vulkan_destroy_fence :: (device: Vk.Device, fence : *Vk.Fence) {
 	Vk.DestroyFence(device, fence.*, null);
 	fence.* = null;
 }
@@ -547,9 +731,102 @@ vulkan_create_buffer :: (
 	return buffer, alloc, buffer_alloc_info;
 }
 
+command_buffer_begin_info :: (flags: Vk.CommandBufferUsageFlags) -> Vk.CommandBufferBeginInfo {
+	info: Vk.CommandBufferBeginInfo;
+	info.flags = flags;
+	return info;
+}
+
+command_buffer_submit_info :: (cmd: Vk.CommandBuffer) -> Vk.CommandBufferSubmitInfo {
+	info: Vk.CommandBufferSubmitInfo;
+	info.commandBuffer = cmd;
+	return info;
+}
+
+submit_info_2 :: (
+	cmd: *Vk.CommandBufferSubmitInfo,
+	signal_semaphore_info: *Vk.SemaphoreSubmitInfo = null,
+	wait_semaphore_info: *Vk.SemaphoreSubmitInfo = null,
+) -> Vk.SubmitInfo2 {
+	info: Vk.SubmitInfo2;
+	info.signalSemaphoreInfoCount = ifx signal_semaphore_info then cast(u32, 1) else cast(u32, 0);
+	info.pSignalSemaphoreInfos = signal_semaphore_info;
+	info.waitSemaphoreInfoCount = ifx wait_semaphore_info then cast(u32, 1) else cast(u32, 0);
+	info.pWaitSemaphoreInfos = wait_semaphore_info;
+	info.commandBufferInfoCount = 1;
+	info.pCommandBufferInfos = cmd;
+	return info;
+}
+
+Layout_Usage :: struct {
+	access: Vk.AccessFlags2;
+	stage: Vk.PipelineStageFlags2;
+}
+
+layout_usage :: (layout: Vk.ImageLayout) -> Layout_Usage {
+	if layout == {
+	case .UNDEFINED; #through;
+	case .PRESENT_SRC_KHR;
+		return {0, .NONE};
+	case .TRANSFER_SRC_OPTIMAL;
+		return {.TRANSFER_READ_BIT, .TRANSFER_BIT};
+	case .TRANSFER_DST_OPTIMAL;
+		return {.TRANSFER_WRITE_BIT, .TRANSFER_BIT};
+	case .COLOR_ATTACHMENT_OPTIMAL;
+		return {.COLOR_ATTACHMENT_READ_BIT | .COLOR_ATTACHMENT_WRITE_BIT, .COLOR_ATTACHMENT_OUTPUT_BIT};
+	case .READ_ONLY_OPTIMAL; #through;
+	case .DEPTH_ATTACHMENT_OPTIMAL; #through;
+	case .DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		return {
+			.DEPTH_STENCIL_ATTACHMENT_READ_BIT | .DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			.EARLY_FRAGMENT_TESTS_BIT | .LATE_FRAGMENT_TESTS_BIT,
+		};
+	case .SHADER_READ_ONLY_OPTIMAL;
+		return {.SHADER_SAMPLED_READ_BIT, .FRAGMENT_SHADER_BIT};
+	case .GENERAL;
+		return {.SHADER_STORAGE_READ_BIT |. SHADER_STORAGE_WRITE_BIT, .COMPUTE_SHADER_BIT};
+	case;
+		log_error("Transition image, unhandled layout: %", layout);
+		return {0, .ALL_COMMANDS_BIT};
+	}
+}
+
+transition_image :: (cmd: Vk.CommandBuffer, image: Vk.Image, old_layout: Vk.ImageLayout, new_layout: Vk.ImageLayout) {
+	src := layout_usage(old_layout);
+	dst := layout_usage(new_layout);
+
+	aspect := Vk.ImageAspectFlags.COLOR_BIT;
+	if new_layout == .DEPTH_ATTACHMENT_OPTIMAL {
+		aspect = .DEPTH_BIT;
+	} else if new_layout == .DEPTH_STENCIL_ATTACHMENT_OPTIMAL {
+		aspect = .DEPTH_BIT | .STENCIL_BIT;
+	}
+
+	barrier: Vk.ImageMemoryBarrier2;
+	barrier.srcStageMask = src.stage;
+	barrier.srcAccessMask = src.access;
+	barrier.dstStageMask = dst.stage;
+	barrier.dstAccessMask = dst.access;
+	barrier.oldLayout = old_layout;
+	barrier.newLayout = new_layout;
+	barrier.srcQueueFamilyIndex = Vk.QUEUE_FAMILY_IGNORED;
+	barrier.dstQueueFamilyIndex = Vk.QUEUE_FAMILY_IGNORED;
+	barrier.image = image;
+	barrier.subresourceRange = {
+		aspectMask = aspect,
+		levelCount = Vk.REMAINING_MIP_LEVELS,
+		layerCount = Vk.REMAINING_ARRAY_LAYERS,
+	};
+
+	info: Vk.DependencyInfo;
+	info.imageMemoryBarrierCount = 1;
+	info.pImageMemoryBarriers = *barrier;
+
+	Vk.CmdPipelineBarrier2(cmd, *info);
+}
+
 // From modules/osor_vulkan/examples/src/main.jai
-vulkan_fill_array :: ($type : Type, procedure : $Procedure, $arguments : ..Code) -> [] type #expand
-{
+vulkan_fill_array :: ($type : Type, procedure : $Procedure, $arguments : ..Code) -> [] type #expand {
 	#insert #run -> string
 	{
 		builder : String_Builder;
