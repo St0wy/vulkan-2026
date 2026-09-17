@@ -1,4 +1,6 @@
 
+#load "vk_init.jai";
+
 MAX_FRAMES_IN_FLIGHT :: 2;
 
 Shader_Data_Buffer :: struct {
@@ -48,7 +50,6 @@ Renderer :: struct {
 	image_acquired_semaphores: [MAX_FRAMES_IN_FLIGHT] Vk.Semaphore;
 	shader_module: Vk.ShaderModule;
 	queue_family: u32;
-	textures: [3] Gpu_Texture;
 	descriptor_set_layout_tex: Vk.DescriptorSetLayout;
 	descriptor_pool: Vk.DescriptorPool;
 	descriptor_set_tex: Vk.DescriptorSet;
@@ -300,11 +301,6 @@ renderer_deinit :: (using r: *Renderer) {
 	Vma.DestroyImage(allocator, depth_image, depth_image_allocation);
 	Vk.DestroyImageView(device, depth_image_view, null);
 	for swapchain_image_views Vk.DestroyImageView(device, it, null);
-	for textures {
-		Vk.DestroyImageView(device, it.view, null);
-		Vk.DestroySampler(device, it.sampler, null);
-		Vma.DestroyImage(allocator, it.image, it.allocation);
-	}
 	Vk.DestroyDescriptorSetLayout(device, descriptor_set_layout_tex, null);
 	Vk.DestroyDescriptorPool(device, descriptor_pool, null);
 	Vk.DestroyPipelineLayout(device, pipeline_layout, null);
@@ -319,6 +315,253 @@ renderer_deinit :: (using r: *Renderer) {
 	if debug_utils_messenger then Vk.DestroyDebugUtilsMessengerEXT(instance, debug_utils_messenger, null);
 	Vk.DestroyInstance(instance, null);
 	Vk.finalize();
+}
+
+renderer_resize :: (r: *Renderer, width: u32, height: u32) {
+	r.window_size = {width, height};
+	r.update_swapchain = true;
+}
+
+renderer_upload_mesh :: (r: *Renderer, mesh: Mesh) -> Gpu_Mesh {
+	gpu_mesh: Gpu_Mesh;
+	v_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
+	i_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
+	alloc_info: Vma.AllocationInfo;
+	gpu_mesh.buffer, gpu_mesh.allocation, alloc_info = vulkan_create_buffer(
+		r.allocator,
+		v_buf_size + i_buf_size,
+		.VERTEX_BUFFER_BIT | .INDEX_BUFFER_BIT,
+		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT
+	);
+	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
+	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
+
+	gpu_mesh.index_offset = v_buf_size;
+	gpu_mesh.index_count = xx mesh.indices.count;
+
+	return gpu_mesh;
+}
+
+renderer_destroy_mesh :: (r: *Renderer, gpu_mesh: *Gpu_Mesh) {
+	Vma.DestroyBuffer(r.allocator, gpu_mesh.buffer, gpu_mesh.allocation);
+	gpu_mesh.* = {};
+}
+
+renderer_create_texture :: (r: *Renderer, ktx: Ktx_Image) -> Gpu_Texture {
+	gpu_texture: Gpu_Texture;
+	texture_info := image_create_info(
+		ktx.vulkan_format,
+		.TRANSFER_DST_BIT | .SAMPLED_BIT,
+		{width=ktx.width, height=ktx.height, depth=1},
+		ktx.level_count,
+	);
+	texture_alloc_ci := Vma.AllocationCreateInfo.{usage=.AUTO};
+	chk(Vma.CreateImage(r.allocator, *texture_info, *texture_alloc_ci, *gpu_texture.image, *gpu_texture.allocation, null));
+
+	texture_view_info: Vk.ImageViewCreateInfo;
+	texture_view_info.image = gpu_texture.image;
+	texture_view_info.viewType = ._2D;
+	texture_view_info.format = texture_info.format;
+	texture_view_info.subresourceRange = {
+		aspectMask = .COLOR_BIT,
+		levelCount = ktx.level_count,
+		layerCount = 1
+	};
+	chk(Vk.CreateImageView(r.device, *texture_view_info, null, *gpu_texture.view));
+
+	image_source_buffer, image_source_allocation, image_source_allocation_info := vulkan_create_buffer(
+		r.allocator,
+		xx ktx.image_data.count,
+		.TRANSFER_SRC_BIT,
+		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .MAPPED_BIT
+	);
+
+	memcpy(image_source_allocation_info.pMappedData, ktx.image_data.data, ktx.image_data.count);
+
+	begin_one_time_commands(r);
+
+	transition_image(r.immediate_command_buffer, gpu_texture.image, .UNDEFINED, .TRANSFER_DST_OPTIMAL);
+
+	copy_regions := make_temp_dyn_array(Vk.BufferImageCopy);
+	for ktx.mipmap_offsets {
+		region_width := ktx.width >> it_index;
+		region_height := ktx.height >> it_index;
+		region := Vk.BufferImageCopy.{
+			bufferOffset = it.byte_offset,
+			imageSubresource = {aspectMask=.COLOR_BIT, mipLevel=xx it_index, layerCount=1},
+			imageExtent = {width=region_width, height=region_height, depth=1},
+		};
+		array_add(*copy_regions, region);
+	}
+
+	Vk.CmdCopyBufferToImage(
+		r.immediate_command_buffer,
+		image_source_buffer,
+		gpu_texture.image,
+		.TRANSFER_DST_OPTIMAL,
+		xx copy_regions.count,
+		copy_regions.data
+	);
+
+	transition_image(r.immediate_command_buffer, gpu_texture.image, .TRANSFER_DST_OPTIMAL, .READ_ONLY_OPTIMAL);
+
+	end_one_time_commands(*renderer);
+
+	Vma.DestroyBuffer(r.allocator, image_source_buffer, image_source_allocation);
+
+	sampler_info: Vk.SamplerCreateInfo;
+	sampler_info.magFilter = .LINEAR;
+	sampler_info.minFilter = .LINEAR;
+	sampler_info.mipmapMode = .LINEAR;
+	sampler_info.anisotropyEnable = Vk.TRUE;
+	sampler_info.maxAnisotropy = 8.0;
+	sampler_info.maxLod = ktx.level_count.(float);
+	chk(Vk.CreateSampler(r.device, *sampler_info, null, *gpu_texture.sampler));
+
+	return gpu_texture;
+}
+
+renderer_destroy_texture :: (r: *Renderer, tex: *Gpu_Texture) {
+	chk(Vk.DeviceWaitIdle(r.device));
+	Vk.DestroyImageView(r.device, tex.view, null);
+	Vk.DestroySampler(r.device, tex.sampler, null);
+	Vma.DestroyImage(r.allocator, tex.image, tex.allocation);
+	tex.* = {};
+}
+
+renderer_create_texture_set :: (r: *Renderer, textures: [] Gpu_Texture) {
+	count := textures.count.(u32);
+
+	desc_variable_flag := Vk.DescriptorBindingFlags.VARIABLE_DESCRIPTOR_COUNT_BIT;
+	desc_binding_flags: Vk.DescriptorSetLayoutBindingFlagsCreateInfo;
+	desc_binding_flags.bindingCount = 1;
+	desc_binding_flags.pBindingFlags = *desc_variable_flag;
+	desc_layout_binding_tex: Vk.DescriptorSetLayoutBinding;
+	desc_layout_binding_tex.descriptorType = .COMBINED_IMAGE_SAMPLER;
+	desc_layout_binding_tex.descriptorCount = count;
+	desc_layout_binding_tex.stageFlags = .FRAGMENT_BIT;
+	desc_layout_tex_ci: Vk.DescriptorSetLayoutCreateInfo;
+	desc_layout_tex_ci.pNext = *desc_binding_flags;
+	desc_layout_tex_ci.bindingCount = 1;
+	desc_layout_tex_ci.pBindings = *desc_layout_binding_tex;
+	chk(Vk.CreateDescriptorSetLayout(r.device, *desc_layout_tex_ci, null, *r.descriptor_set_layout_tex));
+
+	pool_size: Vk.DescriptorPoolSize;
+	pool_size.type = .COMBINED_IMAGE_SAMPLER;
+	pool_size.descriptorCount = count;
+	desc_pool_ci: Vk.DescriptorPoolCreateInfo;
+	desc_pool_ci.maxSets = 1;
+	desc_pool_ci.poolSizeCount = 1;
+	desc_pool_ci.pPoolSizes = *pool_size;
+	chk(Vk.CreateDescriptorPool(r.device, *desc_pool_ci, null, *r.descriptor_pool));
+
+	variable_desc_count_ai: Vk.DescriptorSetVariableDescriptorCountAllocateInfo;
+	variable_desc_count_ai.descriptorSetCount = 1;
+	variable_desc_count_ai.pDescriptorCounts = *count;
+	tex_desc_set_alloc: Vk.DescriptorSetAllocateInfo;
+	tex_desc_set_alloc.pNext = *variable_desc_count_ai;
+	tex_desc_set_alloc.descriptorPool = r.descriptor_pool;
+	tex_desc_set_alloc.descriptorSetCount = 1;
+	tex_desc_set_alloc.pSetLayouts = *r.descriptor_set_layout_tex;
+	chk(Vk.AllocateDescriptorSets(r.device, *tex_desc_set_alloc, *r.descriptor_set_tex));
+
+	texture_descriptors := make_temp_dyn_array(Vk.DescriptorImageInfo);
+	for textures {
+		array_add(*texture_descriptors, texture_get_descriptor(it));
+	}
+
+	write_desc_set: Vk.WriteDescriptorSet;
+	write_desc_set.dstSet = r.descriptor_set_tex;
+	write_desc_set.dstBinding = 0;
+	write_desc_set.descriptorType = .COMBINED_IMAGE_SAMPLER;
+	write_desc_set.descriptorCount = count;
+	write_desc_set.pImageInfo = texture_descriptors.data;
+	Vk.UpdateDescriptorSets(r.device, 1, *write_desc_set, 0, null);
+}
+
+renderer_create_pipeline :: (r: *Renderer, spirv: string) -> bool {
+	shader_module_ci: Vk.ShaderModuleCreateInfo;
+	shader_module_ci.codeSize = xx spirv.count;
+	shader_module_ci.pCode = spirv.data.(*u32);
+	chk(Vk.CreateShaderModule(r.device, *shader_module_ci, null, *r.shader_module));
+
+	push_constant_range: Vk.PushConstantRange;
+	push_constant_range.stageFlags = .VERTEX_BIT;
+	push_constant_range.size = size_of(Vk.DeviceAddress);
+	pipeline_layout_ci: Vk.PipelineLayoutCreateInfo;
+	pipeline_layout_ci.setLayoutCount = 1;
+	pipeline_layout_ci.pSetLayouts = *r.descriptor_set_layout_tex;
+	pipeline_layout_ci.pushConstantRangeCount = 1;
+	pipeline_layout_ci.pPushConstantRanges = *push_constant_range;
+	chk(Vk.CreatePipelineLayout(r.device, *pipeline_layout_ci, null, *r.pipeline_layout));
+
+	vertex_binding: Vk.VertexInputBindingDescription;
+	vertex_binding.stride = size_of(Vertex);
+	vertex_binding.inputRate = .VERTEX;
+	// TODO Try to generate this automatically
+	vertex_attributes := Vk.VertexInputAttributeDescription.[
+		{location=0, binding=0, format=.R32G32B32_SFLOAT},
+		{location=1, binding=0, format=.R32G32B32_SFLOAT, offset=xx offset_of(Vertex, #code normal)},
+		{location=2, binding=0, format=.R32G32_SFLOAT, offset=xx offset_of(Vertex, #code tex_coords)},
+	];
+
+	vertex_input_state: Vk.PipelineVertexInputStateCreateInfo;
+	vertex_input_state.vertexBindingDescriptionCount = 1;
+	vertex_input_state.pVertexBindingDescriptions = *vertex_binding;
+	vertex_input_state.vertexAttributeDescriptionCount = vertex_attributes.count;
+	vertex_input_state.pVertexAttributeDescriptions = vertex_attributes.data;
+
+	input_assembly_state: Vk.PipelineInputAssemblyStateCreateInfo;
+	input_assembly_state.topology = .TRIANGLE_LIST;
+
+	shader_stages := Vk.PipelineShaderStageCreateInfo.[
+		{stage=.VERTEX_BIT, module=renderer.shader_module, pName="main"},
+		{stage=.FRAGMENT_BIT, module=renderer.shader_module, pName="main"},
+	];
+
+	viewport_state: Vk.PipelineViewportStateCreateInfo;
+	viewport_state.viewportCount = 1;
+	viewport_state.scissorCount = 1;
+	dynamic_states := Vk.DynamicState.[.VIEWPORT, .SCISSOR];
+	dynamic_state: Vk.PipelineDynamicStateCreateInfo;
+	dynamic_state.dynamicStateCount = dynamic_states.count;
+	dynamic_state.pDynamicStates = dynamic_states.data;
+
+	depth_stencil_state: Vk.PipelineDepthStencilStateCreateInfo;
+	depth_stencil_state.depthTestEnable = Vk.TRUE;
+	depth_stencil_state.depthWriteEnable = Vk.TRUE;
+	depth_stencil_state.depthCompareOp = .LESS_OR_EQUAL;
+
+	rendering_ci: Vk.PipelineRenderingCreateInfo;
+	rendering_ci.colorAttachmentCount = 1;
+	rendering_ci.pColorAttachmentFormats = *renderer.swapchain_image_format;
+	rendering_ci.depthAttachmentFormat = renderer.depth_image_format;
+
+	blend_attachment := Vk.PipelineColorBlendAttachmentState.{colorWriteMask=0xF};
+	color_blend_state: Vk.PipelineColorBlendStateCreateInfo;
+	color_blend_state.attachmentCount = 1;
+	color_blend_state.pAttachments = *blend_attachment;
+	rasterization_state: Vk.PipelineRasterizationStateCreateInfo;
+	rasterization_state.lineWidth = 1.0;
+	multisample_state: Vk.PipelineMultisampleStateCreateInfo;
+	multisample_state.rasterizationSamples = ._1_BIT;
+
+	pipeline_ci: Vk.GraphicsPipelineCreateInfo;
+	pipeline_ci.pNext = *rendering_ci;
+	pipeline_ci.stageCount = shader_stages.count;
+	pipeline_ci.pStages = shader_stages.data;
+	pipeline_ci.pVertexInputState = *vertex_input_state;
+	pipeline_ci.pInputAssemblyState = *input_assembly_state;
+	pipeline_ci.pViewportState = *viewport_state;
+	pipeline_ci.pRasterizationState = *rasterization_state;
+	pipeline_ci.pMultisampleState = *multisample_state;
+	pipeline_ci.pDepthStencilState = *depth_stencil_state;
+	pipeline_ci.pColorBlendState = *color_blend_state;
+	pipeline_ci.pDynamicState = *dynamic_state;
+	pipeline_ci.layout = renderer.pipeline_layout;
+	chk(Vk.CreateGraphicsPipelines(renderer.device, Vk.NULL_HANDLE, 1, *pipeline_ci, null, *renderer.pipeline));
+
+	return true;
 }
 
 begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool {
@@ -478,36 +721,6 @@ end_frame :: (using r: *Renderer) {
 	} else {
 		chk(result);
 	}
-}
-
-renderer_resize :: (r: *Renderer, width: u32, height: u32) {
-	r.window_size = {width, height};
-	r.update_swapchain = true;
-}
-
-renderer_upload_mesh :: (r: *Renderer, mesh: Mesh) -> Gpu_Mesh {
-	gpu_mesh: Gpu_Mesh;
-	v_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.vertices[0])) * mesh.vertices.count);
-	i_buf_size := cast(Vk.DeviceSize, size_of(type_of(mesh.indices[0])) * mesh.indices.count);
-	alloc_info: Vma.AllocationInfo;
-	gpu_mesh.buffer, gpu_mesh.allocation, alloc_info = vulkan_create_buffer(
-		r.allocator,
-		v_buf_size + i_buf_size,
-		.VERTEX_BUFFER_BIT | .INDEX_BUFFER_BIT,
-		.HOST_ACCESS_SEQUENTIAL_WRITE_BIT | .HOST_ACCESS_ALLOW_TRANSFER_INSTEAD_BIT | .MAPPED_BIT
-	);
-	memcpy(alloc_info.pMappedData, mesh.vertices.data, xx v_buf_size);
-	memcpy(alloc_info.pMappedData.(*u8) + v_buf_size, mesh.indices.data, xx i_buf_size);
-
-	gpu_mesh.index_offset = v_buf_size;
-	gpu_mesh.index_count = xx mesh.indices.count;
-
-	return gpu_mesh;
-}
-
-renderer_destroy_mesh :: (r: *Renderer, gpu_mesh: *Gpu_Mesh) {
-	Vma.DestroyBuffer(r.allocator, gpu_mesh.buffer, gpu_mesh.allocation);
-	gpu_mesh.* = {};
 }
 
 set_shader_data :: (r: *Renderer, data: *Shader_Data) {
@@ -731,33 +944,6 @@ vulkan_create_buffer :: (
 	return buffer, alloc, buffer_alloc_info;
 }
 
-command_buffer_begin_info :: (flags: Vk.CommandBufferUsageFlags) -> Vk.CommandBufferBeginInfo {
-	info: Vk.CommandBufferBeginInfo;
-	info.flags = flags;
-	return info;
-}
-
-command_buffer_submit_info :: (cmd: Vk.CommandBuffer) -> Vk.CommandBufferSubmitInfo {
-	info: Vk.CommandBufferSubmitInfo;
-	info.commandBuffer = cmd;
-	return info;
-}
-
-submit_info_2 :: (
-	cmd: *Vk.CommandBufferSubmitInfo,
-	signal_semaphore_info: *Vk.SemaphoreSubmitInfo = null,
-	wait_semaphore_info: *Vk.SemaphoreSubmitInfo = null,
-) -> Vk.SubmitInfo2 {
-	info: Vk.SubmitInfo2;
-	info.signalSemaphoreInfoCount = ifx signal_semaphore_info then cast(u32, 1) else cast(u32, 0);
-	info.pSignalSemaphoreInfos = signal_semaphore_info;
-	info.waitSemaphoreInfoCount = ifx wait_semaphore_info then cast(u32, 1) else cast(u32, 0);
-	info.pWaitSemaphoreInfos = wait_semaphore_info;
-	info.commandBufferInfoCount = 1;
-	info.pCommandBufferInfos = cmd;
-	return info;
-}
-
 Layout_Usage :: struct {
 	access: Vk.AccessFlags2;
 	stage: Vk.PipelineStageFlags2;
@@ -823,6 +1009,14 @@ transition_image :: (cmd: Vk.CommandBuffer, image: Vk.Image, old_layout: Vk.Imag
 	info.pImageMemoryBarriers = *barrier;
 
 	Vk.CmdPipelineBarrier2(cmd, *info);
+}
+
+texture_get_descriptor :: (texture: Gpu_Texture) -> Vk.DescriptorImageInfo {
+	return {
+		sampler = texture.sampler,
+		imageView = texture.view,
+		imageLayout = .READ_ONLY_OPTIMAL
+	};
 }
 
 // From modules/osor_vulkan/examples/src/main.jai
