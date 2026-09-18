@@ -184,21 +184,44 @@ rederer_init :: (
 
 	{
 		physical_devices := vulkan_fill_array(Vk.PhysicalDevice, Vk.EnumeratePhysicalDevices, instance);
-		device_index := 0;
-		physical_device = physical_devices[device_index];
+		assert(physical_devices.count > 0, "No Vulkan physical devices found.");
+
+		best_score := -1;
+		for candidate: physical_devices {
+			// A device is only usable if it has a queue family that does both graphics and presentation
+			candidate_queue_family: s64 = -1;
+			queue_families := vulkan_fill_array(Vk.QueueFamilyProperties, Vk.GetPhysicalDeviceQueueFamilyProperties, candidate);
+			for queue_families {
+				if (it.queueFlags & .GRAPHICS_BIT) && supports_presentation(candidate, xx it_index) {
+					candidate_queue_family = it_index;
+					break;
+				}
+			}
+			if candidate_queue_family < 0 continue;
+
+			properties: Vk.PhysicalDeviceProperties2;
+			Vk.GetPhysicalDeviceProperties2(candidate, *properties);
+			score := 0;
+			if properties.properties.deviceType == {
+				case .DISCRETE_GPU;
+					score = 3;
+				case .INTEGRATED_GPU;
+					score = 2;
+				case .VIRTUAL_GPU;
+					score = 1;
+			}
+
+			if score > best_score {
+				best_score = score;
+				physical_device = candidate;
+				queue_family = xx candidate_queue_family;
+			}
+		}
+		assert(best_score >= 0, "No physical device with a graphics + present queue family found.");
 
 		device_properties: Vk.PhysicalDeviceProperties2;
 		Vk.GetPhysicalDeviceProperties2(physical_device, *device_properties);
-		log("Selected device: %", to_string(device_properties.properties.deviceName));
-
-		queue_families := vulkan_fill_array(Vk.QueueFamilyProperties, Vk.GetPhysicalDeviceQueueFamilyProperties, physical_device);
-		for queue_families {
-			if it.queueFlags & .GRAPHICS_BIT {
-				queue_family = xx it_index;
-				break;
-			}
-		}
-		chk(supports_presentation(physical_device, queue_family));
+		log("Selected device: % (%)", to_string(device_properties.properties.deviceName), device_properties.properties.deviceType);
 	}
 
 	{
@@ -566,6 +589,7 @@ renderer_create_pipeline :: (r: *Renderer, spirv: string) -> bool {
 
 begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool {
 	if update_swapchain {
+		log("Recreating swapchain with size: %", window_size);
 		update_swapchain = false;
 		ok := vulkan_create_swapchain(r, window_size.width, window_size.height);
 		if ok vulkan_create_depth(r);
@@ -582,6 +606,7 @@ begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool
 		return false;
 	} else if result == .SUBOPTIMAL_KHR {
 		update_swapchain = true;
+		log("Swapchain is suboptimal");
 	} else {
 		chk(result);
 	}
@@ -762,10 +787,13 @@ vulkan_create_swapchain :: (r: *Renderer, width: int = -1, height: int = -1) -> 
 		r.window_size = {xx win_width, xx win_height};
 	}
 
+	image_count := min(surface_capabilities.minImageCount + 1, surface_capabilities.maxImageCount);
+	log("Decided on % images", image_count);
+
 	r.swapchain_image_format = .B8G8R8A8_SRGB;
 	swapchain_info: Vk.SwapchainCreateInfoKHR;
 	swapchain_info.surface = r.surface;
-	swapchain_info.minImageCount = surface_capabilities.minImageCount;
+	swapchain_info.minImageCount = image_count;
 	swapchain_info.imageFormat = r.swapchain_image_format;
 	swapchain_info.imageColorSpace = .SRGB_NONLINEAR_KHR;
 	swapchain_info.imageExtent = r.window_size;

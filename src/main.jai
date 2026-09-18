@@ -27,6 +27,8 @@ Shader_Data :: struct {
 FOV_VERTICAL :: 60 * PI / 180.0;
 
 window_handle: Window_Type;
+is_fullscreen := false;
+saved_win_info: Saved_Window_Info;
 renderer: Renderer;
 mesh: Mesh;
 shader_data: Shader_Data;
@@ -34,7 +36,7 @@ cam_pos := Vector3.{0, 0, 6};
 textures: [3] Gpu_Texture;
 
 main :: () {
-	window_handle = create_window(1920, 1080, "Vulkan 2026");
+	window_handle = create_window(1280, 720, "Vulkan 2026");
 
 	is_release :: BUILD_TYPE == .RELEASE;
 	rederer_init(*renderer, window_handle, !is_release);
@@ -111,15 +113,21 @@ main :: () {
 					shader_data.selected = ifx shader_data.selected < 2 then shader_data.selected + 1 else 0;
 				case .ARROW_LEFT;
 					shader_data.selected = ifx shader_data.selected > 0 then shader_data.selected - 1 else 2;
+				case .F11;
+					is_fullscreen = !is_fullscreen;
+					ok, width, height := toggle_fullscreen(window_handle, is_fullscreen, *saved_win_info);
+					if ok {
+						renderer_resize(*renderer, xx width, xx height);
+					}
 				}
 			case .MOUSE_WHEEL;
-				cam_pos.z -= it.wheel_delta.(float) * delta_time * 10;
+				cam_pos.z -= it.wheel_delta.(float) * 0.01;
 			}
 		}
 
 		if left_click {
-			object_rotations[shader_data.selected].x += mouse_delta_y.(float) * delta_time;
-			object_rotations[shader_data.selected].y += mouse_delta_x.(float) * delta_time;
+			object_rotations[shader_data.selected].x += mouse_delta_y.(float) * 0.01;
+			object_rotations[shader_data.selected].y += mouse_delta_x.(float) * 0.01;
 		}
 
 		resizes := get_window_resizes();
