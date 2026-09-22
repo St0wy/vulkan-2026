@@ -59,6 +59,7 @@ build :: () {
 		target_options.array_bounds_check = .OFF;
 		target_options.null_pointer_check = .OFF;
 		target_options.arithmetic_overflow_check = .OFF;
+		target_options.stack_trace = false;
 		#if OS == .WINDOWS {
 			target_options.additional_linker_arguments = .["/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup"];
 		}
@@ -100,6 +101,12 @@ build :: () {
 
 	compiler_end_intercept(w);
 
+	#if OS == .WINDOWS {
+		#import "Windows_Resources";
+		exe_path := tprint("%/%.exe", target_options.output_path, target_options.output_executable_name);
+		if !add_manifest_to_executable(exe_path, {}) then log_error("Failed to embed manifest in %", exe_path);
+	}
+
 	for plugins if it.finish it.finish(it);
 	for plugins if it.shutdown it.shutdown(it);
 
@@ -130,7 +137,11 @@ setup_build_dir :: (path: string) {
 build_shader :: (in_path: string, out_path: string) {
 	command := tprint("slangc % -target spirv -profile spirv_1_6 -emit-spirv-directly -matrix-layout-row-major -capability spirv_1_5+SPV_KHR_non_semantic_info+SPV_GOOGLE_user_type+spvDerivativeControl+spvImageQuery+spvImageGatherExtended+spvSparseResidency+spvMinLod+spvFragmentFullyCoveredEXT+spvShaderNonUniformEXT -o %", in_path, out_path);
 	strings := break_command_into_strings(command);
-	run_command(..strings);
+	result := run_command(..strings);
+	if result.exit_code != 0 {
+		log_error("Could not build shader");
+		exit(1);
+	}
 }
 
 main :: () {}

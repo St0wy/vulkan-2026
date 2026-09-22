@@ -39,7 +39,7 @@ main :: () {
 	window_handle = create_window(1280, 720, "Vulkan 2026");
 
 	is_release :: BUILD_TYPE == .RELEASE;
-	rederer_init(*renderer, window_handle, !is_release);
+	renderer_init(*renderer, window_handle, !is_release);
 	defer renderer_deinit(*renderer);
 
 	{
@@ -137,4 +137,6 @@ main :: () {
 			}
 		}
 	}
+
+	renderer_wait_idle(*renderer);
 }

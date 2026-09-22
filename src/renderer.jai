@@ -65,7 +65,7 @@ Renderer :: struct {
 	immediate_command_buffer: Vk.CommandBuffer;
 }
 
-rederer_init :: (
+renderer_init :: (
 	using r: *Renderer,
 	handle: Window_Type,
 	$want_validation_layers := true,
@@ -313,7 +313,6 @@ rederer_init :: (
 }
 
 renderer_deinit :: (using r: *Renderer) {
-	chk(Vk.DeviceWaitIdle(device));
 
 	for 0..MAX_FRAMES_IN_FLIGHT - 1 {
 		Vk.DestroyFence(device, fences[it], null);
@@ -341,6 +340,8 @@ renderer_deinit :: (using r: *Renderer) {
 }
 
 renderer_resize :: (r: *Renderer, width: u32, height: u32) {
+	if r.window_size.width == width && r.window_size.height == height then return;
+
 	r.window_size = {width, height};
 	r.update_swapchain = true;
 }
@@ -445,7 +446,6 @@ renderer_create_texture :: (r: *Renderer, ktx: Ktx_Image) -> Gpu_Texture {
 }
 
 renderer_destroy_texture :: (r: *Renderer, tex: *Gpu_Texture) {
-	chk(Vk.DeviceWaitIdle(r.device));
 	Vk.DestroyImageView(r.device, tex.view, null);
 	Vk.DestroySampler(r.device, tex.sampler, null);
 	Vma.DestroyImage(r.allocator, tex.image, tex.allocation);
@@ -502,7 +502,7 @@ renderer_create_texture_set :: (r: *Renderer, textures: [] Gpu_Texture) {
 	Vk.UpdateDescriptorSets(r.device, 1, *write_desc_set, 0, null);
 }
 
-renderer_create_pipeline :: (r: *Renderer, spirv: string) -> bool {
+renderer_create_pipeline :: (r: *Renderer, spirv: string) {
 	shader_module_ci: Vk.ShaderModuleCreateInfo;
 	shader_module_ci.codeSize = xx spirv.count;
 	shader_module_ci.pCode = spirv.data.(*u32);
@@ -583,8 +583,6 @@ renderer_create_pipeline :: (r: *Renderer, spirv: string) -> bool {
 	pipeline_ci.pDynamicState = *dynamic_state;
 	pipeline_ci.layout = renderer.pipeline_layout;
 	chk(Vk.CreateGraphicsPipelines(renderer.device, Vk.NULL_HANDLE, 1, *pipeline_ci, null, *renderer.pipeline));
-
-	return true;
 }
 
 begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool {
@@ -598,7 +596,6 @@ begin_frame :: (using r: *Renderer, clear_color := Vector4.{0, 0, 0, 1}) -> bool
 	if window_size.width == 0 || window_size.height == 0 then return false;
 
 	chk(Vk.WaitForFences(device, 1, *fences[frame_index], Vk.TRUE, U64_MAX));
-	chk(Vk.ResetFences(device, 1, *fences[frame_index]));
 
 	result := Vk.AcquireNextImageKHR(device, swapchain, U64_MAX, image_acquired_semaphores[frame_index], Vk.NULL_HANDLE, *image_index);
 	if result == .ERROR_OUT_OF_DATE_KHR {
@@ -715,6 +712,8 @@ end_frame :: (using r: *Renderer) {
 
 	Vk.EndCommandBuffer(current_cb);
 
+	chk(Vk.ResetFences(device, 1, *fences[frame_index]));
+
 	wait_semaphore_info: Vk.SemaphoreSubmitInfo;
 	wait_semaphore_info.semaphore = image_acquired_semaphores[frame_index];
 	wait_semaphore_info.stageMask = .COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -752,7 +751,11 @@ set_shader_data :: (r: *Renderer, data: *Shader_Data) {
 	memcpy(r.shader_data_buffers[r.frame_index].allocation_info.pMappedData, data, size_of(type_of(data.*)));
 }
 
-// #scope_file
+renderer_wait_idle :: (r: *Renderer) {
+	chk(Vk.DeviceWaitIdle(r.device));
+}
+
+#scope_file
 
 begin_one_time_commands :: (r: *Renderer) {
 	chk(Vk.ResetFences(r.device, 1, *r.immediate_fence));
@@ -787,8 +790,8 @@ vulkan_create_swapchain :: (r: *Renderer, width: int = -1, height: int = -1) -> 
 		r.window_size = {xx win_width, xx win_height};
 	}
 
-	image_count := min(surface_capabilities.minImageCount + 1, surface_capabilities.maxImageCount);
-	log("Decided on % images", image_count);
+	image_count := surface_capabilities.minImageCount + 1;
+	if surface_capabilities.maxImageCount > 0 then image_count = min(image_count, surface_capabilities.maxImageCount);
 
 	r.swapchain_image_format = .B8G8R8A8_SRGB;
 	swapchain_info: Vk.SwapchainCreateInfoKHR;
